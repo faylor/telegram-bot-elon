@@ -66,7 +66,7 @@ async def prices(message: types.Message):
 async def send_welcome(message: types.Message, regexp_command):
     item = regexp_command.group(1)
     p, c = get_price(item)
-    await message.reply(f"You have requested a price for <code>{item}</code> = ${p}   Change = {c}")
+    await message.reply(f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%")
 
 def get_price(label):
     price, change_1hr = 0, 0
