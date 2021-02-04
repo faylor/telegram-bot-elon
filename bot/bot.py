@@ -61,13 +61,10 @@ async def prices(message: types.Message):
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
-    await message.reply(f"You have requested a price for <code>{regexp_command.group(1)}</code>")
+    item = regexp_command.group(1)
+    p, c = get_price(item)
+    await message.reply(f"You have requested a price for <code>{item}</code> = ${p}   Change = {c}")
 
-@dp.message_handler(text=['$doge'])
-async def prices(message: types.Message):
-    p, c = get_price("doge")
-    await bot.send_message(chat_id=message.chat.id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
-    
 def get_price(label):
     price, change_1hr = 0, 0
     logging.error("DOWNLOADING " + label)    
