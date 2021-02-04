@@ -62,7 +62,7 @@ async def prices(message: types.Message):
         out = out + "</pre>MEH, MAYBE LAMBO. HODL."
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
     item = regexp_command.group(1)
     p, c = get_price(item)
