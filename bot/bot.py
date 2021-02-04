@@ -29,13 +29,10 @@ async def sendImage(message: types.Message):
     url = getUrl()
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(text=['Jelly', 'jelly'])
+@dp.message_handler(text=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
 async def sendTable(message: types.Message):
     name = message.from_user.first_name
-    if "josh" in name.lower():
-        await message.reply(f'Hello {name}, you are Jelly Hands')
-    else:
-        await message.reply(f'Hello {name}, you are HODLing strong')
+    await message.reply(f'Hello {name}, you have Jelly Hands.')
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
@@ -45,7 +42,7 @@ async def sendTable(message: types.Message):
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
-    out = "<pre>| Symbol |  Price       | +/- 1hr  |\n"
+    out = "<pre>| Symbol|  Price      | +/- 1hr  |\n"
     totes = 0
     for l in mains:
         p, c = get_price(l)
