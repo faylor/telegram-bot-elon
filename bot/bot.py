@@ -40,7 +40,7 @@ async def sendTable(message: types.Message):
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
     await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? /$btc /$aave /lambo')
-    await message.send_message(chat_id=message.chat.id, sticker="https://badgen.net/badge/btc/price/red")
+    await bot.send_message(chat_id=message.chat.id, sticker="https://badgen.net/badge/btc/price/red")
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
