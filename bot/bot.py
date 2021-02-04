@@ -23,13 +23,13 @@ def getUrl():
     return url
 
 @dp.message_handler(text=['doge', 'cat'])
-def sendImage(message: types.Message):
+async def sendImage(message: types.Message):
     url = getUrl()
     chat_id = update.message.chat_id
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
 @dp.message_handler(text=['me', 'you'])
-def sendTable(message: types.Message):
+async def sendTable(message: types.Message):
     name = message.effective_user.first_name
     if "josh" in name.lower():
         await message.reply_text(f'Hello {update.effective_user.first_name}, you are Jelly Hands')
@@ -37,7 +37,7 @@ def sendTable(message: types.Message):
         await message.reply_text(f'Hello {update.effective_user.first_name}, you are HODLing strong')
 
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
-def prices(message: types.Message):
+async def prices(message: types.Message):
     chat_id = message.chat_id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
     out = ""
@@ -47,9 +47,9 @@ def prices(message: types.Message):
         totes = totes + c
         context.bot.send_message(chat_id=chat_id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
     
-    if totes<0:
+    if totes < 0:
         await bot.send_message(chat_id=chat_id, text="OUCH, NO LAMBO FOR YOU!")
-    elif totes>15:
+    elif totes > 15:
         await bot.send_message(chat_id=chat_id, text="OK OK, LAMBO FOR YOU!")
     else:
         await bot.send_message(chat_id=chat_id, text="MEH, MAYBE LAMBO. HODL.")
