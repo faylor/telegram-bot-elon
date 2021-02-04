@@ -36,6 +36,11 @@ async def sendTable(message: types.Message):
     else:
         await message.reply_text(f'Hello {name}, you are HODLing strong')
 
+@dp.message_handler(text=['elon?', 'Elon?'])
+async def sendTable(message: types.Message):
+    await message.reply_text(f'Hello {name}, I am a busy man, what?")
+
+
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
