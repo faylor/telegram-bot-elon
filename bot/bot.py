@@ -5,6 +5,7 @@ from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils.executor import start_webhook
+from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT)
@@ -28,7 +29,7 @@ async def sendImage(message: types.Message):
     url = getUrl()
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(text=['me', 'you'])
+@dp.message_handler(text=['Jelly', 'jelly'])
 async def sendTable(message: types.Message):
     name = message.from_user.first_name
     if "josh" in name.lower():
@@ -38,8 +39,8 @@ async def sendTable(message: types.Message):
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
-    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what?')
-
+    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? /$btc /$aave /lambo')
+    await message.send_message(chat_id=message.chat.id, sticker="https://github.com/TelegramBots/book/raw/master/src/docs/sticker-fred.webp")
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
@@ -57,7 +58,7 @@ async def prices(message: types.Message):
         out = out + "OK OK, LAMBO FOR YOU!\n"
     else:
         out = out + "MEH, MAYBE LAMBO. HODL.\n"
-    await bot.send_message(chat_id=chat_id, text=out, parse_mode="MarkdownV2")
+    await bot.send_message(chat_id=chat_id, text=escape_md(out), parse_mode="MarkdownV2")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
