@@ -1,5 +1,6 @@
 import logging
-
+import requests
+import json
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
@@ -25,7 +26,6 @@ def getUrl():
 @dp.message_handler(text=['doge', 'cat'])
 async def sendImage(message: types.Message):
     url = getUrl()
-    chat_id = update.message.chat_id
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
 @dp.message_handler(text=['me', 'you'])
@@ -38,7 +38,7 @@ async def sendTable(message: types.Message):
 
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
-    chat_id = message.chat_id
+    chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
     out = ""
     totes = 0
