@@ -50,7 +50,7 @@ async def prices(message: types.Message):
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
-        out = out + f"|{l}    | ${round(p,4)}    | {round(c,1)}   | \n"
+        out = out + f"| <b>{l}</b>    | ${round(p,4)}    | {round(c,1)}   | \n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 15:
