@@ -54,9 +54,9 @@ async def prices(message: types.Message):
     if totes < 0:
         out = out + "OUCH, NO LAMBO FOR YOU!" 
     elif totes > 15:
-        out = out + "OK OK, LAMBO FOR YOU!")
+        out = out + "OK OK, LAMBO FOR YOU!"
     else:
-        out = out + "MEH, MAYBE LAMBO. HODL.")
+        out = out + "MEH, MAYBE LAMBO. HODL."
     await bot.send_message(chat_id=chat_id, text=out)
 
 @dp.message_handler(text=['$doge'])
