@@ -32,13 +32,13 @@ async def sendImage(message: types.Message):
 async def sendTable(message: types.Message):
     name = message.from_user.first_name
     if "josh" in name.lower():
-        await message.reply_text(f'Hello {name}, you are Jelly Hands')
+        await message.reply(f'Hello {name}, you are Jelly Hands')
     else:
-        await message.reply_text(f'Hello {name}, you are HODLing strong')
+        await message.reply(f'Hello {name}, you are HODLing strong')
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
-    await message.reply_text(f'Hello {name}, I am a busy man, what?")
+    await message.reply(f'Hello {name}, I am a busy man, what?")
 
 
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
