@@ -58,6 +58,7 @@ async def prices(message: types.Message):
         out = out + "</pre>OK OK, LAMBO FOR YOU!"
     else:
         out = out + "</pre>MEH, MAYBE LAMBO. HODL."
+    out = out + "<img src='https://badgen.net/badge/btc/price/red'/>"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
