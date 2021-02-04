@@ -45,14 +45,14 @@ async def sendTable(message: types.Message):
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
-    out = "<pre>|  Symbol  |  Price       | Change (1hr)  |\n"
+    out = "<pre>| Symbol  |  Price       | Change (1hr)  |\n"
     totes = 0
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
-        l = l.ljust(10, ' ')
-        price = str(round(p,4)).ljust(20,' ')
-        change = str(round(c,1)).ljust(10,' ')
+        l = l.ljust(5, ' ')
+        price = str(round(p,4)).ljust(10,' ')
+        change = str(round(c,1)).ljust(5,' ')
         out = out + f"| {l} | ${price} | {change} | \n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
