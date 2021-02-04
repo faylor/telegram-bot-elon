@@ -46,19 +46,19 @@ async def sendTable(message: types.Message):
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
-    out = "| Symbol | Price | Change (1hr) |\n|--------|-------|--------|\n"
+    out = "<pre>| Symbol | Price | Change (1hr) |\n|--------|-------|--------|\n"
     totes = 0
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
         out = out + f"|{l}    | ${round(p,4)}    | {round(c,1)}   | \n"
     if totes < 0:
-        out = out + "OUCH, NO LAMBO FOR YOU!\n" 
+        out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 15:
-        out = out + "OK OK, LAMBO FOR YOU!\n"
+        out = out + "</pre>OK OK, LAMBO FOR YOU!"
     else:
-        out = out + "MEH, MAYBE LAMBO. HODL.\n"
-    await bot.send_message(chat_id=chat_id, text=escape_md(out), parse_mode="MarkdownV2")
+        out = out + "</pre>MEH, MAYBE LAMBO. HODL."
+    await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
