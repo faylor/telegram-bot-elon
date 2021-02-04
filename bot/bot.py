@@ -57,7 +57,7 @@ async def prices(message: types.Message):
         out = out + "OK OK, LAMBO FOR YOU!\n"
     else:
         out = out + "MEH, MAYBE LAMBO. HODL.\n"
-    await bot.send_message(chat_id=chat_id, text=out, parse_mode="Markdown")
+    await bot.send_message(chat_id=chat_id, text=out, parse_mode="MarkdownV2")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
