@@ -3,12 +3,6 @@ certifi==2020.11.8
 chardet==3.0.4
 click==7.1.2
 Flask==1.1.2
-google-api-core==1.23.0
-google-api-python-client==1.12.8
-google-auth==1.23.0
-google-auth-httplib2==0.0.4
-google-auth-oauthlib==0.4.2
-googleapis-common-protos==1.52.0
 gunicorn==20.0.4
 httplib2==0.18.1
 idna==2.10

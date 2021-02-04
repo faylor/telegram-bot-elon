@@ -1,6 +1,7 @@
 import asyncio
 import json
 import requests
+import os
 from aiogram import Bot
 
 # TOKEN var for elon_bot
