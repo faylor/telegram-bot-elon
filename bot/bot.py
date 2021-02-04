@@ -52,12 +52,18 @@ async def prices(message: types.Message):
         totes = totes + c
         out = out + f"{l} ${round(p,4)} {round(c,1)}% 1 hour \n"
     if totes < 0:
-        out = out + "OUCH, NO LAMBO FOR YOU!" 
+        out = out + "OUCH, NO LAMBO FOR YOU!\n" 
     elif totes > 15:
-        out = out + "OK OK, LAMBO FOR YOU!"
+        out = out + "OK OK, LAMBO FOR YOU!\n"
     else:
-        out = out + "MEH, MAYBE LAMBO. HODL."
-    await bot.send_message(chat_id=chat_id, text=out)
+        out = out + "MEH, MAYBE LAMBO. HODL.\n"
+    out = out + """| Symbol | Price | Change |
+                    |--------|-------|--------|
+                    | ABC    | 20.85 |  1.626 |
+                    | DEF    | 78.95 |  0.099 |
+                    | GHI    | 23.45 |  0.192 |
+                    | JKL    | 98.85 |  0.292 |"""
+    await bot.send_message(chat_id=chat_id, text=out, parse_mode="Markdown")
 
 @dp.message_handler(text=['$doge'])
 async def prices(message: types.Message):
