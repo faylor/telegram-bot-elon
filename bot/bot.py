@@ -32,9 +32,9 @@ async def sendImage(message: types.Message):
 async def sendTable(message: types.Message):
     name = message.from_user
     if "josh" in name.lower():
-        await message.reply_text(f'Hello {update.effective_user.first_name}, you are Jelly Hands')
+        await message.reply_text(f'Hello {name}, you are Jelly Hands')
     else:
-        await message.reply_text(f'Hello {update.effective_user.first_name}, you are HODLing strong')
+        await message.reply_text(f'Hello {name}, you are HODLing strong')
 
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
@@ -45,7 +45,7 @@ async def prices(message: types.Message):
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
-        context.bot.send_message(chat_id=chat_id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
+        await bot.send_message(chat_id=chat_id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
     
     if totes < 0:
         await bot.send_message(chat_id=chat_id, text="OUCH, NO LAMBO FOR YOU!")
