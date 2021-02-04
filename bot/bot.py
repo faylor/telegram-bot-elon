@@ -3,7 +3,7 @@ import requests
 import json
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils.executor import start_webhook
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
@@ -58,6 +58,10 @@ async def prices(message: types.Message):
     else:
         out = out + "MEH, MAYBE LAMBO. HODL.\n"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="Markdown")
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
+async def send_welcome(message: types.Message, regexp_command):
+    await message.reply(f"You have requested a price for <code>{regexp_command.group(1)}</code>")
 
 @dp.message_handler(text=['$doge'])
 async def prices(message: types.Message):
