@@ -1,1 +1,1 @@
-web: python -m telegram_bot_elon.index.app
+web: python telegram_bot_elon/index.py
