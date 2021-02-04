@@ -50,15 +50,20 @@ async def prices(message: types.Message):
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
-        await bot.send_message(chat_id=chat_id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
-    
+        out = out + f"{l} ${round(p,4)} {round(c,1)}% 1 hour \n")  
     if totes < 0:
-        await bot.send_message(chat_id=chat_id, text="OUCH, NO LAMBO FOR YOU!")
+        out = out + "OUCH, NO LAMBO FOR YOU!" 
     elif totes > 15:
-        await bot.send_message(chat_id=chat_id, text="OK OK, LAMBO FOR YOU!")
+        out = out + "OK OK, LAMBO FOR YOU!")
     else:
-        await bot.send_message(chat_id=chat_id, text="MEH, MAYBE LAMBO. HODL.")
+        out = out + "MEH, MAYBE LAMBO. HODL.")
+    await bot.send_message(chat_id=chat_id, text=out)
 
+@dp.message_handler(text=['$doge'])
+async def prices(message: types.Message):
+    p, c = get_price("doge")
+    await bot.send_message(chat_id=message.chat.id, text=f"{l} ${round(p,4)} {round(c,1)}% 1 hour")
+    
 def get_price(label):
     price, change_1hr = 0, 0
     logging.error("DOWNLOADING " + label)    
