@@ -68,7 +68,6 @@ async def send_welcome(message: types.Message, regexp_command):
 
 def get_price(label):
     price, change_1hr = 0, 0
-    logging.error("DOWNLOADING " + label)    
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
         resp = requests.get(url)
@@ -78,12 +77,6 @@ def get_price(label):
     except Exception as e:
         logging.error(e)
     return price, change_1hr
-
-
-# @dp.message_handler()
-# async def echo(message: types.Message):
-#     logging.warning(f'Recieved a message from {message.from_user}')
-#     await bot.send_message(message.chat.id, message.text)
 
 
 async def on_startup(dp):
