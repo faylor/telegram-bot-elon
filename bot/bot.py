@@ -40,7 +40,7 @@ async def sendTable(message: types.Message):
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
     await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? /$btc /$aave /lambo')
-    await message.send_message(chat_id=message.chat.id, sticker="https://github.com/TelegramBots/book/raw/master/src/docs/sticker-fred.webp")
+    await message.send_message(chat_id=message.chat.id, sticker="https://badgen.net/badge/btc/price/red")
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
@@ -58,7 +58,6 @@ async def prices(message: types.Message):
         out = out + "</pre>OK OK, LAMBO FOR YOU!"
     else:
         out = out + "</pre>MEH, MAYBE LAMBO. HODL."
-    out = out + "<img src='https://badgen.net/badge/btc/price/red'/>"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([a-zA-Z]*)']))
