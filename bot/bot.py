@@ -41,28 +41,22 @@ async def sendTable(message: types.Message):
     await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what?')
 
 
-@dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
+@dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
-    out = ""
+    out = """| Symbol | Price | Change (1hr) |\n|--------|-------|--------|\n"""
     totes = 0
     for l in mains:
         p, c = get_price(l)
         totes = totes + c
-        out = out + f"{l} ${round(p,4)} {round(c,1)}% 1 hour \n"
+        out = out + f"|{l}    | ${round(p,4)}    | {round(c,1)}   | \n"
     if totes < 0:
         out = out + "OUCH, NO LAMBO FOR YOU!\n" 
     elif totes > 15:
         out = out + "OK OK, LAMBO FOR YOU!\n"
     else:
         out = out + "MEH, MAYBE LAMBO. HODL.\n"
-    out = out + """| Symbol | Price | Change |
-                    |--------|-------|--------|
-                    | ABC    | 20.85 |  1.626 |
-                    | DEF    | 78.95 |  0.099 |
-                    | GHI    | 23.45 |  0.192 |
-                    | JKL    | 98.85 |  0.292 |"""
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="Markdown")
 
 @dp.message_handler(text=['$doge'])
