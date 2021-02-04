@@ -30,7 +30,7 @@ async def sendImage(message: types.Message):
 
 @dp.message_handler(text=['me', 'you'])
 async def sendTable(message: types.Message):
-    name = message.from_user
+    name = message.from_user.first_name
     if "josh" in name.lower():
         await message.reply_text(f'Hello {name}, you are Jelly Hands')
     else:
