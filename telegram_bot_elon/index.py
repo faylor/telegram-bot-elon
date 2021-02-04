@@ -2,7 +2,7 @@ import asyncio
 import json
 import requests
 import os
-from aiogram import Bot
+from aiogram import Bot, Dispatcher, types
 
 # TOKEN var for elon_bot
 TOKEN = os.environ["TELEGRAM_BOT"]
