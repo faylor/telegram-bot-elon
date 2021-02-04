@@ -68,10 +68,10 @@ def get_price(label):
     return price, change_1hr
 
 
-@dp.message_handler()
-async def echo(message: types.Message):
-    logging.warning(f'Recieved a message from {message.from_user}')
-    await bot.send_message(message.chat.id, message.text)
+# @dp.message_handler()
+# async def echo(message: types.Message):
+#     logging.warning(f'Recieved a message from {message.from_user}')
+#     await bot.send_message(message.chat.id, message.text)
 
 
 async def on_startup(dp):
