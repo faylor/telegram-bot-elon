@@ -33,6 +33,12 @@ async def echo(message: types.Message):
     # or reply INTO webhook
     return SendMessage(message.chat.id, message.text)
 
+@dp.message_handler(commands=['start', 'help'])
+async def send_welcome(message: types.Message):
+    """
+    This handler will be called when user sends `/start` or `/help` command
+    """
+    await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
 
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
