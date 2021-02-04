@@ -38,7 +38,7 @@ async def sendTable(message: types.Message):
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
-    await message.reply(f'Hello {name}, I am a busy man, what?')
+    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what?')
 
 
 @dp.message_handler(text=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
