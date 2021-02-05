@@ -109,12 +109,12 @@ async def get_weekly(message: types.Message):
     amount=r.get("BTC_*") or 'Not Sure'
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     for key in r.scan_iter("BTC_*"):
-        a = r.get(key) or "NONE"
-        out = out + key.replace("BTC_","") + " => " + a + "\n"
+        a = str(r.get(key)) or "NONE"
+        out = out + str(key).replace("BTC_","") + " => " + a + "\n"
     out = "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     for key in r.scan_iter("ETH_*"):
-        a = r.get(key) or "NONE"
-        out = out + key.replace("ETH_","") + " => " + a + "\n"
+        a = str(r.get(key)) or "NONE"
+        out = out + str(key).replace("ETH_","") + " => " + a + "\n"
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
