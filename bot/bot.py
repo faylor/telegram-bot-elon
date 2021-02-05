@@ -18,32 +18,36 @@ dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
 
-def getUrl():
-    #obtain a json object with image details
-    #extract image url from the json object
-    contents = requests.get('https://api.thecatapi.com/v1/images/search')
+def getUrl(animal):
+    contents = requests.get('https://api.the' + animal + 'api.com/v1/images/search')
     js = contents.json()
     print(js)
     url = js[0]["url"]
     return url
 
-@dp.message_handler(text=['doge', 'cat'])
-async def sendImage(message: types.Message):
-    url = getUrl()
+@dp.message_handler(command=['doge', 'dog'])
+async def sendDogImage(message: types.Message):
+    url = getUrl('dog')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(text=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
+@dp.message_handler(command=['cate', 'cat'])
+async def sendCatImage(message: types.Message):
+    url = getUrl('cat')
+    await bot.send_photo(chat_id=message.chat.id, photo=url)
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\green([a-zA-Z]*)']))
+async def send_green(message: types.Message, regexp_command):
+    await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/national-pickle-day-pickle-pickles-gif-12883700")
+
+
+@dp.message_handler(command=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
 async def sendTable(message: types.Message):
     name = message.from_user.first_name
     await message.reply(f'Hello {name}, you have Jelly Hands.')
 
-@dp.message_handler(text=['elon?', 'Elon?'])
-async def sendTable(message: types.Message):
-    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices\n bet: Try /bet btc 12.3k eth 1.2k\nand \bets')
-
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help'])
 async def send_help(message: types.Message):
-    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices \n bet: Try /bet btc 12.3k eth 1.2k\nand \bets')
+    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices \n bet: /bet btc 12.3k eth 1.2k\n and /bets. \n Fun: /jelly /jellyhand')
 
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
@@ -101,6 +105,19 @@ async def finish_weekly(message: types.Message):
         r.delete(key)
     await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
 
+def get_abs_difference(s, p):
+    estimate = 0
+    try:
+        if s is not "NONE":
+            if "k" in s.lower():
+                tmp_a = s.replace("k","")
+                tmp_a_double = float(tmp_a)
+                estimate = tmp_a_double * 1000
+            estimate = float(s)
+        return abs(estimate - p)
+    except Exception as e:
+        logging.warn("Cannot convert ab difference:" + str(e))
+        return 999999
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
@@ -110,11 +127,13 @@ async def get_weekly(message: types.Message):
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     for key in r.scan_iter("BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
-        out = out + str(key.decode('utf-8')).replace("BTC_","") + " => " + a + "\n"
+        d = get_abs_difference(a, p_btc)
+        out = out + str(key.decode('utf-8')).replace("BTC_","") + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     for key in r.scan_iter("ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
-        out = out + str(key.decode('utf-8')).replace("ETH_","") + " => " + a + "\n"
+        d = get_abs_difference(a, p_eth)
+        out = out + str(key.decode('utf-8')).replace("ETH_","") + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
