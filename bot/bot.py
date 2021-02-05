@@ -109,11 +109,14 @@ def get_abs_difference(s, p):
     estimate = -999999
     try:
         if s != "NONE":
-            if "k" in s.lower():
-                tmp_a = s.lower().replace("k","")
+            logging.info(s)
+            if "k" in str(s).lower():
+                logging.info("IN HERE.")
+                tmp_a = str(s).lower().replace("k","")
+                logging.info("IN HERE2." + str(tmp_a))
                 tmp_a_double = float(tmp_a)
                 estimate = tmp_a_double * 1000
-            estimate = float(s)
+            estimate = float(str(s))
         return abs(estimate - p)
     except Exception as e:
         logging.warn("Cannot convert abs difference:" + str(e))
