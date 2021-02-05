@@ -213,9 +213,11 @@ async def add_to_prices(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
         logging.info("config")
-        config = json.loads(r.get(message.chat.id))
+        config = r.get(message.chat.id)
         if config is None:
             config = {}
+        else:
+            config = json.loads(config)
         logging.info(json.dumps(config))
         a, _, _ = get_price(new_coin)
         if "watch_list" not in config:
