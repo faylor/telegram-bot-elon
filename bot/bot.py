@@ -42,8 +42,7 @@ async def send_red(message: types.Message, regexp_command):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['jelly([\sa-zA-Z]*)']))
 async def send_green(message: types.Message, regexp_command):
     name = regexp_command.group(1)
-    await message.reply(f'Hello {name}, you have Jelly Hands. Love Elon. Kisses.')
-    await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/laughing-spacex-elon-musk-elon-musk-gif-13597458")
+    await bot.send_sticker(chat_id=message.chat.id, caption=f'Hello {name}, you have Jelly Hands. Love Elon. Kisses.', sticker="https://tenor.com/view/laughing-spacex-elon-musk-elon-musk-gif-13597458")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['green([a-zA-Z]*)']))
 async def send_green(message: types.Message, regexp_command):
