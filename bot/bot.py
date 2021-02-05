@@ -39,7 +39,7 @@ async def sendCatImage(message: types.Message):
 async def send_red(message: types.Message, regexp_command):
     await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/spacex-fail-landing-explosion-explode-gif-19509668")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['jelly([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['jelly([\sa-zA-Z]*)']))
 async def send_green(message: types.Message, regexp_command):
     name = regexp_command.group(1)
     await message.reply(f'Hello {name}, you have Jelly Hands. Love Elon. Kisses.')
