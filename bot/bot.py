@@ -40,7 +40,7 @@ async def send_green(message: types.Message, regexp_command):
     await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/national-pickle-day-pickle-pickles-gif-12883700")
 
 
-@dp.message_handler(command=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
+@dp.message_handler(commands=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
 async def sendTable(message: types.Message):
     name = message.from_user.first_name
     await message.reply(f'Hello {name}, you have Jelly Hands.')
@@ -106,9 +106,9 @@ async def finish_weekly(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
 
 def get_abs_difference(s, p):
-    estimate = 0
+    estimate = -999999
     try:
-        if s is not "NONE":
+        if s != "NONE":
             if "k" in s.lower():
                 tmp_a = s.replace("k","")
                 tmp_a_double = float(tmp_a)
@@ -117,7 +117,7 @@ def get_abs_difference(s, p):
         return abs(estimate - p)
     except Exception as e:
         logging.warn("Cannot convert ab difference:" + str(e))
-        return 999999
+        return -999999
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
