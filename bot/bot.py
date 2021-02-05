@@ -214,6 +214,8 @@ async def add_to_prices(message: types.Message, regexp_command):
         new_coin = regexp_command.group(1)
         logging.info("config")
         config = json.loads(r.get(message.chat.id))
+        if config is None:
+            config = {}
         logging.info(json.dumps(config))
         a, _, _ = get_price(new_coin)
         if "watch_list" not in config:
@@ -228,7 +230,8 @@ async def add_to_prices(message: types.Message, regexp_command):
                 r.set(message.chat.id, json.dumps(config))
                 await message.reply(f'Gotit. Added ' + new_coin)
     except Exception as e:
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+        logging.warn(str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
 
 async def on_startup(dp):
