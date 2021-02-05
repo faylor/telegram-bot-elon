@@ -39,11 +39,11 @@ async def sendTable(message: types.Message):
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
-    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices')
+    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices\n bet: Try /bet btc 12.3k eth 1.2k\nand \bets')
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help'])
 async def send_help(message: types.Message):
-    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices')
+    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices \n bet: Try /bet btc 12.3k eth 1.2k\nand \bets')
 
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
@@ -93,11 +93,29 @@ def get_price(label):
         logging.error(e)
     return price, change_1hr, change_24hr
 
+@dp.message_handler(commands=['bets delete', 'weekly delete', 'weeklybets delete', '#weeklybets delete'])
+async def finish_weekly(message: types.Message):
+    for key in r.scan_iter("BTC_*"):
+        r.delete(key)
+    for key in r.scan_iter("ETH_*"):
+        r.delete(key)
+    await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
+
+
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    amount=r.get("BTC_" + message.from_user.mention) or 'Not Sure'
-    amount_eth=r.get("ETH_" + message.from_user.mention) or 'Not Sure'
-    await message.reply(f'{message.from_user.first_name} BTC {amount}, ETH {amount_eth}')
+    p_btc, _, _ = get_price("btc")
+    p_eth, _, _ = get_price("eth")
+    amount=r.get("BTC_*") or 'Not Sure'
+    out = "BTC Bets (Current=" + round(p_btc,0) + "):\n"
+    for key in r.scan_iter("BTC_*"):
+        a = r.get(key) or "NONE"
+        out = out + key.replace("BTC_","") + " => " + a + "\n"
+    out = "\nETH Bets (Current=" + round(p_eth,0) + "):\n"
+    for key in r.scan_iter("ETH_*"):
+        a = r.get(key) or "NONE"
+        out = out + key.replace("ETH_","") + " => " + a + "\n"
+    await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
