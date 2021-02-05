@@ -111,7 +111,7 @@ async def get_weekly(message: types.Message):
     for key in r.scan_iter("BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         out = out + str(key.decode('utf-8')).replace("BTC_","") + " => " + a + "\n"
-    out = "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
+    out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     for key in r.scan_iter("ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         out = out + str(key.decode('utf-8')).replace("ETH_","") + " => " + a + "\n"
