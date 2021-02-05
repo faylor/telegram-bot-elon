@@ -36,20 +36,27 @@ async def sendTable(message: types.Message):
 
 @dp.message_handler(text=['elon?', 'Elon?'])
 async def sendTable(message: types.Message):
-    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? /$btc /$aave /lambo')
+    await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices')
 
-@dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'price', '$'])
+@dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
     out = "<pre>| Symbol|  Price      | +/- 1hr  |\n"
     totes = 0
     for l in mains:
-        p, c = get_price(l)
+        p, c, _ = get_price(l)
         totes = totes + c
         l = l.ljust(5, ' ')
+        label_on_change = "   "
+        if c > 3:
+            label_on_change = "++++"
+        elif c > 2:
+            label_on_change = "  ++"
+        elif c > 0:
+            label_on_change = "   +"
         price = str(round(p,4)).ljust(10,' ')
-        change = str(round(c,1)).ljust(5,' ')
+        change = label_on_change + str(round(c,1)).ljust(5,' ')
         out = out + f"| {l} | ${price} | {change} | \n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
@@ -62,20 +69,21 @@ async def prices(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
     item = regexp_command.group(1)
-    p, c = get_price(item)
-    await message.reply(f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%")
+    p, c, c24 = get_price(item)
+    await bot.send_message(chat_id=message.chat.it, text=f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
 
 def get_price(label):
-    price, change_1hr = 0, 0
+    price, change_1hr, change_24hr = 0, 0, 0
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
         resp = requests.get(url)
         js = resp.json()
         price = js["data"]["market_data"]["price_usd"]
         change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
+        change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
     except Exception as e:
         logging.error(e)
-    return price, change_1hr
+    return price, change_1hr, change_24hr
 
 
 async def on_startup(dp):
