@@ -75,7 +75,7 @@ async def prices(message: types.Message):
         out = out + f"| {l} | ${price} | {change} | \n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
-    elif totes > 15:
+    elif totes > 6:
         out = out + "</pre>OK OK, LAMBO FOR YOU!"
     else:
         out = out + "</pre>MEH, MAYBE LAMBO. HODL."
@@ -130,15 +130,35 @@ async def get_weekly(message: types.Message):
     p_eth, _, _ = get_price("eth")
     amount=r.get("BTC_*") or 'Not Sure'
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
+    winning = ""
+    winning_diff = 99999
     for key in r.scan_iter("BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
-        out = out + str(key.decode('utf-8')).replace("BTC_","") + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        name = str(key.decode('utf-8')).replace("BTC_","")
+        if d <= winning_diff:
+            if d == winning_diff:
+                winning = winning + ", " + name
+            else:
+                winning = name
+                winning_diff = d
+        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+    out = out + "\n LOOK WHO IS WINNING BTC == " + winning + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
+    winning = ""
+    winning_diff = 99999
     for key in r.scan_iter("ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_eth)
-        out = out + str(key.decode('utf-8')).replace("ETH_","") + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        name = str(key.decode('utf-8')).replace("ETH_","")
+        if d <= winning_diff:
+            if d == winning_diff:
+                winning = winning + ", " + name
+            else:
+                winning = name
+                winning_diff = d
+        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+    out = out + "\n LOOK WHO IS WINNING ETH == " + winning + "\n"
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
