@@ -41,7 +41,7 @@ async def sendTable(message: types.Message):
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
-    mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE"]
+    mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
     out = "<pre>| Symbol|  Price      | +/- 1hr  |\n"
     totes = 0
     for l in mains:
@@ -70,7 +70,7 @@ async def prices(message: types.Message):
 async def send_welcome(message: types.Message, regexp_command):
     item = regexp_command.group(1)
     p, c, c24 = get_price(item)
-    await bot.send_message(chat_id=message.chat.it, text=f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+    await bot.send_message(chat_id=message.chat.id, text=f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
