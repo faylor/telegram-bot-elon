@@ -167,7 +167,7 @@ def weekly_tally(message: types.Message):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _ = weekly_tally(message)
+    out, _, _ = weekly_tally(message)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(commands=['bets stop', 'weekly stop', 'weeklybets stop', '#weeklybets start'])
