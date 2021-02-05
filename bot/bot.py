@@ -110,13 +110,13 @@ def get_abs_difference(s, p):
     try:
         if s != "NONE":
             if "k" in s.lower():
-                tmp_a = s.replace("k","")
+                tmp_a = s.lower().replace("k","")
                 tmp_a_double = float(tmp_a)
                 estimate = tmp_a_double * 1000
             estimate = float(s)
         return abs(estimate - p)
     except Exception as e:
-        logging.warn("Cannot convert ab difference:" + str(e))
+        logging.warn("Cannot convert abs difference:" + str(e))
         return -999999
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
