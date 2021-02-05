@@ -25,12 +25,12 @@ def getUrl(animal):
     url = js[0]["url"]
     return url
 
-@dp.message_handler(command=['doge', 'dog'])
+@dp.message_handler(commands=['doge', 'dog'])
 async def sendDogImage(message: types.Message):
     url = getUrl('dog')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(command=['cate', 'cat'])
+@dp.message_handler(commands=['cate', 'cat'])
 async def sendCatImage(message: types.Message):
     url = getUrl('cat')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
