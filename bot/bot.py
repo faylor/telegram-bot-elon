@@ -39,21 +39,19 @@ async def sendCatImage(message: types.Message):
 async def send_red(message: types.Message, regexp_command):
     await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/spacex-fail-landing-explosion-explode-gif-19509668")
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['jelly([a-zA-Z]*)']))
+async def send_green(message: types.Message, regexp_command):
+    name = regexp_command.group(1)
+    await message.reply(f'Hello {name}, you have Jelly Hands. Love Elon. Kisses.')
+    await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/laughing-spacex-elon-musk-elon-musk-gif-13597458")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['green([a-zA-Z]*)']))
 async def send_green(message: types.Message, regexp_command):
-    await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/laughing-spacex-elon-musk-elon-musk-gif-13597458")
-
-
-@dp.message_handler(commands=['Jelly', 'jelly', 'jelly hands', '#jellyhands'])
-async def sendTable(message: types.Message):
-    name = message.from_user.first_name
-    await message.reply(f'Hello {name}, you have Jelly Hands.')
+    await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/spacex-bitcoin-rd_btc-elon-musk-elon-gif-20158067")
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help'])
 async def send_help(message: types.Message):
     await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices \n bet: /bet btc 12.3k eth 1.2k\n and /bets. \n Fun: /jelly /jellyhand')
-
 
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
