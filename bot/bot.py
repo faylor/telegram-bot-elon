@@ -98,6 +98,7 @@ def get_price(label):
         change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
     except Exception as e:
         logging.error(e)
+        return 0, 0, 0
     return price, change_1hr, change_24hr
 
 @dp.message_handler(commands=['bets delete', 'weekly delete', 'weeklybets delete', '#weeklybets delete'])
