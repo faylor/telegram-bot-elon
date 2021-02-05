@@ -93,7 +93,7 @@ async def get_weekly(message: types.Message):
     amount=r.get(message.from_user.username) or 'Not Sure'
     await message.reply(f'{message.from_user.first_name} BTC {amount}')
 
-@dp.message_handler(commands=filters.RegexpCommandsFilter(regexp_commands=['bet btc ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
     amount = regexp_command.group(1)
     r.set(message.from_user.username, amount)
