@@ -57,10 +57,13 @@ async def send_help(message: types.Message):
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
-    config = json.loads(r.execute_command('JSON.GET', message.chat.id))
-    logging.info(json.dumps(config))
-    if "watch_list" in config:
-        mains = config["watch_list"]
+    try:
+        config = json.loads(r.get(message.chat.id))
+        logging.info(json.dumps(config))
+        if "watch_list" in config:
+            mains = config["watch_list"]
+    except Exception as ex:
+        logging.info("no config found, ignore")
     out = "<pre>| Symbol|  Price      | +/- 1hr  |\n"
     totes = 0
     for l in mains:
@@ -205,12 +208,12 @@ async def set_weekly(message: types.Message, regexp_command):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch \$([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
 async def add_to_prices(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
         logging.info("config")
-        config = json.loads(r.execute_command('JSON.GET', message.chat.id))
+        config = json.loads(r.get(message.chat.id))
         logging.info(json.dumps(config))
         a, _, _ = get_price(new_coin)
         if "watch_list" not in config:
@@ -222,7 +225,7 @@ async def add_to_prices(message: types.Message, regexp_command):
                 await message.reply(f'{message.from_user.first_name} Fail. Already Watching This One. ' + str(config["watch_list"]))
             else:
                 config["watch_list"].append(new_coin)
-                r.execute_command('JSON.SET', message.chat.id, '.', json.dumps(config))
+                r.set(message.chat.id, json.dumps(config))
                 await message.reply(f'Gotit. Added ' + new_coin)
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
