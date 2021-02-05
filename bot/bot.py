@@ -173,7 +173,7 @@ async def get_weekly(message: types.Message):
     out, _, _ = weekly_tally(message)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
-@dp.message_handler(commands=['bets stop', 'weekly stop', 'weeklybets stop', '#weeklybets start'])
+@dp.message_handler(commands=['stop bets', 'stop weekly', 'stop weeklybets', 'stop #weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth = weekly_tally(message)
     await bot.send_message(chat_id=message.chat.id, text=out)
