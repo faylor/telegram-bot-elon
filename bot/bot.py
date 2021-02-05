@@ -124,7 +124,7 @@ async def set_weekly(message: types.Message, regexp_command):
         amount_eth = regexp_command.group(2)
         r.set("BTC_" + message.from_user.mention, amount)
         r.set("ETH_" + message.from_user.mention, amount_eth)
-        await message.reply(f'{message.from_user.first_name} BTC {amount}, ETH {amount_eth}')
+        await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
