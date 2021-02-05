@@ -95,15 +95,20 @@ def get_price(label):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    amount=r.get(message.from_user.username) or 'Not Sure'
-    await message.reply(f'{message.from_user.first_name} BTC {amount}')
+    amount=r.get("BTC_" + message.from_user.mention) or 'Not Sure'
+    amount_eth=r.get("ETH_" + message.from_user.mention) or 'Not Sure'
+    await message.reply(f'{message.from_user.first_name} BTC {amount}, ETH {amount_eth}')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
-    amount = regexp_command.group(1)
-    print(amount)
-    r.set(message.from_user.mention, amount)
-    await message.reply(f'{message.from_user.first_name} BTC {amount}')
+    try:
+        amount = regexp_command.group(1)
+        amount_eth = regexp_command.group(2)
+        r.set("BTC_" + message.from_user.mention, amount)
+        r.set("ETH_" + message.from_user.mention, amount_eth)
+        await message.reply(f'{message.from_user.first_name} BTC {amount}, ETH {amount_eth}')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 
 async def on_startup(dp):
