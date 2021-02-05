@@ -107,11 +107,11 @@ async def get_weekly(message: types.Message):
     p_btc, _, _ = get_price("btc")
     p_eth, _, _ = get_price("eth")
     amount=r.get("BTC_*") or 'Not Sure'
-    out = "BTC Bets (Current=" + round(p_btc,0) + "):\n"
+    out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     for key in r.scan_iter("BTC_*"):
         a = r.get(key) or "NONE"
         out = out + key.replace("BTC_","") + " => " + a + "\n"
-    out = "\nETH Bets (Current=" + round(p_eth,0) + "):\n"
+    out = "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     for key in r.scan_iter("ETH_*"):
         a = r.get(key) or "NONE"
         out = out + key.replace("ETH_","") + " => " + a + "\n"
