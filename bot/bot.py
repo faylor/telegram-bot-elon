@@ -53,7 +53,7 @@ async def send_green(message: types.Message, regexp_command):
 async def send_help(message: types.Message):
     await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices \n bet: /bet btc 12.3k eth 1.2k\n and /bets. \n Fun: /jelly /jellyhand')
 
-@dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
+@dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
@@ -179,8 +179,11 @@ async def finish_weekly(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text=out)
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_btc}, ETH winner = {winning_eth}')
     logging.info("config")
-    config = json.loads(r.execute_command('JSON.GET', message.chat.id))
-    logging.info(json.dumps(config))
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
     if winning_btc not in config["winners_list"]:
@@ -192,7 +195,7 @@ async def finish_weekly(message: types.Message):
     else:
         config["winners_list"][winning_eth] = int(config["winners_list"][winning_eth]) + 1
     logging.info(json.dumps(config))
-    r.execute_command('JSON.SET', message.chat.id, '.', json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
     await bot.send_message(chat_id=message.chat.id, text=f'Added To Table: ' + json.dumps(config["winners_list"]))
     await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /bets start')
     
