@@ -35,7 +35,7 @@ async def sendCatImage(message: types.Message):
     url = getUrl('cat')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\green([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['green([a-zA-Z]*)']))
 async def send_green(message: types.Message, regexp_command):
     await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/national-pickle-day-pickle-pickles-gif-12883700")
 
