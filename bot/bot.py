@@ -41,6 +41,11 @@ async def sendTable(message: types.Message):
 async def sendTable(message: types.Message):
     await message.reply(f'Hello {message.from_user.first_name}, I am a busy man, what? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices')
 
+@dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help'])
+async def send_help(message: types.Message):
+    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n Show Table: /lambo /prices')
+
+
 @dp.message_handler(commands=['prices', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
