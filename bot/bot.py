@@ -8,7 +8,10 @@ from aiogram.utils.executor import start_webhook
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
-                          WEBAPP_HOST, WEBAPP_PORT)
+                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+import redis
+
+r = redis.from_url(REDIS_URL)
 
 bot = Bot(token=TELEGRAM_BOT)
 dp = Dispatcher(bot)
@@ -84,6 +87,17 @@ def get_price(label):
     except Exception as e:
         logging.error(e)
     return price, change_1hr, change_24hr
+
+@dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
+async def get_weekly(message: types.Message):
+    amount=r.get(message.from_user.username) or 'Not Sure'
+    await message.reply(f'{message.from_user.first_name} BTC {amount}')
+
+@dp.message_handler(commands=filters.RegexpCommandsFilter(regexp_commands=['bet btc ([a-zA-Z]*)']))
+async def set_weekly(message: types.Message, regexp_command):
+    amount = regexp_command.group(1)
+    r.set(message.from_user.username, amount)
+    await message.reply(f'{message.from_user.first_name} BTC {amount}')
 
 
 async def on_startup(dp):

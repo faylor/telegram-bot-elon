@@ -22,3 +22,4 @@ ujson==4.0.1
 uvloop==0.14.0
 yarl==1.6.3
 requests==2.25.0
+redis
