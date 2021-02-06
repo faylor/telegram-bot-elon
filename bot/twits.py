@@ -54,7 +54,8 @@ class Twits:
     def set_stream_rules(self):
         # You can adjust the rules if needed
         sample_rules = [
-            {"value": "doge", "from": "elonmusk", "tag": "doge pictures"},
+            {"value": "doge from:elonmusk", "tag": "doge elon"},
+            {"value": "bitcoin from:elonmusk", "tag": "btc elon"},
         ]
         payload = {"add": sample_rules}
         response = requests.post(self.twitter_stream_url + "/rules", headers=self.headers, json=payload)
@@ -77,6 +78,6 @@ class Twits:
         for response_line in response.iter_lines():
             if response_line:
                 json_response = json.loads(response_line)
-                bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(len(json_response)))
+                bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
                 print(json.dumps(json_response, indent=4, sort_keys=True))
 
