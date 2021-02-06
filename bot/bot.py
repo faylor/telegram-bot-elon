@@ -311,7 +311,8 @@ async def on_startup(dp):
     logging.warning(
         'Starting connection. ')
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
-
+    twits.prepare_stream()
+    await twits.get_stream(bot)
 
 async def on_shutdown(dp):
     logging.warning('Bye! Shutting down webhook connection')
@@ -327,5 +328,3 @@ def main():
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
-    twits.prepare_stream()
-    twits.get_stream(bot)
