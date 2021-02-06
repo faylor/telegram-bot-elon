@@ -234,14 +234,28 @@ async def set_weekly(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy ([0-9.,a-zA-Z]*)']))
-async def set_point(message: types.Message, regexp_command):
+async def set_buy_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         p, _, _ = get_price(symbol)
         r.set("At_" + symbol.lower() + "_" + message.from_user.mention, p)
         await message.reply(f'Gotit. {symbol} at {p} marked')
     except Exception as e:
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
+
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([0-9.,a-zA-Z]*)']))
+async def set_sell_point(message: types.Message, regexp_command):
+    try:
+        symbol = regexp_command.group(1)
+        p, _, _ = get_price(symbol)
+        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
+        if saved is not None:
+            changes = round(100 * (p - float(saved)) / float(saved), 2)
+            await message.reply(f'Sold. {symbol} final diff {changes}%')
+        r.delete("At_" + symbol.lower() + "_" + message.from_user.mention)
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
