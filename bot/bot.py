@@ -5,7 +5,7 @@ import redis
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
-from aiogram.utils.executor import start_webhook
+from aiogram.utils.executor import start_webhook, start
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
@@ -309,16 +309,23 @@ async def add_to_prices(message: types.Message, regexp_command):
 
 async def on_startup(dp):
     logging.warning('Starting connection.')
-    try:
-        await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
-        twits.prepare_stream()
-        await twits.get_stream(bot)
-    except Exception as e:
-        logging.error("Startup error: " + str(e))
+    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+    
 
 async def on_shutdown(dp):
     logging.warning('Bye! Shutting down webhook connection')
 
+
+async def broadcaster() -> int:
+    count = 0
+    try:
+        await twits.get_stream(bot)
+    except Exception as e:
+        logging.error("Exception for broadcast:" + str(e))
+    finally:
+        logging.info(f"Broadcast messages successful sent.")
+
+    return count
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -330,3 +337,5 @@ def main():
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
+    twits.prepare_stream()
+    start(dp, broadcaster())

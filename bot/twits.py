@@ -3,6 +3,7 @@ import logging
 import requests
 import json
 from aiogram import Bot, types
+import asyncio
 
 class Twits:
 
@@ -95,6 +96,7 @@ class Twits:
                     for chat_id in self.chat_ids:
                         await bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
                     logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
+                await asyncio.sleep(10)
         except Exception as e:
             logging.error("STREAM ERROR:" + str(e))
 
