@@ -31,11 +31,11 @@ class Twits:
         
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
-            self.chat_ids.remove(chat_id)
+            self.chat_ids.append(chat_id)
 
     def remove_chat_id(self, chat_id):
         if chat_id in self.chat_ids:
-            self.chat_ids.append(chat_id)
+            self.chat_ids.remove(chat_id)
 
     def get_stream_rules(self):
         response = requests.get(self.twitter_stream_url + "/rules", headers=self.headers)

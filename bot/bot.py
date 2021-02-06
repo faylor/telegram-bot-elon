@@ -33,7 +33,7 @@ async def startStream(message: types.Message):
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
-        logging.error(str(e))
+        logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
 @dp.message_handler(commands=['stopstream'])
