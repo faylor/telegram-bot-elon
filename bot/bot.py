@@ -100,7 +100,7 @@ async def send_welcome(message: types.Message, regexp_command):
     saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
     if saved is not None:
         try:
-            changes = round(100 * (p - saved) / saved, 2)
+            changes = round(100 * (p - float(saved)) / float(saved), 2)
             await bot.send_message(chat_id=message.chat.id, text=f"You marked at {saved}, changed by {changes}%")
         except Exception as e:
             logging.warn("Could convert saved point:" + str(e))
