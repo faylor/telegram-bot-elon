@@ -8,8 +8,8 @@ class Twits:
     def __init__(self):
         bearer_token = os.environ["TWITTER_ACCESS_TOKEN"]
         self.headers = {"Authorization": "Bearer {}".format(bearer_token)}
-        self.twitter_search_url = os.environ["TWITTER_URL"] or "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
-        self.twitter_stream_url = os.environ["TWITTER_URL"] or "https://api.twitter.com/2/tweets/search/stream/"
+        self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
+        self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream/"
     
 
     def search_twitter(self, query, tweet_fields):    
