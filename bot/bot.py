@@ -311,28 +311,19 @@ async def add_to_prices(message: types.Message, regexp_command):
 async def on_startup(dp):
     logging.warning('Starting connection.')
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
-    
+    twits.prepare_stream()
+    dp._loop_create_task(twits.get_stream(bot))
+
 
 async def on_shutdown(dp):
     logging.warning('Bye! Shutting down webhook connection')
 
 
-async def broadcaster() -> int:
-    count = 0
-    try:
-        await twits.get_stream(bot)
-    except Exception as e:
-        logging.error("Exception for broadcast:" + str(e))
-    finally:
-        logging.info(f"Broadcast messages successful sent.")
-
-    return count
 
 def main():
     logging.basicConfig(level=logging.INFO)
     try:
-        twits.prepare_stream()
-        dp._loop_create_task(broadcaster())
+        
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
