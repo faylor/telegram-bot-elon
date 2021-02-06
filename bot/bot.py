@@ -98,9 +98,10 @@ async def send_welcome(message: types.Message, regexp_command):
         symbol = regexp_command.group(1)
         p, c, c24 = get_price(symbol)
         await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
-        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
+        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
-            changes = round(100 * (p - float(saved)) / float(saved), 2)
+            saved = float(saved.decode('utf-8'))
+            changes = round(100 * (p - saved) / saved, 2)
             await bot.send_message(chat_id=message.chat.id, text=f"You marked at {saved}, changed by {changes}%")
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
