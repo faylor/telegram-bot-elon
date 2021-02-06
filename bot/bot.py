@@ -108,7 +108,7 @@ def get_price(label):
         return 0, 0, 0
     return price, change_1hr, change_24hr
 
-@dp.message_handler(commands=['bets start', 'weekly start', 'weeklybets start', '#weeklybets start'])
+@dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
     for key in r.scan_iter("BTC_*"):
         r.delete(key)
@@ -197,8 +197,19 @@ async def finish_weekly(message: types.Message):
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await bot.send_message(chat_id=message.chat.id, text=f'Added To Table: ' + json.dumps(config["winners_list"]))
-    await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /bets start')
-    
+    await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
+
+@dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
+async def total_weekly(message: types.Message):
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {"winners_list":[]}
+    else:
+        config = json.loads(config)
+    out = "TOTES WINNERS: \n"
+    for k,v in config["winners_list"].items():
+        out = out + str(k) + " == " + str(v) + "\n"
+    await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
