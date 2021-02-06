@@ -27,15 +27,22 @@ def getUrl(animal):
     url = js[0]["url"]
     return url
 
-@dp.message_handler(commands=['stream'])
+@dp.message_handler(commands=['preparestream'])
 async def startStream(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Preparing stream...")
         twits.prepare_stream()
         await bot.send_message(chat_id=message.chat.id, text="Prepared. Starting stream...")
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+
+@dp.message_handler(commands=['startstream'])
+async def startStream(message: types.Message):
+    try:
         twits.get_stream(bot, message.chat.id)
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+
 
 @dp.message_handler(commands=['doge', 'dog'])
 async def sendDogImage(message: types.Message):
