@@ -1,6 +1,7 @@
 import logging
-import requests
 import json
+import requests
+import redis
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -9,14 +10,15 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
-import redis
+
+from .twits import Twits
 
 r = redis.from_url(REDIS_URL)
 
 bot = Bot(token=TELEGRAM_BOT)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
-
+twits = Twits()
 
 def getUrl(animal):
     contents = requests.get('https://api.the' + animal + 'api.com/v1/images/search')
@@ -24,6 +26,16 @@ def getUrl(animal):
     print(js)
     url = js[0]["url"]
     return url
+
+@dp.message_handler(commands=['stream'])
+async def startStream(message: types.Message):
+    try:
+        await bot.send_message(chat_id=message.chat.id, text="Preparing stream...")
+        twits.prepare_stream()
+        await bot.send_message(chat_id=message.chat.id, text="Prepared. Starting stream...")
+        twits.get_stream(bot, message.chat.id)
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
 
 @dp.message_handler(commands=['doge', 'dog'])
 async def sendDogImage(message: types.Message):
