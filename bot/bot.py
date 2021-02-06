@@ -5,7 +5,7 @@ import redis
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
-from aiogram.utils.executor import start_webhook, start
+from aiogram.utils.executor import start_webhook
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
@@ -332,7 +332,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     try:
         twits.prepare_stream()
-        dp.loop.create_task(broadcaster())
+        dp._loop_create_task(broadcaster())
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
