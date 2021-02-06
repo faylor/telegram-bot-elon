@@ -97,7 +97,7 @@ async def send_welcome(message: types.Message, regexp_command):
     symbol = regexp_command.group(1)
     p, c, c24 = get_price(symbol)
     await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
-    saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
+    saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
     if saved is not None:
         try:
             changes = round(100 * (p - saved) / saved, 2)
