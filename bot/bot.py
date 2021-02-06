@@ -329,13 +329,16 @@ async def broadcaster() -> int:
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        skip_updates=True,
-        on_startup=on_startup,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
-    twits.prepare_stream()
-    start(dp, broadcaster())
+    try:
+        twits.prepare_stream()
+        start(dp, broadcaster())
+        start_webhook(
+            dispatcher=dp,
+            webhook_path=WEBHOOK_PATH,
+            skip_updates=True,
+            on_startup=on_startup,
+            host=WEBAPP_HOST,
+            port=WEBAPP_PORT,
+        )
+    except Exception as e:
+        logging.error("Error:" + str(e))
