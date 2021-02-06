@@ -9,9 +9,8 @@ class Twits:
         bearer_token = os.environ["TWITTER_ACCESS_TOKEN"]
         self.headers = {"Authorization": "Bearer {}".format(bearer_token)}
         self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
-        self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream/"
+        self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream"
     
-
     def search_twitter(self, query, tweet_fields):    
         headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
         url = self.twitter_search_url.format(query, tweet_fields)    
@@ -28,7 +27,7 @@ class Twits:
         self.set_stream_rules()
         
     def get_stream_rules(self):
-        response = requests.get(self.twitter_stream_url + "rules", headers=self.headers)
+        response = requests.get(self.twitter_stream_url + "/rules", headers=self.headers)
         if response.status_code != 200:
             raise Exception(
                 "Cannot get rules (HTTP {}): {}".format(response.status_code, response.text)
@@ -42,7 +41,7 @@ class Twits:
 
         ids = list(map(lambda rule: rule["id"], rules["data"]))
         payload = {"delete": {"ids": ids}}
-        response = requests.post(self.twitter_stream_url + "rules", headers=self.headers, json=payload)
+        response = requests.post(self.twitter_stream_url + "/rules", headers=self.headers, json=payload)
         if response.status_code != 200:
             raise Exception(
                 "Cannot delete rules (HTTP {}): {}".format(
@@ -59,7 +58,7 @@ class Twits:
             {"value": "cat has:images -grumpy", "tag": "cat pictures"},
         ]
         payload = {"add": sample_rules}
-        response = requests.post(self.twitter_stream_url + "rules", headers=self.headers, json=payload)
+        response = requests.post(self.twitter_stream_url + "/rules", headers=self.headers, json=payload)
         if response.status_code != 201:
             raise Exception(
                 "Cannot add rules (HTTP {}): {}".format(response.status_code, response.text)
