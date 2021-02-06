@@ -28,7 +28,7 @@ def getUrl(animal):
     return url
 
 @dp.message_handler(commands=['preparestream'])
-async def startStream(message: types.Message):
+async def prepareStream(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Preparing stream...")
         twits.prepare_stream()
@@ -40,6 +40,13 @@ async def startStream(message: types.Message):
 async def startStream(message: types.Message):
     try:
         twits.get_stream(bot, message.chat.id)
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+
+@dp.message_handler(commands=['stopstream'])
+async def stopStream(message: types.Message):
+    try:
+        twits.delete_stream_all_rules()
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
 
