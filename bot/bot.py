@@ -51,7 +51,7 @@ async def send_green(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
 async def send_help(message: types.Message):
-    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n\n Watch Table: /$ /lambo /prices \n Add Coin To Watch: /watch <coin> eg: /watch eth \n Mark A Point: /buy btc \n Remove a Point: /sell btc \n\n bets: \n Start a new week: /startbets \n Finish a week: /stopbets \n Add your bet: /bet btc 12.3k eth 1.2k \n View current bets: /bets \n View Winners: /totes or /leaderboard \n\n Fun:\n /jelly <name>  \n /green<anything> \n /red<anything> \n /doge \n /cat \n /remind')
+    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n\n Watch Table: /$ /lambo /prices \n Add Coin To Watch: /watch <coin> eg: /watch eth \n Mark A Point: /buy btc \n Remove a Point: /sell btc \n\n bets: \n Start a new week: /startbets \n Finish a week: /stopbets \n Add your bet: /bet btc 12.3k eth 1.2k \n View current bets: /bets \n View Winners: /totes or /leaderboard \n\n Fun:\n /jelly <name>  \n /green<anything> \n /red<anything> \n /doge \n /cat \n /remind \n\n * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.')
 
 @dp.message_handler(commands=['remind'])
 async def send_reminder(message: types.Message):
