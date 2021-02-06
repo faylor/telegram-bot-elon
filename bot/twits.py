@@ -11,6 +11,7 @@ class Twits:
         self.headers = {"Authorization": "Bearer {}".format(bearer_token)}
         self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
         self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream"
+        self.chat_ids = []
     
     def search_twitter(self, query, tweet_fields):    
         headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
@@ -27,6 +28,14 @@ class Twits:
         self.delete_stream_all_rules(rules)
         self.set_stream_rules()
         
+    def add_chat_id(self, chat_id):
+        if chat_id not in self.chat_ids:
+            self.chat_ids.remove(chat_id)
+
+    def remove_chat_id(self, chat_id):
+        if chat_id in self.chat_ids:
+            self.chat_ids.append(chat_id)
+
     def get_stream_rules(self):
         response = requests.get(self.twitter_stream_url + "/rules", headers=self.headers)
         if response.status_code != 200:
@@ -67,7 +76,7 @@ class Twits:
         print(json.dumps(response.json()))
 
 
-    def get_stream(self, bot: Bot, chat_id):
+    async def get_stream(self, bot: Bot):
         try:
             response = requests.get(self.twitter_stream_url, headers=self.headers, stream=True)
             logging.warn("STREAM RESP:" + str(response.status_code))
@@ -79,10 +88,11 @@ class Twits:
                 )
             for response_line in response.iter_lines():
                 logging.warn("STREAM RESP Line")
-                if response_line:
+                if response_line and len(self.chat_ids) > 0:
                     logging.warn("STREAM RESP Line ++")
                     json_response = json.loads(response_line)
-                    bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
+                    for chat_id in self.chat_ids:
+                        await bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
                     logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
         except Exception as e:
             logging.error("STREAM ERROR:" + str(e))
