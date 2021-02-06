@@ -90,9 +90,16 @@ async def prices(message: types.Message):
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
 async def send_welcome(message: types.Message, regexp_command):
-    item = regexp_command.group(1)
+    symbol = regexp_command.group(1)
     p, c, c24 = get_price(item)
-    await bot.send_message(chat_id=message.chat.id, text=f"{item} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+    await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+    saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
+    if saved is not None:
+        try:
+            changes = round(100 * (p - saved) / saved, 2)
+            await bot.send_message(chat_id=message.chat.id, text=f"You marked at {saved}, changed by {changes}%")
+        except Exception as e:
+            logging.warn("Could convert saved point:" + str(e))
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
@@ -221,6 +228,17 @@ async def set_weekly(message: types.Message, regexp_command):
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy ([0-9.,a-zA-Z]*)']))
+async def set_point(message: types.Message, regexp_command):
+    try:
+        symbol = regexp_command.group(1)
+        p, _, _ = get_price(symbol)
+        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, p)
+        await message.reply(f'Gotit. {symbol} at {p} marked')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
 async def add_to_prices(message: types.Message, regexp_command):
