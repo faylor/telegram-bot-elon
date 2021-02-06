@@ -78,6 +78,7 @@ class Twits:
 
     async def get_stream(self, bot: Bot):
         try:
+            logging.warn("-- OPENING STREAM ---")
             response = requests.get(self.twitter_stream_url, headers=self.headers, stream=True)
             logging.warn("STREAM RESP:" + str(response.status_code))
             if response.status_code != 200:

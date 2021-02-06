@@ -308,11 +308,13 @@ async def add_to_prices(message: types.Message, regexp_command):
 
 
 async def on_startup(dp):
-    logging.warning(
-        'Starting connection. ')
-    await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
-    twits.prepare_stream()
-    await twits.get_stream(bot)
+    logging.warning('Starting connection.')
+    try:
+        await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
+        twits.prepare_stream()
+        await twits.get_stream(bot)
+    except Exception as e:
+        logging.error("Startup error: " + str(e))
 
 async def on_shutdown(dp):
     logging.warning('Bye! Shutting down webhook connection')
