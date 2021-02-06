@@ -30,6 +30,7 @@ def getUrl(animal):
 @dp.message_handler(commands=['startstream'])
 async def startStream(message: types.Message):
     try:
+        logging.warn("____CHAT IT_____ " + message.chat.id)
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
@@ -331,7 +332,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     try:
         twits.prepare_stream()
-        start(dp, broadcaster())
+        dp.loop.create_task(broadcaster())
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
