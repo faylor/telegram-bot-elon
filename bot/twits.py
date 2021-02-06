@@ -70,7 +70,7 @@ class Twits:
     async def get_stream(self, bot: Bot, chat_id):
         try:
             response = requests.get(self.twitter_stream_url, headers=self.headers, stream=True)
-            logging.warn("STREAM RESP:" + response.status_code)
+            logging.warn("STREAM RESP:" + str(response.status_code))
             if response.status_code != 200:
                 raise Exception(
                     "Cannot get stream (HTTP {}): {}".format(
