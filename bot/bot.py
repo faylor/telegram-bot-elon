@@ -34,21 +34,24 @@ async def prepareStream(message: types.Message):
         twits.prepare_stream()
         await bot.send_message(chat_id=message.chat.id, text="Prepared. Starting stream...")
     except Exception as e:
-        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+        logging.error(str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Prepare Stream")
 
 @dp.message_handler(commands=['startstream'])
 async def startStream(message: types.Message):
     try:
-        twits.get_stream(bot, message.chat.id)
+        twits.prepare_stream()
     except Exception as e:
-        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+        logging.error(str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
 @dp.message_handler(commands=['stopstream'])
 async def stopStream(message: types.Message):
     try:
-        twits.delete_stream_all_rules()
+        twits.prepare_stream()
     except Exception as e:
-        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream: " + str(e))
+        logging.error(str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Stop Stream")
 
 
 @dp.message_handler(commands=['doge', 'dog'])
