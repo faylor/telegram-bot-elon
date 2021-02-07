@@ -329,10 +329,14 @@ async def total_weekly(message: types.Message):
         config = {"winners_list":[]}
     else:
         config = json.loads(config)
-    out = "TOTES WINNERS: \n"
-    for k,v in config["winners_list"].items():
-        out = out + str(k) + " == " + str(v) + "\n"
-    await bot.send_message(chat_id=message.chat.id, text=out)
+    
+    if "winners_list" in config:
+        out = "TOTES WINNERS: \n"
+        for k,v in config["winners_list"].items():
+            out = out + str(k) + " == " + str(v) + "\n"
+        await bot.send_message(chat_id=message.chat.id, text=out)
+    else:
+        await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
