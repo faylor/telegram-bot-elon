@@ -172,7 +172,7 @@ async def send_balance(message: types.Message):
     try:
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
-        out = out + "<pre>| Coin |  Buy Price |  Price    | +/-  |\n"
+        out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
         total_change = 0
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
