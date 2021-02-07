@@ -30,7 +30,7 @@ def getUrl(animal):
 @dp.message_handler(commands=['startstream'])
 async def startStream(message: types.Message):
     try:
-        logging.warn("____CHAT IT_____ " + message.chat.id)
+        logging.warn("____CHAT IT_____ " + str(message.chat.id))
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
         await get_stream()
