@@ -198,7 +198,7 @@ async def send_balance(message: types.Message):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
-        total_change = 0.00
+        total_change = float(0.00)
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
             p, c, c24 = get_price(symbol)
@@ -207,7 +207,7 @@ async def send_balance(message: types.Message):
                 value = float(value.decode('utf-8'))
                 buy_price = str(round(value,4)).ljust(10,' ')
                 price = str(round(p,4)).ljust(10,' ')
-                change = round(100 * (p - value) / value, 2)
+                change = float(round(100 * (p - value) / value, 2))
                 total_change = total_change + change
                 change = str(round(c,1)).ljust(5,' ')
                 symbol = symbol.ljust(4, ' ')
