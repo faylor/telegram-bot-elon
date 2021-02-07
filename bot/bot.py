@@ -303,7 +303,7 @@ async def clear_weekly_totals(message: types.Message):
     if config is not None:
         config = json.loads(config)
         if "winners_list" in config:
-            config["winners_list"] = []
+            config["winners_list"] = {}
             r.set(message.chat.id, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
@@ -312,20 +312,19 @@ async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth = weekly_tally(message)
     await bot.send_message(chat_id=message.chat.id, text=out)
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_btc}, ETH winner = {winning_eth}')
-    logging.info("config")
     config = r.get(message.chat.id)
     if config is None:
         config = {}
     else:
         config = json.loads(config)
     if "winners_list" not in config:
-        config["winners_list"] = []
+        config["winners_list"] = {}
     if winning_btc not in config["winners_list"]:
-        config["winners_list"].append({winning_btc: 1})
+        config["winners_list"][winning_btc] = 1
     else:
         config["winners_list"][winning_btc] = int(config["winners_list"][winning_btc]) + 1
     if winning_eth not in config["winners_list"]:
-        config["winners_list"].append({winning_eth: 1})
+        config["winners_list"][winning_eth] = 1
     else:
         config["winners_list"][winning_eth] = int(config["winners_list"][winning_eth]) + 1
     logging.info(json.dumps(config))
@@ -343,7 +342,8 @@ async def total_weekly(message: types.Message):
     
     if "winners_list" in config:
         out = "TOTES WINNERS: \n"
-        for k,v in config["winners_list"].items():
+        logging.error(config["winners_list"])
+        for k, v in config["winners_list"].items():
             out = out + str(k) + " == " + str(v) + "\n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     else:
