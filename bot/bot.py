@@ -183,6 +183,7 @@ async def send_balance(message: types.Message):
                 price = str(round(p,4)).ljust(10,' ')
                 change = round(100 * (p - value) / value, 2)
                 change = str(round(c,1)).ljust(5,' ')
+                symbol = symbol.ljust(2, ' ')
                 out = out + out + f"| {symbol} | ${buy_price} | ${price} | {change} | \n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     except Exception as e:
