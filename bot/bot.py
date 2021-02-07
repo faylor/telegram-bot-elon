@@ -209,13 +209,10 @@ async def send_balance(message: types.Message):
                 price = str(round(p,4)).ljust(10,' ')
                 change = round(100 * (p - value) / value, 2)
                 total_change = total_change + change
-                logging.error("TOTAL CHANGE == " + str(total_change))
-                change = str(round(c,1)).ljust(5,' ')
+                change = str(round(change,1)).ljust(5,' ')
                 symbol = symbol.ljust(4, ' ')
                 out = out + f"| {symbol} | {buy_price} | {price} | {change} | \n"
-        logging.error("TOTAL CHANGE 1 == " + str(total_change))
         total_change = round(total_change, 2)
-        logging.error("TOTAL CHANGE 3 == " + str(total_change))
         out = out + "</pre>\nTOTAL CHANGE = " + str(total_change)
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
