@@ -57,7 +57,11 @@ def get_stream():
                 logging.warn("STREAM RESP Line ++" + str(twits.chat_ids))
                 json_response = json.loads(response_line)
                 for chat_id in twits.chat_ids:
+                    logging.warn("SENDING Line ++" + chat_id)
+                
                     SendMessage(chat_id, "Got A Tweet: " + str(json_response["data"]["text"]))
+
+                    logging.warn("SENT Line ++" + chat_id)
                 logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
     except Exception as e:
         logging.error("STREAM ERROR:" + str(e))
