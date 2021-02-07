@@ -37,7 +37,7 @@ class Twits:
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
             self.chat_ids.append(chat_id)
-            logging.warn("Added CHAT ID:" + chat_id)
+            logging.warn("Added CHAT ID:" + str(chat_id))
 
     def remove_chat_id(self, chat_id):
         if chat_id in self.chat_ids:

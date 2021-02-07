@@ -352,6 +352,7 @@ async def on_shutdown(dp):
 
 
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
     try:
