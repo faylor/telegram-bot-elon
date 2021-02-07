@@ -33,6 +33,7 @@ async def startStream(message: types.Message):
         logging.warn("____CHAT IT_____ " + message.chat.id)
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
+        await get_stream()
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
@@ -326,7 +327,6 @@ async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     twits.prepare_stream()
     twits.start_stream()
-    dp._loop_create_task(get_stream())
 
 
 async def on_shutdown(dp):
@@ -337,7 +337,6 @@ async def on_shutdown(dp):
 def main():
     logging.basicConfig(level=logging.INFO)
     try:
-        
         start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
