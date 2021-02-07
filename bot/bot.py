@@ -7,6 +7,7 @@ from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils.executor import start_webhook
+from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
@@ -46,7 +47,7 @@ def fire_and_forget(f):
     return wrapped
 
 @fire_and_forget
-async def get_stream():
+def get_stream():
     try:
         if twits.stream is None:
             twits.start_stream()
@@ -56,7 +57,7 @@ async def get_stream():
                 logging.warn("STREAM RESP Line ++")
                 json_response = json.loads(response_line)
                 for chat_id in twits.chat_ids:
-                    await bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
+                    SendMessage(chat_id, "Got A Tweet: " + str(json_response["data"]["text"]))
                 logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
     except Exception as e:
         logging.error("STREAM ERROR:" + str(e))
