@@ -3,6 +3,7 @@ import logging
 import requests
 import json
 from aiogram import Bot, types
+from requests import Response
 import asyncio
 
 class Twits:
@@ -13,8 +14,11 @@ class Twits:
         self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
         self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream"
         self.chat_ids = [1442973965]
-        self.stream = None
+        self.stream: Response = None
     
+    def close(self):
+        self.stream.close()
+
     def search_twitter(self, query, tweet_fields):    
         headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
         url = self.twitter_search_url.format(query, tweet_fields)    
