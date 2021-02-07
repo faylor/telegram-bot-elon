@@ -13,6 +13,7 @@ class Twits:
         self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
         self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream"
         self.chat_ids = []
+        self.stream = None
     
     def search_twitter(self, query, tweet_fields):    
         headers = {"Authorization": "Bearer {}".format(self.bearer_token)}
@@ -76,27 +77,21 @@ class Twits:
             )
         print(json.dumps(response.json()))
 
-
-    async def get_stream(self, bot: Bot):
+    def start_stream(self):
         try:
-            logging.warn("-- OPENING STREAM ---")
-            response = requests.get(self.twitter_stream_url, headers=self.headers, stream=True)
-            logging.warn("STREAM RESP:" + str(response.status_code))
-            if response.status_code != 200:
-                raise Exception(
-                    "Cannot get stream (HTTP {}): {}".format(
-                        response.status_code, response.text
+            if self.stream is None:
+                logging.warn("-- OPENING STREAM ---")
+                response = requests.get(self.twitter_stream_url, headers=self.headers, stream=True)
+                logging.warn("STREAM RESP:" + str(response.status_code))
+                if response.status_code != 200:
+                    raise Exception(
+                        "Cannot get stream (HTTP {}): {}".format(
+                            response.status_code, response.text
+                        )
                     )
-                )
-            for response_line in response.iter_lines():
-                logging.warn("STREAM RESP Line")
-                if response_line and len(self.chat_ids) > 0:
-                    logging.warn("STREAM RESP Line ++")
-                    json_response = json.loads(response_line)
-                    for chat_id in self.chat_ids:
-                        await bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
-                    logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
-                await asyncio.sleep(10)
+                self.stream = response.iter_lines()
         except Exception as e:
             logging.error("STREAM ERROR:" + str(e))
+            stream = None
+
 
