@@ -379,13 +379,11 @@ async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     twits.prepare_stream()
     twits.start_stream()
-
+    get_stream()
 
 async def on_shutdown(dp):
     twits.close()
     logging.warning('Bye! Shutting down webhook connection')
-
-
 
 
 def main():
