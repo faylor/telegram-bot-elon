@@ -113,6 +113,11 @@ async def send_help(message: types.Message):
 async def send_reminder(message: types.Message):
     await message.reply(f'Yo! Get a wallet. Idjiot.')
 
+@dp.message_handler(commands=['whois'])
+async def check_user(message: types.Message):
+    logging.warn('user:' + message.from_user.mention)
+    await message.reply('user:' + message.from_user.mention)
+
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
@@ -159,6 +164,23 @@ async def send_welcome(message: types.Message, regexp_command):
             saved = float(saved.decode('utf-8'))
             changes = round(100 * (p - saved) / saved, 2)
             await bot.send_message(chat_id=message.chat.id, text=f"You marked at {saved}, changed by {changes}%")
+    except Exception as e:
+        logging.warn("Could convert saved point:" + str(e))
+
+@dp.message_handler(commands=['balance', 'hodl'])
+async def send_balance(message: types.Message, regexp_command):
+    try:
+        saves = r.scan_iter("At_*_" + message.from_user.mention)
+        out = "HODLing:\n"
+        for key in saves:
+            symbol = key.replace("At_", "").replace(message.from_user.mention,"")
+            p, c, c24 = get_price(symbol)
+            value = r.get(key)
+            if value is not None: 
+                value = float(value.decode('utf-8'))
+                changes = round(100 * (p - value) / value, 2)
+                out = out + f"{value} changed by {changes}%\n"
+        await bot.send_message(chat_id=message.chat.id, text=out)
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
@@ -255,11 +277,11 @@ async def finish_weekly(message: types.Message):
     if "winners_list" not in config:
         config["winners_list"] = []
     if winning_btc not in config["winners_list"]:
-        config["winners_list"] = {winning_btc: 1}
+        config["winners_list"].append({winning_btc: 1})
     else:
         config["winners_list"][winning_btc] = int(config["winners_list"][winning_btc]) + 1
     if winning_eth not in config["winners_list"]:
-        config["winners_list"] = {winning_eth: 1}
+        config["winners_list"].append({winning_eth: 1})
     else:
         config["winners_list"][winning_eth] = int(config["winners_list"][winning_eth]) + 1
     logging.info(json.dumps(config))
