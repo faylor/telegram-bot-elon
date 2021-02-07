@@ -168,7 +168,7 @@ async def send_welcome(message: types.Message, regexp_command):
         logging.warn("Could convert saved point:" + str(e))
 
 @dp.message_handler(commands=['balance', 'hodl'])
-async def send_balance(message: types.Message, regexp_command):
+async def send_balance(message: types.Message):
     try:
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
