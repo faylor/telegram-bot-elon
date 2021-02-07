@@ -297,6 +297,16 @@ async def get_weekly(message: types.Message):
     out, _, _ = weekly_tally(message)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
+@dp.message_handler(commands=['clearbetstotals'])
+async def clear_weekly_totals(message: types.Message):
+    config = r.get(message.chat.id)
+    if config is not None:
+        config = json.loads(config)
+        if "winners_list" in config:
+            config["winners_list"] = []
+            r.set(message.chat.id, json.dumps(config))
+            await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
+
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth = weekly_tally(message)
