@@ -107,7 +107,7 @@ async def send_green(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
 async def send_help(message: types.Message):
-    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n\n Watch Table: /$ /lambo /prices \n Add Coin To Watch: /watch <coin> eg: /watch eth \n Mark A Point: /buy btc \n Remove a Point: /sell btc \n\n bets: \n Start a new week: /startbets \n Finish a week: /stopbets \n Add your bet: /bet btc 12.3k eth 1.2k \n View current bets: /bets \n View Winners: /totes or /leaderboard \n\n Fun:\n /jelly <name>  \n /green<anything> \n /red<anything> \n /doge \n /cat \n /remind \n\n * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.')
+    await message.reply(f'SUP! {message.from_user.first_name}? \n Get Price: /$btc /$aave ..etc \n\n Watch Table: /$ /lambo /prices \n Add Coin To Watch: /watch <coin> eg: /watch eth \n Mark A Point: /buy btc \n Remove a Point: /sell btc \n View Balance: /hodl \n\n bets: \n Start a new week: /startbets \n Finish a week: /stopbets \n Add your bet: /bet btc 12.3k eth 1.2k \n View current bets: /bets \n View Winners: /totes or /leaderboard \n\n Fun:\n /jelly <name>  \n /green<anything> \n /red<anything> \n /doge \n /cat \n /remind \n\n * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.')
 
 @dp.message_handler(commands=['remind'])
 async def send_reminder(message: types.Message):
@@ -172,14 +172,18 @@ async def send_balance(message: types.Message):
     try:
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
+        out = "<pre>| Symbol|  Buy Price  |  Price  | +/-  |\n"
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
             p, c, c24 = get_price(symbol)
             value = r.get(key)
             if value is not None: 
                 value = float(value.decode('utf-8'))
-                changes = round(100 * (p - value) / value, 2)
-                out = out + f"{symbol} you got at {value} changed by {changes}%\n"
+                buy_price = str(round(value,4)).ljust(10,' ')
+                price = str(round(p,4)).ljust(10,' ')
+                change = round(100 * (p - value) / value, 2)
+                change = str(round(c,1)).ljust(5,' ')
+                out = out + out + f"| {symbol} | ${buy_price} | ${price} | {change} | \n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     except Exception as e:
         logging.warn("Couldnt convert saved point:" + str(e))
