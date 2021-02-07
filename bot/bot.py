@@ -173,7 +173,7 @@ async def send_balance(message: types.Message):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         for key in saves:
-            symbol = key.replace("At_", "").replace(message.from_user.mention,"")
+            symbol = key.decode('utf-8').replace("At_", "").replace(message.from_user.mention,"")
             p, c, c24 = get_price(symbol)
             value = r.get(key)
             if value is not None: 
@@ -182,7 +182,7 @@ async def send_balance(message: types.Message):
                 out = out + f"{value} changed by {changes}%\n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     except Exception as e:
-        logging.warn("Could convert saved point:" + str(e))
+        logging.warn("Couldnt convert saved point:" + str(e))
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
