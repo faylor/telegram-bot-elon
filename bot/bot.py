@@ -326,7 +326,7 @@ async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     twits.prepare_stream()
     twits.start_stream()
-    dp._loop_create_task(twits.get_stream(bot))
+    dp._loop_create_task(get_stream())
 
 
 async def on_shutdown(dp):
