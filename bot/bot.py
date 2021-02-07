@@ -58,9 +58,13 @@ def get_stream():
                 json_response = json.loads(response_line)
                 for chat_id in twits.chat_ids:
                     logging.warn("SENDING Line ++" + str(chat_id))
-                
-                    SendMessage(chat_id=chat_id, text="Got A Tweet")
-
+                    text = "Got A Tweet"
+                    bot_key = TELEGRAM_BOT
+                    send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                    resp = requests.post(send_message_url)
+                    logging.warn("SENT Line +RESP+" + str(resp.status_code))
+                    logging.warn("SENT Line +RESP text+" + str(resp.text))
+                    
                     logging.warn("SENT Line ++" + str(chat_id))
                 logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
     except Exception as e:
