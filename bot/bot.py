@@ -262,10 +262,11 @@ def weekly_tally(message: types.Message):
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     winning = ""
     winning_diff = 99999
-    for key in r.scan_iter(message.chat.id + "_BTC_*"):
+    cid = str(message.chat.id)
+    for key in r.scan_iter(f"{cid}_BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
-        name = str(key.decode('utf-8')).replace(message.chat.id + "_BTC_","")
+        name = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
         if d <= winning_diff:
             if d == winning_diff:
                 winning = winning + ", " + name
@@ -277,10 +278,10 @@ def weekly_tally(message: types.Message):
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     winning_eth = ""
     winning_diff = 99999
-    for key in r.scan_iter(message.chat.id + "_ETH_*"):
+    for key in r.scan_iter(f"{cid}_ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_eth)
-        name = str(key.decode('utf-8')).replace(message.chat.id + "_ETH_","")
+        name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
         if d <= winning_diff:
             if d == winning_diff:
                 winning_eth = winning + ", " + name
@@ -343,8 +344,9 @@ async def set_weekly(message: types.Message, regexp_command):
     try:
         amount = regexp_command.group(1)
         amount_eth = regexp_command.group(2)
-        r.set(message.chat.id + "_BTC_" + message.from_user.mention, amount)
-        r.set(message.chat.id + "_ETH_" + message.from_user.mention, amount_eth)
+        cid = str(message.chat.id)
+        r.set(f"{cid}_BTC_" + message.from_user.mention, amount)
+        r.set(f"{cid}_ETH_" + message.from_user.mention, amount_eth)
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
