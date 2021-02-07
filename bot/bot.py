@@ -54,7 +54,7 @@ def get_stream():
         for response_line in twits.stream:
             logging.warn("STREAM RESP Line")
             if response_line and len(twits.chat_ids) > 0:
-                logging.warn("STREAM RESP Line ++")
+                logging.warn("STREAM RESP Line ++" + str(twits.chat_ids))
                 json_response = json.loads(response_line)
                 for chat_id in twits.chat_ids:
                     SendMessage(chat_id, "Got A Tweet: " + str(json_response["data"]["text"]))
