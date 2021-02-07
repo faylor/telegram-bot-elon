@@ -311,6 +311,8 @@ async def add_to_prices(message: types.Message, regexp_command):
 
 async def get_stream():
     try:
+        if twits.stream is None:
+            twits.start_stream()
         for response_line in twits.stream:
             logging.warn("STREAM RESP Line")
             if response_line and len(twits.chat_ids) > 0:
@@ -321,6 +323,7 @@ async def get_stream():
                 logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
     except Exception as e:
         logging.error("STREAM ERROR:" + str(e))
+
 
 async def on_startup(dp):
     logging.warning('Starting connection.')
