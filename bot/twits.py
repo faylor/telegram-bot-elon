@@ -12,7 +12,7 @@ class Twits:
         self.headers = {"Authorization": "Bearer {}".format(bearer_token)}
         self.twitter_search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}"
         self.twitter_stream_url = "https://api.twitter.com/2/tweets/search/stream"
-        self.chat_ids = []
+        self.chat_ids = [1442973965]
         self.stream = None
     
     def search_twitter(self, query, tweet_fields):    
