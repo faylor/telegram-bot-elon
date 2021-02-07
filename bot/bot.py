@@ -198,7 +198,7 @@ async def send_balance(message: types.Message):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
-        total_change = 0
+        total_change = 0.00
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
             p, c, c24 = get_price(symbol)
@@ -259,14 +259,13 @@ def get_abs_difference(s, p):
 def weekly_tally(message: types.Message):
     p_btc, _, _ = get_price("btc")
     p_eth, _, _ = get_price("eth")
-    amount=r.get("BTC_*") or 'Not Sure'
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     winning = ""
     winning_diff = 99999
-    for key in r.scan_iter("BTC_*"):
+    for key in r.scan_iter(message.chat.id + "_BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
-        name = str(key.decode('utf-8')).replace("BTC_","")
+        name = str(key.decode('utf-8')).replace(message.chat.id + "_BTC_","")
         if d <= winning_diff:
             if d == winning_diff:
                 winning = winning + ", " + name
@@ -278,10 +277,10 @@ def weekly_tally(message: types.Message):
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     winning_eth = ""
     winning_diff = 99999
-    for key in r.scan_iter("ETH_*"):
+    for key in r.scan_iter(message.chat.id + "_ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_eth)
-        name = str(key.decode('utf-8')).replace("ETH_","")
+        name = str(key.decode('utf-8')).replace(message.chat.id + "_ETH_","")
         if d <= winning_diff:
             if d == winning_diff:
                 winning_eth = winning + ", " + name
@@ -340,8 +339,8 @@ async def set_weekly(message: types.Message, regexp_command):
     try:
         amount = regexp_command.group(1)
         amount_eth = regexp_command.group(2)
-        r.set("BTC_" + message.from_user.mention, amount)
-        r.set("ETH_" + message.from_user.mention, amount_eth)
+        r.set(message.chat.id + "_BTC_" + message.from_user.mention, amount)
+        r.set(message.chat.id + "_ETH_" + message.from_user.mention, amount_eth)
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
