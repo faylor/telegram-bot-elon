@@ -172,7 +172,7 @@ async def send_balance(message: types.Message):
     try:
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
-        out = out + "<pre>| Symbol |  Buy Price |  Price  | +/-  |\n"
+        out = out + "<pre>| Symbol |  Buy Price |  Price  | +/-  |\n<table><tr><td>test</td><td>test2</td></tr><tr><td>test</td><td>test2</td></tr></table>"
         total_change = 0
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
@@ -189,7 +189,7 @@ async def send_balance(message: types.Message):
                 out = out + f"| {symbol} | {buy_price} | {price} | {change} | \n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n\n TOTAL CHANGE = " + str(total_change)
-        await bot.send_message(chat_id=message.chat.id, text=out)
+        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt convert saved point:" + str(e))
 
