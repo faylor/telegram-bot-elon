@@ -71,7 +71,7 @@ class Twits:
     def set_stream_rules(self):
         # You can adjust the rules if needed
         sample_rules = [
-            {"value": "dog from:5dog12", "tag": "doge 5dog12"},
+            {"value": "doge from:elonmusk", "tag": "doge 5dog12"},
             {"value": "cat from:5dog12", "tag": "btc 5dog12"},
         ]
         payload = {"add": sample_rules}
