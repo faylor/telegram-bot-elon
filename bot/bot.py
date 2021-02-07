@@ -2,6 +2,7 @@ import logging
 import json
 import requests
 import redis
+import asyncio
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -33,7 +34,7 @@ async def startStream(message: types.Message):
         logging.warn("____CHAT IT_____ " + str(message.chat.id))
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
-        await get_stream()
+        asyncio.get_event_loop().run_until_complete(get_stream())
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
