@@ -33,11 +33,35 @@ async def startStream(message: types.Message):
     try:
         logging.warn("____CHAT IT_____ " + str(message.chat.id))
         twits.add_chat_id(message.chat.id)
+        await bot.send_message(chat_id=message.chat.id, text="Trying to running...")
+        get_stream()
         await bot.send_message(chat_id=message.chat.id, text="Running...")
-        asyncio.get_event_loop().run_until_complete(get_stream())
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+    return wrapped
+
+@fire_and_forget
+def get_stream():
+    try:
+        if twits.stream is None:
+            twits.start_stream()
+        for response_line in twits.stream:
+            logging.warn("STREAM RESP Line")
+            if response_line and len(twits.chat_ids) > 0:
+                logging.warn("STREAM RESP Line ++")
+                json_response = json.loads(response_line)
+                for chat_id in twits.chat_ids:
+                    bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
+                logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
+    except Exception as e:
+        logging.error("STREAM ERROR:" + str(e))
+
+
 
 @dp.message_handler(commands=['stopstream'])
 async def stopStream(message: types.Message):
@@ -308,22 +332,6 @@ async def add_to_prices(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
-
-
-async def get_stream():
-    try:
-        if twits.stream is None:
-            twits.start_stream()
-        for response_line in twits.stream:
-            logging.warn("STREAM RESP Line")
-            if response_line and len(twits.chat_ids) > 0:
-                logging.warn("STREAM RESP Line ++")
-                json_response = json.loads(response_line)
-                for chat_id in twits.chat_ids:
-                    await bot.send_message(chat_id=chat_id, text="Got A Tweet: " + str(json_response["data"]["text"]))
-                logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
-    except Exception as e:
-        logging.error("STREAM ERROR:" + str(e))
 
 
 async def on_startup(dp):
