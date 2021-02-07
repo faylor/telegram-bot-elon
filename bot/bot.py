@@ -113,10 +113,35 @@ async def send_help(message: types.Message):
 async def send_reminder(message: types.Message):
     await message.reply(f'Yo! Get a wallet. Idjiot.')
 
-@dp.message_handler(commands=['whois'])
-async def check_user(message: types.Message):
+@dp.message_handler(commands=['add1'])
+async def add_user(message: types.Message):
     logging.warn('user:' + message.from_user.mention)
     await message.reply('user:' + message.from_user.mention)
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
+    if "winners_list" not in config:
+        config["winners_list"] = []
+    if message.from_user.mention not in config["winners_list"]:
+        config["winners_list"].append({message.from_user.mention: 1})
+    else:
+        config["winners_list"][message.from_user.mention] = int(config["winners_list"][message.from_user.mention]) + 1
+    logging.info(json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
+
+@dp.message_handler(commands=['minus1'])
+async def minus_user(message: types.Message):
+    logging.warn('user:' + message.from_user.mention)
+    await message.reply('user:' + message.from_user.mention)
+    config = r.get(message.chat.id)
+    if config is not None:
+        config = json.loads(config)
+        if "winners_list" in config and message.from_user.mention in config["winners_list"]:
+            config["winners_list"][message.from_user.mention] = int(config["winners_list"][message.from_user.mention]) - 1
+            logging.info(json.dumps(config))
+            r.set(message.chat.id, json.dumps(config))
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
