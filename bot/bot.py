@@ -125,7 +125,7 @@ async def add_user(message: types.Message):
     if "winners_list" not in config:
         config["winners_list"] = []
     if message.from_user.mention not in config["winners_list"]:
-        config["winners_list"].append({message.from_user.mention: 1})
+        config["winners_list"][message.from_user.mention] = 1
     else:
         config["winners_list"][message.from_user.mention] = int(config["winners_list"][message.from_user.mention]) + 1
     logging.info(json.dumps(config))
