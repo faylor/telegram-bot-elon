@@ -154,10 +154,10 @@ async def prices(message: types.Message):
             mains = config["watch_list"]
     except Exception as ex:
         logging.info("no config found, ignore")
-    out = "<pre>| Symbol|  Price      | +/- 1hr  |\n"
+    out = "<pre>Symbol|     $ / BTC      | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
-        p, c, _ = get_price(l)
+        p, c, c24, btc_price = get_price(l)
         totes = totes + c
         l = l.ljust(5, ' ')
         label_on_change = "   "
@@ -167,9 +167,11 @@ async def prices(message: types.Message):
             label_on_change = "  ++"
         elif c > 0:
             label_on_change = "   +"
-        price = str(round(p,4)).ljust(10,' ')
-        change = label_on_change + str(round(c,1)).ljust(5,' ')
-        out = out + f"| {l} | ${price} | {change} | \n"
+        price = str(round(p,4))
+        btc_price = str(round(btc_price,4))
+        change = label_on_change + str(round(c,1))
+        change24 = str(round(c24,1))
+        out = out + f"{l} | {price} / {btc_price} | {change} / {change24}\n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 6:
@@ -182,8 +184,8 @@ async def prices(message: types.Message):
 async def send_welcome(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        p, c, c24 = get_price(symbol)
-        await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)}  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+        p, c, c24, btc_price = get_price(symbol)
+        await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)} / {round(4,btc_price)}BTC  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
             saved = float(saved.decode('utf-8'))
@@ -201,7 +203,7 @@ async def send_balance(message: types.Message):
         total_change = float(0.00)
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
-            p, c, c24 = get_price(symbol)
+            p, c, c24, _ = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None: 
@@ -228,12 +230,13 @@ def get_price(label):
         resp = requests.get(url)
         js = resp.json()
         price = js["data"]["market_data"]["price_usd"]
+        price_btc = js["data"]["market_date"]["price_btc"]
         change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
         change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
     except Exception as e:
         logging.error(e)
-        return 0, 0, 0
-    return price, change_1hr, change_24hr
+        return 0, 0, 0, 0
+    return price, change_1hr, change_24hr, price_btc
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
@@ -260,8 +263,8 @@ def get_abs_difference(s, p):
         return -999999
 
 def weekly_tally(message: types.Message):
-    p_btc, _, _ = get_price("btc")
-    p_eth, _, _ = get_price("eth")
+    p_btc, _, _, _ = get_price("btc")
+    p_eth, _, _, _ = get_price("eth")
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     winning = ""
     winning_diff = 99999
@@ -368,7 +371,7 @@ async def set_weekly(message: types.Message, regexp_command):
 async def set_buy_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        p, _, _ = get_price(symbol)
+        p, _, _, _ = get_price(symbol)
         r.set("At_" + symbol.lower() + "_" + message.from_user.mention, p)
         await message.reply(f'Gotit. {symbol} at {p} marked')
     except Exception as e:
@@ -379,7 +382,7 @@ async def set_buy_point(message: types.Message, regexp_command):
 async def set_sell_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        p, _, _ = get_price(symbol)
+        p, _, _, _ = get_price(symbol)
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
         if saved is not None:
             saved = float(saved)
@@ -404,7 +407,7 @@ async def add_to_prices(message: types.Message, regexp_command):
         else:
             config = json.loads(config)
         logging.info(json.dumps(config))
-        a, _, _ = get_price(new_coin)
+        a, _, _, _ = get_price(new_coin)
         if "watch_list" not in config:
             config["watch_list"] = []
         if a == 0:
