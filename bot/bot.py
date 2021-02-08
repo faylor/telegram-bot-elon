@@ -292,7 +292,7 @@ def weekly_tally(message: types.Message):
         name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
         if d <= winning_diff:
             if d == winning_diff:
-                winning_eth = winning + ", " + name
+                winning_eth = winning_eth + ", " + name
             else:
                 winning_eth = name
                 winning_diff = d
