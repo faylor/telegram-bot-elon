@@ -202,16 +202,19 @@ async def send_balance(message: types.Message):
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
             p, c, c24 = get_price(symbol)
-            value = r.get(key)
-            if value is not None: 
-                value = float(value.decode('utf-8'))
-                buy_price = str(round(value,4)).ljust(10,' ')
-                price = str(round(p,4)).ljust(10,' ')
-                change = round(100 * (p - value) / value, 2)
-                total_change = total_change + change
-                change = str(round(change,1)).ljust(5,' ')
-                symbol = symbol.ljust(4, ' ')
-                out = out + f"| {symbol} | {buy_price} | {price} | {change} | \n"
+            if float(p) > 0:
+                value = r.get(key)
+                if value is not None: 
+                    value = float(value.decode('utf-8'))
+                    buy_price = str(round(value,4)).ljust(10,' ')
+                    price = str(round(p,4)).ljust(10,' ')
+                    change = round(100 * (p - value) / value, 2)
+                    total_change = total_change + change
+                    change = str(round(change,1)).ljust(5,' ')
+                    symbol = symbol.ljust(4, ' ')
+                    out = out + f"| {symbol} | {buy_price} | {price} | {change} | \n"
+            else:
+                out = out + f"| {symbol} | NA | NA | NA | \n"
         total_change = round(total_change, 2)
         out = out + "</pre>\nTOTAL CHANGE = " + str(total_change)
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
@@ -379,7 +382,11 @@ async def set_sell_point(message: types.Message, regexp_command):
         p, _, _ = get_price(symbol)
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
         if saved is not None:
-            changes = round(100 * (p - float(saved)) / float(saved), 2)
+            saved = float(saved)
+            if saved > 0:
+                changes = round(100 * (p - float(saved)) / float(saved), 2)
+            else:
+                changes = "NA"
             await message.reply(f'Sold. {symbol} final diff {changes}%')
         r.delete("At_" + symbol.lower() + "_" + message.from_user.mention)
     except Exception as e:
