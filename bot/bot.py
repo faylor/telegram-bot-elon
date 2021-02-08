@@ -230,7 +230,7 @@ def get_price(label):
         resp = requests.get(url)
         js = resp.json()
         price = js["data"]["market_data"]["price_usd"]
-        price_btc = js["data"]["market_date"]["price_btc"]
+        price_btc = js["data"]["market_data"]["price_btc"]
         change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
         change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
     except Exception as e:
