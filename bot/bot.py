@@ -154,7 +154,7 @@ async def prices(message: types.Message):
             mains = config["watch_list"]
     except Exception as ex:
         logging.info("no config found, ignore")
-    out = "<pre>Symbol|     $ / BTC      | +/- 1hr / 24hr\n"
+    out = "<pre>Symbol|     $ / BTC         | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
         p, c, c24, btc_price = get_price(l)
@@ -169,9 +169,11 @@ async def prices(message: types.Message):
             label_on_change = "   +"
         price = str(round(p,4))
         btc_price = str(round(btc_price,4))
+        prices = price + " / " + btc_price
+        prices = prices.ljust(15, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
-        out = out + f"{l} | {price} / {btc_price} | {change} / {change24}\n"
+        out = out + f"{l} | {prices} | {change} / {change24}\n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 6:
@@ -185,12 +187,12 @@ async def send_price_of(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         p, c, c24, btc_price = get_price(symbol)
-        await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)} / {round(btc_price,4)}BTC  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round(p,4)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
             saved = float(saved.decode('utf-8'))
             changes = round(100 * (p - saved) / saved, 2)
-            await bot.send_message(chat_id=message.chat.id, text=f"You marked at {saved}, changed by {changes}%")
+            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at {saved}, changed by {changes}%</pre>", parse_mode="HTML")
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
