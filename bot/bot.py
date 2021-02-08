@@ -154,7 +154,7 @@ async def prices(message: types.Message):
             mains = config["watch_list"]
     except Exception as ex:
         logging.info("no config found, ignore")
-    out = "<pre>Symbol|     $ / BTC         | +/- 1hr / 24hr\n"
+    out = "<pre>Symbol|     $ / BTC            | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
         p, c, c24, btc_price = get_price(l)
@@ -170,7 +170,7 @@ async def prices(message: types.Message):
         price = str(round(p,4))
         btc_price = str(round(btc_price,8))
         prices = price + " / " + btc_price
-        prices = prices.ljust(24, ' ')
+        prices = prices.ljust(22, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
         out = out + f"{l} | {prices} | {change} / {change24}\n"
