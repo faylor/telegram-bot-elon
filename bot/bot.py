@@ -168,7 +168,7 @@ async def prices(message: types.Message):
         elif c > 0:
             label_on_change = "   +"
         price = str(round(p,4))
-        btc_price = str(round(btc_price,4))
+        btc_price = str(round(btc_price,8))
         prices = price + " / " + btc_price
         prices = prices.ljust(15, ' ')
         change = label_on_change + str(round(c,1))
