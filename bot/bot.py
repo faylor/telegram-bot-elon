@@ -181,11 +181,11 @@ async def prices(message: types.Message):
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
-async def send_welcome(message: types.Message, regexp_command):
+async def send_price_of(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         p, c, c24, btc_price = get_price(symbol)
-        await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)} / {round(4,btc_price)}BTC  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
+        await bot.send_message(chat_id=message.chat.id, text=f"{symbol} = ${round(p,4)} / {round(btc_price,4)}BTC  Last hr = {round(c,2)}%, Last 24hr = {round(c24,2)}%")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
             saved = float(saved.decode('utf-8'))
