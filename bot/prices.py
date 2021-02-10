@@ -33,6 +33,14 @@ def get_price(label):
     except Exception as e:
         logging.error(e)
         return 0, 0, 0, 0
+    if price is None:
+        price = 0
+    if change_1hr is None:
+        change_1hr = 0
+    if change_24hr is None:
+        change_24hr = 0
+    if price_btc is None:
+        price_btc = 0
     return price, change_1hr, change_24hr, price_btc
 
 def round_sense(price):
