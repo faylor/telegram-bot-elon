@@ -20,11 +20,16 @@ def get_price(label):
         logging.info("GETTING LABEL:[" + label + "]")
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
         resp = http.get(url)
-        js = resp.json()
-        price = js["data"]["market_data"]["price_usd"]
-        price_btc = js["data"]["market_data"]["price_btc"]
-        change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
-        change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
+        if resp.status_code == 200:
+            js = resp.json()
+            price = js["data"]["market_data"]["price_usd"]
+            price_btc = js["data"]["market_data"]["price_btc"]
+            change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
+            change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return 0,0,0,0
     except Exception as e:
         logging.error(e)
         return 0, 0, 0, 0
