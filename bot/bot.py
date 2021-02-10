@@ -186,11 +186,12 @@ async def send_balance(message: types.Message, regexp_command):
                         btc_price = "UNKNOWN"
                     
                     if bysymbol is not None and "btc" in bysymbol.lower():
-                        buy_price = str(round_sense(btc_price)).ljust(10,' ')
                         price = str(round(btc_price,8)).ljust(10,' ')
                         if btc_price == "UNKNOWN":
+                            buy_price = "UNKNOWN".ljust(10,' ')
                             change = 0
                         else:
+                            buy_price = str(round_sense(btc_price)).ljust(10,' ')
                             change = round(100 * (p - btc_price) / btc_price, 2)
                     else:
                         buy_price = str(round_sense(usd_price)).ljust(10,' ')
