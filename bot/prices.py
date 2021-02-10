@@ -1,12 +1,13 @@
 import logging
 import requests
 from aiogram import types
+from urllib3.util.retry import Retry
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
-        resp = requests.get(url)
+        resp = requests.get(url, retries=Retry(total=5, backoff_factor=1))
         js = resp.json()
         price = js["data"]["market_data"]["price_usd"]
         price_btc = js["data"]["market_data"]["price_btc"]

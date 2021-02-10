@@ -313,16 +313,33 @@ async def set_weekly(message: types.Message, regexp_command):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy ([0-9.,a-zA-Z]*)']))
+
+def get_symbol_list(symbols):
+    if "," in symbols:
+        symbol_split = symbols.split(",")
+    elif " " in symbols:
+        symbol_split = symbols.split()
+    else:
+        symbol_split = [symbols]
+    return symbol_split
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy ([\s0-9.,a-zA-Z]*)']))
 async def set_buy_point(message: types.Message, regexp_command):
     try:
-        symbol = regexp_command.group(1)
-        p, _, _, btc_price = get_price(symbol)
-        js = {}
-        js["usd"] = p
-        js["btc"] = btc_price
-        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, json.dumps(js))
-        await message.reply(f'Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked')
+        symbols = regexp_command.group(1)
+        symbol_split = get_symbol_list(symbols)
+        
+        out = ""
+        for symbol in symbol_split:
+            symbol = symbol.strip().lower()
+            p, _, _, btc_price = get_price(symbol)
+            js = {}
+            js["usd"] = p
+            js["btc"] = btc_price
+            r.set("At_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+            out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
+        
+        await message.reply(out)
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
@@ -331,29 +348,36 @@ async def set_buy_point(message: types.Message, regexp_command):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([0-9.,a-zA-Z]*)']))
 async def set_sell_point(message: types.Message, regexp_command):
     try:
-        symbol = regexp_command.group(1)
-        p, _, _, btc_price = get_price(symbol)
-        js = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
-        if js is not None:
-            if "{" in js:
-                js = json.loads(js)
-                saved = js["usd"]
-                saved_btc = js["btc"]
-                if saved_btc > 0:
-                    changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
+        symbols = regexp_command.group(1)
+        symbol_split = get_symbol_list(symbols)
+        
+        out = ""
+        for symbol in symbol_split:
+            symbol = symbol.strip().lower()
+            p, _, _, btc_price = get_price(symbol)
+            js = r.get("At_" + symbol + "_" + message.from_user.mention).decode('utf-8')
+            if js is not None:
+                if "{" in js:
+                    js = json.loads(js)
+                    saved = js["usd"]
+                    saved_btc = js["btc"]
+                    if saved_btc > 0:
+                        changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
+                    else:
+                        changes_btc = "NA"
                 else:
-                    changes_btc = "NA"
-            else:
-                saved = float(js)
-                saved_btc = 1
-                changes_btc = "<UNKNOWN>"
-            if saved > 0:
-                changes = round(100 * (p - float(saved)) / float(saved), 2)
-            else:
-                changes = "NA"
-            await message.reply(f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc}')
-        r.delete("At_" + symbol.lower() + "_" + message.from_user.mention)
+                    saved = float(js)
+                    saved_btc = 1
+                    changes_btc = "<UNKNOWN>"
+                if saved > 0:
+                    changes = round(100 * (p - float(saved)) / float(saved), 2)
+                else:
+                    changes = "NA"
+                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
+            r.delete("At_" + symbol + "_" + message.from_user.mention)
+        await message.reply(out)
     except Exception as e:
+        logging.error("Sell Error:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
 
 
