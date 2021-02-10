@@ -180,19 +180,19 @@ async def send_balance(message: types.Message, regexp_command):
                     if "{" in value:
                         js = json.loads(value)
                         usd_price = float(js["usd"])
-                        btc_price = float(js["btc"])
+                        buy_btc_price = float(js["btc"])
                     else:
                         usd_price = float(value)
-                        btc_price = "UNKNOWN"
+                        buy_btc_price = "UNKNOWN"
                     
                     if bysymbol is not None and "btc" in bysymbol.lower():
                         price = str(round(btc_price,8)).ljust(10,' ')
-                        if btc_price == "UNKNOWN":
-                            buy_price = "UNKNOWN".ljust(10,' ')
+                        if buy_btc_price == "UNKNOWN":
+                            buy_price = buy_btc_price.ljust(10,' ')
                             change = 0
                         else:
-                            buy_price = str(round_sense(btc_price)).ljust(10,' ')
-                            change = round(100 * (p - btc_price) / btc_price, 2)
+                            buy_price = str(round_sense(buy_btc_price)).ljust(10,' ')
+                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
                     else:
                         buy_price = str(round_sense(usd_price)).ljust(10,' ')
                         price = str(round_sense(p)).ljust(10,' ')
