@@ -124,11 +124,11 @@ def get_change_label(c):
     if c > 3:
         label_on_change = "🚀"
     elif c > 0:
-        label_on_change = "🛫"
+        label_on_change = "+"
     elif c == 0:
-        label_on_change = "🤷🏽"
+        label_on_change = " "
     elif c > -3:
-        label_on_change = "☠️"
+        label_on_change = "-"
     return label_on_change + str(round(c,1)).replace("-","")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
@@ -159,11 +159,11 @@ async def prices(message: types.Message):
         change24 = get_change_label(c24)
         out = out + f"{l} {prices} |{change}    {change24}\n"
     if totes < 0:
-        out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
+        out = out + "</pre>\n\n ☠️☠️☠️☠️☠️☠️" 
     elif totes > 6:
-        out = out + "</pre>OK OK, LAMBO FOR YOU!"
+        out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
     else:
-        out = out + "</pre>MEH, MAYBE LAMBO. HODL."
+        out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
@@ -187,7 +187,7 @@ async def send_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.mention)
-        out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
+        out = out + "<pre>         Buy Price |  Price     |  +/-  \n"
         total_change = float(0.00)
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
@@ -220,9 +220,9 @@ async def send_balance(message: types.Message, regexp_command):
                         else:
                             change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
-                    change = str(round(change,1)).ljust(5,' ')
+                    change = get_change_label(change).ljust(5,' ')
                     symbol = symbol.ljust(4, ' ')
-                    out = out + f"| {symbol} | {buy_price} | {price} | {change} | \n"
+                    out = out + f"{symbol} | {buy_price} | {price} | {change}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | \n"
         total_change = round(total_change, 2)

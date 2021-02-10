@@ -17,7 +17,6 @@ http.mount("http://", adapter)
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
-        logging.info("GETTING LABEL:[" + label + "]")
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
         resp = http.get(url)
         if resp.status_code == 200:
