@@ -13,7 +13,9 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 
-from .twits import Twits
+from .twits import Twits, get_stream
+from .thecats import getTheApiUrl
+from .prices import get_price, weekly_tally, get_abs_difference, round_sense
 
 r = redis.from_url(REDIS_URL)
 
@@ -22,12 +24,6 @@ dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
 
-def getUrl(animal):
-    contents = requests.get('https://api.the' + animal + 'api.com/v1/images/search')
-    js = contents.json()
-    print(js)
-    url = js[0]["url"]
-    return url
 
 @dp.message_handler(commands=['startstream'])
 async def startStream(message: types.Message):
@@ -35,41 +31,11 @@ async def startStream(message: types.Message):
         logging.warn("____CHAT IT_____ " + str(message.chat.id))
         twits.add_chat_id(message.chat.id)
         await bot.send_message(chat_id=message.chat.id, text="Trying to running...")
-        get_stream()
+        get_stream(twits)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
-
-def fire_and_forget(f):
-    def wrapped(*args, **kwargs):
-        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
-    return wrapped
-
-@fire_and_forget
-def get_stream():
-    try:
-        if twits.stream is None:
-            twits.start_stream()
-        for response_line in twits.stream:
-            logging.warn("STREAM RESP Line")
-            if response_line and len(twits.chat_ids) > 0:
-                logging.warn("STREAM RESP Line ++" + str(twits.chat_ids))
-                json_response = json.loads(response_line)
-                for chat_id in twits.chat_ids:
-                    logging.warn("SENDING Line ++" + str(chat_id))
-                    text = "Got A Tweet: " + json_response["data"]["text"]
-                    bot_key = TELEGRAM_BOT
-                    send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-                    resp = requests.post(send_message_url)
-                    logging.warn("SENT Line +RESP+" + str(resp.status_code))
-                    logging.warn("SENT Line +RESP text+" + str(resp.text))
-                    
-                    logging.warn("SENT Line ++" + str(chat_id))
-                logging.warn(json.dumps(json_response, indent=4, sort_keys=True))
-    except Exception as e:
-        logging.error("STREAM ERROR:" + str(e))
-
 
 
 @dp.message_handler(commands=['stopstream'])
@@ -83,12 +49,12 @@ async def stopStream(message: types.Message):
 
 @dp.message_handler(commands=['doge', 'dog'])
 async def sendDogImage(message: types.Message):
-    url = getUrl('dog')
+    url = getTheApiUrl('dog')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
 @dp.message_handler(commands=['cate', 'cat'])
 async def sendCatImage(message: types.Message):
-    url = getUrl('cat')
+    url = getTheApiUrl('cat')
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['red([a-zA-Z]*)']))
@@ -167,7 +133,7 @@ async def prices(message: types.Message):
             label_on_change = "  ++"
         elif c > 0:
             label_on_change = "   +"
-        price = str(round(p,4))
+        price = str(round_sense(p))
         btc_price = str(round(btc_price,8))
         prices = price + " / " + btc_price
         prices = prices.ljust(22, ' ')
@@ -187,7 +153,7 @@ async def send_price_of(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         p, c, c24, btc_price = get_price(symbol)
-        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round(p,4)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
+        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
             saved = float(saved.decode('utf-8'))
@@ -196,22 +162,25 @@ async def send_price_of(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
-@dp.message_handler(commands=['balance', 'hodl'])
-async def send_balance(message: types.Message):
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl ([a-zA-Z]*)']))
+async def send_balance(message: types.Message, regexp_command):
     try:
+        symbol = regexp_command.group(1)
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
         total_change = float(0.00)
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
-            p, c, c24, _ = get_price(symbol)
+            p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None: 
                     value = float(value.decode('utf-8'))
-                    buy_price = str(round(value,4)).ljust(10,' ')
-                    price = str(round(p,4)).ljust(10,' ')
+                    buy_price = str(round_sense(value)).ljust(10,' ')
+                    if symbol is not None and "btc" in symbol.lower():
+                        buy_price = str(round(btc_price,8)).ljust(10,' ')
+                    price = str(round_sense(p)).ljust(10,' ')
                     change = round(100 * (p - value) / value, 2)
                     total_change = total_change + change
                     change = str(round(change,1)).ljust(5,' ')
@@ -225,21 +194,6 @@ async def send_balance(message: types.Message):
     except Exception as e:
         logging.warn("Couldnt convert saved point:" + str(e))
 
-def get_price(label):
-    price, change_1hr, change_24hr = 0, 0, 0
-    try:
-        url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
-        resp = requests.get(url)
-        js = resp.json()
-        price = js["data"]["market_data"]["price_usd"]
-        price_btc = js["data"]["market_data"]["price_btc"]
-        change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
-        change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
-    except Exception as e:
-        logging.error(e)
-        return 0, 0, 0, 0
-    return price, change_1hr, change_24hr, price_btc
-
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
     for key in r.scan_iter("BTC_*"):
@@ -247,58 +201,6 @@ async def start_weekly(message: types.Message):
     for key in r.scan_iter("ETH_*"):
         r.delete(key)
     await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
-
-
-def get_abs_difference(s, p):
-    estimate = -999999
-    try:
-        if s != "NONE":
-            if "k" in s.lower():
-                tmp_a = s.lower().replace("k","")
-                tmp_a_double = float(tmp_a)
-                estimate = tmp_a_double * 1000
-            else:
-                estimate = float(str(s))
-        return abs(estimate - p)
-    except Exception as e:
-        logging.warn("Cannot convert abs difference:" + str(e))
-        return -999999
-
-def weekly_tally(message: types.Message):
-    p_btc, _, _, _ = get_price("btc")
-    p_eth, _, _, _ = get_price("eth")
-    out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
-    winning = ""
-    winning_diff = 99999
-    cid = str(message.chat.id)
-    for key in r.scan_iter(f"{cid}_BTC_*"):
-        a = r.get(key).decode('utf-8') or "NONE"
-        d = get_abs_difference(a, p_btc)
-        name = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning = winning + ", " + name
-            else:
-                winning = name
-                winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING BTC == " + winning + "\n"
-    out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
-    winning_eth = ""
-    winning_diff = 99999
-    for key in r.scan_iter(f"{cid}_ETH_*"):
-        a = r.get(key).decode('utf-8') or "NONE"
-        d = get_abs_difference(a, p_eth)
-        name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning_eth = winning_eth + ", " + name
-            else:
-                winning_eth = name
-                winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth + "\n"
-    return out, winning, winning_eth
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
