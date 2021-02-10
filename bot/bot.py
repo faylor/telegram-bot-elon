@@ -322,7 +322,7 @@ async def set_buy_point(message: types.Message, regexp_command):
         js = {}
         js["usd"] = p
         js["btc"] = btc_price
-        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, json.dump(js))
+        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, json.dumps(js))
         await message.reply(f'Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked')
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
