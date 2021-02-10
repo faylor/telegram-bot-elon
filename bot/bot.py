@@ -109,6 +109,16 @@ async def minus_user(message: types.Message):
             logging.info(json.dumps(config))
             r.set(message.chat.id, json.dumps(config))
 
+def get_user_price_config(user):
+    try:
+        config = r.get("prices_" + user)
+        if config is None:
+            return "usd"
+        else:
+            return config.decode('UTF-8')
+    except Exception as e:
+        return "usd"
+
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
     chat_id = message.chat.id
@@ -120,7 +130,8 @@ async def prices(message: types.Message):
             mains = config["watch_list"]
     except Exception as ex:
         logging.info("no config found, ignore")
-    out = "<pre>Symbol|     $ / BTC            | +/- 1hr / 24hr\n"
+    in_prices = get_user_price_config(message.from_user.mentions).upper()
+    out = f"<pre>Symbol|     {in_prices}          | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
         p, c, c24, btc_price = get_price(l)
@@ -133,9 +144,10 @@ async def prices(message: types.Message):
             label_on_change = "  ++"
         elif c > 0:
             label_on_change = "   +"
-        price = str(round_sense(p))
-        btc_price = str(round(btc_price,8))
-        prices = price + " / " + btc_price
+        if in_prices == "USD":
+            prices = str(round_sense(p))
+        else:
+            prices = str(round(btc_price,8))
         prices = prices.ljust(22, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
@@ -231,6 +243,22 @@ async def clear_weekly_totals(message: types.Message):
             config["winners_list"] = {}
             r.set(message.chat.id, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['userprices ([a-zA-Z]*)']))
+async def set_user_prices(message: types.Message, regexp_command):
+    try:
+        type = regexp_command.group(1)
+        if type is None or type.lower() != "btc":
+            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. /userprices btc   or /userprices usd')
+            return
+        if type.lower() == "btc" or type.lower() == "usd":
+            user = message.from_user.mention
+            r.set("prices_" + user, type.lower())
+            await message.reply(f'Gotit. Prices in {type} for {user}')
+        else:
+            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. We only accept btc or usd prices. /userprices btc   or /userprices usd')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
