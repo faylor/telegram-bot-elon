@@ -198,7 +198,7 @@ async def send_balance(message: types.Message, regexp_command):
                     
                     if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
                         price = str(round(btc_price,8)).ljust(10,' ')
-                        if buy_btc_price == "UNKNOWN":
+                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
                             buy_price = buy_btc_price.ljust(10,' ')
                             change = 0
                         else:
