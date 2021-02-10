@@ -202,7 +202,7 @@ async def send_balance(message: types.Message, regexp_command):
                             buy_price = buy_btc_price.ljust(10,' ')
                             change = 0
                         else:
-                            buy_price = str(round_sense(buy_btc_price)).ljust(10,' ')
+                            buy_price = str(round(buy_btc_price, 6)).ljust(10,' ')
                             change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
                     else:
                         buy_price = str(round_sense(usd_price)).ljust(10,' ')
