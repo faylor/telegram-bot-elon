@@ -18,13 +18,11 @@ def get_stream(twits):
         if twits.stream is None:
             twits.start_stream()
         for response_line in twits.stream:
-            logging.warn("STREAM RESP Line")
             if response_line and len(twits.chat_ids) > 0:
-                logging.warn("STREAM RESP Line ++" + str(twits.chat_ids))
                 json_response = json.loads(response_line)
                 for chat_id in twits.chat_ids:
                     logging.warn("SENDING Line ++" + str(chat_id))
-                    text = "Got A Tweet: " + json_response["data"]["text"]
+                    text = "\n YO! WAKE UP. \n\n WAAAAKKKKKEEE UP \n\n Got A Tweet: " + json_response["data"]["text"]
                     bot_key = TELEGRAM_BOT
                     send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                     resp = requests.post(send_message_url)
