@@ -187,7 +187,7 @@ async def send_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.mention)
-        out = out + "<pre>        Buy At  |  Price     |  +/-  \n"
+        out = out + "<pre>       Buy At   |  Price   |  +/-  \n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -208,14 +208,14 @@ async def send_balance(message: types.Message, regexp_command):
                     if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
                         price = str(round(btc_price,8)).ljust(10,' ')
                         if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                            buy_price = buy_btc_price.ljust(10,' ')
+                            buy_price = buy_btc_price.ljust(8,' ')
                             change = 0
                         else:
-                            buy_price = str(round(buy_btc_price, 6)).ljust(10,' ')
+                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
                             change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
                     else:
                         buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p)).ljust(10,' ')
+                        price = str(round_sense(p)).ljust(8,' ')
                         if usd_price == 0:
                             change = 0
                         else:
