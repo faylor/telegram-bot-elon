@@ -131,7 +131,7 @@ async def prices(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = f"<pre>Symbol|   {in_prices}        | +/- 1hr / 24hr\n"
+    out = f"<pre>Symbol|   {in_prices}      | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
         p, c, c24, btc_price = get_price(l)
@@ -148,7 +148,7 @@ async def prices(message: types.Message):
             prices = str(round_sense(p))
         else:
             prices = str(round(btc_price,8))
-        prices = prices.ljust(9, ' ')
+        prices = prices.ljust(7, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
         out = out + f"{l} | {prices} | {change} / {change24}\n"
