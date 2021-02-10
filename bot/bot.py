@@ -130,7 +130,7 @@ async def prices(message: types.Message):
             mains = config["watch_list"]
     except Exception as ex:
         logging.info("no config found, ignore")
-    in_prices = get_user_price_config(message.from_user.mentions).upper()
+    in_prices = get_user_price_config(message.from_user.mention).upper()
     out = f"<pre>Symbol|     {in_prices}          | +/- 1hr / 24hr\n"
     totes = 0
     for l in mains:
