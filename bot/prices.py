@@ -1,14 +1,25 @@
 import logging
 import requests
 from aiogram import types
-from retry_requests import retry
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
+retry_strategy = Retry(
+    total=5,
+    status_forcelist=[429, 500, 502, 503, 504],
+    method_whitelist=["HEAD", "GET", "OPTIONS"]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+http = requests.Session()
+http.mount("https://", adapter)
+http.mount("http://", adapter)
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
+        logging.info("GETTING LABEL:[" + label + "]")
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
-        retryable = retry()
-        resp = retryable.get(url)
+        resp = http.get(url)
         js = resp.json()
         price = js["data"]["market_data"]["price_usd"]
         price_btc = js["data"]["market_data"]["price_btc"]
