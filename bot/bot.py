@@ -148,7 +148,7 @@ async def prices(message: types.Message):
             prices = str(round_sense(p))
         else:
             prices = str(round(btc_price,8))
-        prices = prices.ljust(22, ' ')
+        prices = prices.ljust(12, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
         out = out + f"{l} | {prices} | {change} / {change24}\n"
