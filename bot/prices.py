@@ -3,7 +3,6 @@ import requests
 from aiogram import types
 from retry_requests import retry
 
-
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
@@ -19,7 +18,6 @@ def get_price(label):
         logging.error(e)
         return 0, 0, 0, 0
     return price, change_1hr, change_24hr, price_btc
-
 
 def round_sense(price):
     if price is None:
