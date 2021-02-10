@@ -176,13 +176,13 @@ async def send_balance(message: types.Message, regexp_command):
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None:
-                    value = float(value.decode('utf-8'))
+                    value = value.decode('utf-8')
                     if "{" in value:
                         js = json.loads(value)
-                        usd_price = js["usd"]
-                        btc_price = js["btc"]
+                        usd_price = float(js["usd"])
+                        btc_price = float(js["btc"])
                     else:
-                        usd_price = value
+                        usd_price = float(value)
                         btc_price = "UNKNOWN"
                     
                     if bysymbol is not None and "btc" in bysymbol.lower():
@@ -206,7 +206,7 @@ async def send_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nTOTAL CHANGE = " + str(total_change) + "%"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
-        logging.warn("Couldnt convert saved point:" + str(e))
+        logging.warn("Couldnt get hodl data:" + str(e))
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
