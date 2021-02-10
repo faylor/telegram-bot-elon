@@ -165,7 +165,7 @@ async def send_price_of(message: types.Message, regexp_command):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl([a-zA-Z]*)']))
 async def send_balance(message: types.Message, regexp_command):
     try:
-        symbol = regexp_command.group(1)
+        bysymbol = regexp_command.group(1)
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         out = out + "<pre>| Coin |  Buy Price |  Price     |  +/-  |\n"
@@ -175,13 +175,27 @@ async def send_balance(message: types.Message, regexp_command):
             p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
-                if value is not None: 
+                if value is not None:
                     value = float(value.decode('utf-8'))
-                    buy_price = str(round_sense(value)).ljust(10,' ')
-                    price = str(round_sense(p)).ljust(10,' ')
-                    if symbol is not None and "btc" in symbol.lower():
+                    if "{" in value:
+                        js = json.loads(value)
+                        usd_price = js["usd"]
+                        btc_price = js["btc"]
+                    else:
+                        usd_price = value
+                        btc_price = "UNKNOWN"
+                    
+                    if bysymbol is not None and "btc" in bysymbol.lower():
+                        buy_price = str(round_sense(btc_price)).ljust(10,' ')
                         price = str(round(btc_price,8)).ljust(10,' ')
-                    change = round(100 * (p - value) / value, 2)
+                        if btc_price == "UNKNOWN":
+                            change = 0
+                        else:
+                            change = round(100 * (p - btc_price) / btc_price, 2)
+                    else:
+                        buy_price = str(round_sense(usd_price)).ljust(10,' ')
+                        price = str(round_sense(p)).ljust(10,' ')
+                        change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
                     change = str(round(change,1)).ljust(5,' ')
                     symbol = symbol.ljust(4, ' ')
@@ -189,7 +203,7 @@ async def send_balance(message: types.Message, regexp_command):
             else:
                 out = out + f"| {symbol} | NA | NA | NA | \n"
         total_change = round(total_change, 2)
-        out = out + "</pre>\nTOTAL CHANGE = " + str(total_change)
+        out = out + "</pre>\nTOTAL CHANGE = " + str(total_change) + "%"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt convert saved point:" + str(e))
@@ -275,9 +289,10 @@ async def set_weekly(message: types.Message, regexp_command):
 async def set_buy_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        p, _, _, _ = get_price(symbol)
-        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, p)
-        await message.reply(f'Gotit. {symbol} at {p} marked')
+        p, _, _, btc_price = get_price(symbol)
+        js = {"usd":p,"btc":btc_price}
+        r.set("At_" + symbol.lower() + "_" + message.from_user.mention, json.dump(js))
+        await message.reply(f'Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
@@ -286,15 +301,26 @@ async def set_buy_point(message: types.Message, regexp_command):
 async def set_sell_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        p, _, _, _ = get_price(symbol)
-        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
-        if saved is not None:
-            saved = float(saved)
+        p, _, _, btc_price = get_price(symbol)
+        js = r.get("At_" + symbol.lower() + "_" + message.from_user.mention).decode('utf-8')
+        if js is not None:
+            if "{" in js:
+                js = json.loads(js)
+                saved = js["usd"]
+                saved_btc = js["btc"]
+                if saved_btc > 0:
+                    changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
+                else:
+                    changes_btc = "NA"
+            else:
+                saved = float(js)
+                saved_btc = 1
+                changes_btc = "<UNKNOWN>"
             if saved > 0:
                 changes = round(100 * (p - float(saved)) / float(saved), 2)
             else:
                 changes = "NA"
-            await message.reply(f'Sold. {symbol} final diff {changes}%')
+            await message.reply(f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc}')
         r.delete("At_" + symbol.lower() + "_" + message.from_user.mention)
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
