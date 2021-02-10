@@ -333,7 +333,7 @@ async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     twits.prepare_stream()
     twits.start_stream()
-    get_stream()
+    get_stream(twits)
 
 async def on_shutdown(dp):
     twits.close()
