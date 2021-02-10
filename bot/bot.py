@@ -162,7 +162,7 @@ async def send_price_of(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl([\sa-zA-Z]*)']))
 async def send_balance(message: types.Message, regexp_command):
     try:
         bysymbol = regexp_command.group(1)
