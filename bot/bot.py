@@ -124,11 +124,11 @@ def get_change_label(c):
     if c > 3:
         label_on_change = "🚀"
     elif c > 0:
-        label_on_change = "+"
+        label_on_change = " +"
     elif c == 0:
-        label_on_change = " "
+        label_on_change = "  "
     elif c > -3:
-        label_on_change = "-"
+        label_on_change = " -"
     return label_on_change + str(round(c,1)).replace("-","")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
@@ -187,8 +187,9 @@ async def send_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.mention)
-        out = out + "<pre>         Buy Price |  Price     |  +/-  \n"
+        out = out + "<pre>        Buy Price |  Price     |  +/-  \n"
         total_change = float(0.00)
+        counter = 0
         for key in saves:
             symbol = key.decode('utf-8').replace("At_", "").replace("_" + message.from_user.mention,"")
             p, c, c24, btc_price = get_price(symbol)
@@ -220,13 +221,16 @@ async def send_balance(message: types.Message, regexp_command):
                         else:
                             change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
+                    counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
                     symbol = symbol.ljust(4, ' ')
                     out = out + f"{symbol} | {buy_price} | {price} | {change}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | \n"
         total_change = round(total_change, 2)
-        out = out + "</pre>\nTOTAL CHANGE = " + str(total_change) + "%"
+        out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
+        if counter > 0:
+            out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
