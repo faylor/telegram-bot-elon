@@ -208,7 +208,7 @@ async def send_balance(message: types.Message, regexp_command):
                         buy_price = str(round_sense(usd_price)).ljust(10,' ')
                         price = str(round_sense(p)).ljust(10,' ')
                         if usd_price == 0:
-                            change = "NA"
+                            change = 0
                         else:
                             change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
