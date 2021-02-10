@@ -131,25 +131,29 @@ async def prices(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = f"<pre>         {in_prices}  | 1hr / 24hr\n"
+    out = f"<pre>       {in_prices}    | 1hr      24hr\n"
     totes = 0
     for l in mains:
         p, c, c24, btc_price = get_price(l)
         totes = totes + c
         l = l.ljust(5, ' ')
-        label_on_change = " "
+        label_on_change = "💩"
         if c > 3:
             label_on_change = "🚀"
         elif c > 0:
-            label_on_change = "📈"
+            label_on_change = "🛫"
+        elif c == 0:
+            label_on_change = "🤷🏽"
+        elif c > -3:
+            label_on_change = "❗️"
         if in_prices == "USD":
             prices = str(round_sense(p))
         else:
             prices = str(round(btc_price,8))
         prices = prices.ljust(7, ' ')
-        change = label_on_change + str(round(c,1))
+        change = label_on_change + str(round(c,1)).replace("-","")
         change24 = str(round(c24,1))
-        out = out + f"{l} {prices} |{change}/{change24}\n"
+        out = out + f"{l} {prices} |{change}  {change24}\n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 6:
@@ -399,7 +403,7 @@ async def add_to_prices(message: types.Message, regexp_command):
         if "watch_list" not in config:
             config["watch_list"] = []
         if a == 0:
-            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watch $aave')
+            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watch aave')
         else:
             if new_coin in config["watch_list"]:
                 await message.reply(f'{message.from_user.first_name} Fail. Already Watching This One. ' + str(config["watch_list"]))
