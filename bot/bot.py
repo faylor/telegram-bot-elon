@@ -348,7 +348,7 @@ async def set_buy_point(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([\s0-9.,a-zA-Z]*)']))
 async def set_sell_point(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
