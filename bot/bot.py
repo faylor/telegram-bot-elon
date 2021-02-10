@@ -137,11 +137,11 @@ async def prices(message: types.Message):
         p, c, c24, btc_price = get_price(l)
         totes = totes + c
         l = l.ljust(5, ' ')
-        label_on_change = "   "
+        label_on_change = "  "
         if c > 3:
             label_on_change = "++"
         elif c > 0:
-            label_on_change = "   +"
+            label_on_change = " +"
         if in_prices == "USD":
             prices = str(round_sense(p))
         else:
@@ -149,7 +149,7 @@ async def prices(message: types.Message):
         prices = prices.ljust(7, ' ')
         change = label_on_change + str(round(c,1))
         change24 = str(round(c24,1))
-        out = out + f"{l} | {prices} | {change} / {change24}\n"
+        out = out + f"{l} |{prices} |{change}/{change24}\n"
     if totes < 0:
         out = out + "</pre>OUCH, NO LAMBO FOR YOU!" 
     elif totes > 6:
