@@ -141,7 +141,7 @@ async def prices(message: types.Message):
         if c > 3:
             label_on_change = "🚀"
         elif c > 0:
-            label_on_change = "🦘"
+            label_on_change = "📈"
         if in_prices == "USD":
             prices = str(round_sense(p))
         else:
