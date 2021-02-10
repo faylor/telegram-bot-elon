@@ -162,7 +162,7 @@ async def send_price_of(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl([a-zA-Z]*)']))
 async def send_balance(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
@@ -178,9 +178,9 @@ async def send_balance(message: types.Message, regexp_command):
                 if value is not None: 
                     value = float(value.decode('utf-8'))
                     buy_price = str(round_sense(value)).ljust(10,' ')
-                    if symbol is not None and "btc" in symbol.lower():
-                        buy_price = str(round(btc_price,8)).ljust(10,' ')
                     price = str(round_sense(p)).ljust(10,' ')
+                    if symbol is not None and "btc" in symbol.lower():
+                        price = str(round(btc_price,8)).ljust(10,' ')
                     change = round(100 * (p - value) / value, 2)
                     total_change = total_change + change
                     change = str(round(change,1)).ljust(5,' ')
