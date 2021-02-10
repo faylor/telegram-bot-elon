@@ -248,7 +248,7 @@ async def clear_weekly_totals(message: types.Message):
 async def set_user_prices(message: types.Message, regexp_command):
     try:
         type = regexp_command.group(1)
-        if type is None or type.lower() != "btc":
+        if type is None:
             await message.reply(f'{message.from_user.first_name} Fail. You Idiot. /userprices btc   or /userprices usd')
             return
         if type.lower() == "btc" or type.lower() == "usd":
@@ -319,10 +319,13 @@ async def set_buy_point(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         p, _, _, btc_price = get_price(symbol)
-        js = {"usd":p,"btc":btc_price}
+        js = {}
+        js["usd"] = p
+        js["btc"] = btc_price
         r.set("At_" + symbol.lower() + "_" + message.from_user.mention, json.dump(js))
         await message.reply(f'Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked')
     except Exception as e:
+        logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
