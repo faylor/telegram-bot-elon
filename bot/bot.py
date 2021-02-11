@@ -274,6 +274,13 @@ async def set_user_prices(message: types.Message, regexp_command):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
+def add_win_for_user(config, mention):
+    mention = mention.strip()
+    if mention not in config["winners_list"]:
+        config["winners_list"][mention] = 1
+    else:
+        config["winners_list"][mention] = int(config["winners_list"][mention]) + 1
+    
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth = weekly_tally(message, r)
@@ -286,14 +293,19 @@ async def finish_weekly(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = {}
-    if winning_btc not in config["winners_list"]:
-        config["winners_list"][winning_btc] = 1
+    if "," in winning_btc:
+        winners = winning_btc.split(",")
+        for winner in winners:
+            add_win_for_user(config, winner)
     else:
-        config["winners_list"][winning_btc] = int(config["winners_list"][winning_btc]) + 1
-    if winning_eth not in config["winners_list"]:
-        config["winners_list"][winning_eth] = 1
+        add_win_for_user(config, winning_btc)
+    if "," in winning_eth:
+        winners = winning_eth.split(",")
+        for winner in winners:
+            add_win_for_user(config, winner)
     else:
-        config["winners_list"][winning_eth] = int(config["winners_list"][winning_eth]) + 1
+        add_win_for_user(config, winning_eth)
+    
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await bot.send_message(chat_id=message.chat.id, text=f'Added To Table: ' + json.dumps(config["winners_list"]))
