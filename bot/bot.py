@@ -445,17 +445,18 @@ async def remove_from_prices(message: types.Message, regexp_command):
         if config is not None:
             config = json.loads(config)
             if "watch_list" in config:
-                if new_coin in config["watch_list"] or new_coin.lower() in config["watch_list"] or new_coin.upper() in config["watch_list"]:
-                    if config["watch_list"].index(new_coin) >= 0:
-                        config["watch_list"].remove(new_coin)
-                    if config["watch_list"].index(new_coin.lower()) >= 0:
-                        config["watch_list"].remove(new_coin.lower())
-                    if config["watch_list"].index(new_coin.upper()) >= 0:
-                        config["watch_list"].remove(new_coin.upper())
-                    r.set(message.chat.id, json.dumps(config))
-                    await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
-                else:
-                    await message.reply(f'{message.from_user.first_name} Fail. Not found. ' + str(new_coin))
+                if new_coin in config["watch_list"]:
+                    config["watch_list"].remove(new_coin)
+                elif new_coin.lower() in config["watch_list"]:
+                    config["watch_list"].remove(new_coin.lower())
+                elif new_coin.upper() in config["watch_list"]:
+                    config["watch_list"].remove(new_coin.upper())
+                    
+                r.set(message.chat.id, json.dumps(config))
+                await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
+                return
+                
+        await message.reply(f'{message.from_user.first_name} Fail. Not found. ' + str(new_coin))
     except Exception as e:
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
