@@ -102,8 +102,8 @@ class Twits:
         # You can adjust the rules if needed
         sample_rules = [
             {"value": "from:elonmusk", "tag": "doge 5dog12"},
-            {"value": "from:CryptoDonAlt", "tag": "CryptoDonAlt"},
-            {"value": "from:100trillionUSD", "tag": "100trillionUSD"},
+            {"value": "btc eth from:CryptoDonAlt", "tag": "CryptoDonAlt"},
+            {"value": "btc eth from:100trillionUSD", "tag": "100trillionUSD"},
             {"value": "bitcoin from:NickSzabo4", "tag": "NickSzabo4"}
         ]
         payload = {"add": sample_rules}
