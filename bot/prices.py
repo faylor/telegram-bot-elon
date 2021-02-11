@@ -1,5 +1,6 @@
 import logging
 import requests
+import os
 from aiogram import types
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -14,12 +15,13 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 http = requests.Session()
 http.mount("https://", adapter)
 http.mount("http://", adapter)
+api_key = os.environ["MESSARI_API_KEY"]
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
-        url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
-        resp = http.get(url, timeout=(1, 1))
+        url = "https://data.messari.io/api/v1/assets/" + label + "/metrics?fields=data/price_usd,data/price_btc,data/percent_change_usd_last_1_hour,data/percent_change_usd_last_24_hours"
+        resp = http.get(url, headers={"x-messari-api-key": api_key}, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
             price = js["data"]["market_data"]["price_usd"]
