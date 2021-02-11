@@ -120,15 +120,15 @@ def get_user_price_config(user):
         return "usd"
 
 def get_change_label(c):
-    label_on_change = "💩"
+    label_on_change = "🔻"
     if c > 3:
         label_on_change = "🚀"
     elif c > 0:
-        label_on_change = " +"
+        label_on_change = "➕"
     elif c == 0:
         label_on_change = "  "
     elif c > -3:
-        label_on_change = " -"
+        label_on_change = "➖"
     return label_on_change + str(round(c,1)).replace("-","")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
