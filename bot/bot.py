@@ -245,7 +245,7 @@ async def start_weekly(message: types.Message):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _, _ = weekly_tally(message)
+    out, _, _ = weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(commands=['clearbetstotals'])
@@ -276,7 +276,7 @@ async def set_user_prices(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    out, winning_btc, winning_eth = weekly_tally(message)
+    out, winning_btc, winning_eth = weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_btc}, ETH winner = {winning_eth}')
     config = r.get(message.chat.id)

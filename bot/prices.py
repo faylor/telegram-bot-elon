@@ -70,7 +70,7 @@ def get_abs_difference(s, p):
         return -999999
 
 
-def weekly_tally(message: types.Message):
+def weekly_tally(message: types.Message, r):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
