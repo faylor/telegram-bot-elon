@@ -19,7 +19,7 @@ def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
-        resp = http.get(url)
+        resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
             price = js["data"]["market_data"]["price_usd"]
