@@ -425,6 +425,7 @@ async def add_to_prices(message: types.Message, regexp_command):
         if a == 0:
             await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watch aave')
         else:
+            new_coin = new_coin.lower()
             if new_coin in config["watch_list"]:
                 await message.reply(f'{message.from_user.first_name} Fail. Already Watching This One. ' + str(config["watch_list"]))
             else:
@@ -435,6 +436,26 @@ async def add_to_prices(message: types.Message, regexp_command):
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['stopwatch ([a-zA-Z]*)']))
+async def remove_from_prices(message: types.Message, regexp_command):
+    try:
+        new_coin = regexp_command.group(1)
+        logging.info("config")
+        config = r.get(message.chat.id)
+        if config is not None:
+            config = json.loads(config)
+            if "watch_list" in config:
+                if new_coin in config["watch_list"] or new_coin.lower() in config["watch_list"] or new_coin.upper() in config["watch_list"]:
+                    config["watch_list"].remove(new_coin)
+                    config["watch_list"].remove(new_coin.lower())
+                    config["watch_list"].remove(new_coin.upper())
+                    r.set(message.chat.id, json.dumps(config))
+                    await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
+                else:
+                    await message.reply(f'{message.from_user.first_name} Fail. Not found. ' + str(new_coin))
+    except Exception as e:
+        logging.warn(str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
 async def on_startup(dp):
     logging.warning('Starting connection.')
