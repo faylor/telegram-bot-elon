@@ -446,9 +446,12 @@ async def remove_from_prices(message: types.Message, regexp_command):
             config = json.loads(config)
             if "watch_list" in config:
                 if new_coin in config["watch_list"] or new_coin.lower() in config["watch_list"] or new_coin.upper() in config["watch_list"]:
-                    config["watch_list"].remove(new_coin)
-                    config["watch_list"].remove(new_coin.lower())
-                    config["watch_list"].remove(new_coin.upper())
+                    if config["watch_list"].index(new_coin) >= 0:
+                        config["watch_list"].remove(new_coin)
+                    if config["watch_list"].index(new_coin.lower()) >= 0:
+                        config["watch_list"].remove(new_coin.lower())
+                    if config["watch_list"].index(new_coin.upper()) >= 0:
+                        config["watch_list"].remove(new_coin.upper())
                     r.set(message.chat.id, json.dumps(config))
                     await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
                 else:
