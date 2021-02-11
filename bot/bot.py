@@ -436,7 +436,7 @@ async def add_to_prices(message: types.Message, regexp_command):
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['stopwatch ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['remove ([a-zA-Z]*)']))
 async def remove_from_prices(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
