@@ -80,9 +80,10 @@ SETTINGS:
   User Prices in BTC: /userprices btc   
   User Prices in USD (Default): /userprices usd
 
-PRICES:
+COIN INFORMATION:
   Get Price: /$btc /$aave ..etc
-
+  News Summary: /news btc 
+  
 WATCH COINS (PER CHAT):
   Watch table: /$ /lambo /prices 
   Add To watch: /watch <coin> (eg: /watch eth)
