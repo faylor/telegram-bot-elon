@@ -15,7 +15,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl
-from .prices import get_price, weekly_tally, get_abs_difference, round_sense
+from .prices import get_price, weekly_tally, get_abs_difference, round_sense, get_news
 
 r = redis.from_url(REDIS_URL)
 
@@ -232,7 +232,7 @@ async def send_price_of(message: types.Message, regexp_command):
         logging.warn("Could convert saved point:" + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['news ([a-zA-Z]*)']))
-async def get_news(message: types.Message, regexp_command):
+async def find_news(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
         title, content = get_news(symbol)
