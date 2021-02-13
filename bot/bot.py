@@ -80,9 +80,10 @@ async def send_help(message: types.Message):
                 User Prices Setting: /userprices btc   or    /userprices usd   (Default is USD)
 
                 WATCH COINS (PER CHAT):
-                Watch Table: /$ /lambo /prices 
-                Add Coin To Watch: /watch <coin> eg: /watch eth \n 
-
+                Watch table: /$ /lambo /prices 
+                Add To watch: /watch <coin> eg: /watch eth
+                Remove from watch: /remove <coin>   eg: /remove aave
+ 
                 VIRTUAL WALLET:
                 Buy: /buy btc     or multple: /buy eth btc ada
                 Sell: /sell btc    or mulitple: /sell eth btc aave
