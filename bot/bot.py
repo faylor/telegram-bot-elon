@@ -73,46 +73,49 @@ async def send_green(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
 async def send_help(message: types.Message):
-    out = f"""  Elons A Bot: 
+    out = """  
+Elons A Bot: 
 
-                Get Price: /$btc /$aave ..etc 
+SETTINGS:
+  User Prices in BTC: /userprices btc   
+  User Prices in USD (Default): /userprices usd
 
-                User Prices in BTC: /userprices btc   
-                User Prices in USD (Default): /userprices usd
+PRICES:
+  Get Price: /$btc /$aave ..etc
 
-                WATCH COINS (PER CHAT):
-                Watch table: /$ /lambo /prices 
-                Add To watch: /watch <coin> (eg: /watch eth)
-                Remove from watch: /remove <coin> (eg: /remove aave)
- 
-                VIRTUAL WALLET:
-                Buy: /buy btc     or multple: /buy eth btc ada
-                Sell: /sell btc    or mulitple: /sell eth btc aave
-                View Balance (in user price setting): /hodl     
-                View Balance in BTC: /hodl btc     
-                View Balance in USD: /hodl usd
-                Clear Score**: /clearscore      
-                **Score is simply adding up change % on each sell action. 
+WATCH COINS (PER CHAT):
+  Watch table: /$ /lambo /prices 
+  Add To watch: /watch <coin> (eg: /watch eth)
+  Remove from watch: /remove <coin> (eg: /remove aave)
 
-                GUESS THE PRICE GAME:
-                Start a new round: /startbets  
-                Add your bet: /bet btc 12.3k eth 1.2k 
-                View current bets: /bets
-                Finish a round: /stopbets
-                View Winners: /totes or /leaderboard
-                Clear Winner: /clearbetstotals
-                Update Winners, dds one to the user calling it: /add1
-                Update Winners, removes one from calling user: /minus1
+VIRTUAL WALLET:
+  Buy: /buy btc     or multple: /buy eth btc ada
+  Sell: /sell btc    or mulitple: /sell eth btc aave
+  View Balance (in user price setting): /hodl     
+  View Balance in BTC: /hodl btc     
+  View Balance in USD: /hodl usd
+  Clear Score**: /clearscore      
+  ** Score is simply adding up change % on each sell action. 
 
-                Fun: 
-                /jelly <name>  
-                /green <anything> 
-                /red <anything> 
-                /doge 
-                /cat 
-                /remind
-                
-                * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
+GUESS THE PRICE GAME:
+  Start a new round: /startbets  
+  Add your bet: /bet btc 12.3k eth 1.2k 
+  View current bets: /bets
+  Finish a round: /stopbets
+  View Winners: /totes or /leaderboard
+  Clear Winner: /clearbetstotals
+  Update Winners, dds one to the user calling it: /add1
+  Update Winners, removes one from calling user: /minus1
+
+Fun: 
+  /jelly <name>  
+  /green <anything> 
+  /red <anything> 
+  /doge 
+  /cat 
+  /remind
+
+* NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
     """
     await bot.send_message(chat_id=message.chat.id, text=out)
 
