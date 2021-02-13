@@ -45,6 +45,27 @@ def get_price(label):
         price_btc = 0
     return price, change_1hr, change_24hr, price_btc
 
+def get_news(label):
+    try:
+        url = "https://data.messari.io/api/v1/news/" + label
+        resp = http.get(url, timeout=(1, 1))
+        if resp.status_code == 200:
+            js = resp.json()
+            news_array = js["data"]
+            if len(news_array) > 0:
+                article = js["data"][0]
+                title = article["title"]
+                content = article["content"]
+                return title, content
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return "Not Available", ""
+    except Exception as e:
+        logging.error(e)
+        return "Not Available", ""
+
+
 def round_sense(price):
     if price is None:
         return 0
