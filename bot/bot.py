@@ -174,9 +174,16 @@ async def send_price_of(message: types.Message, regexp_command):
         await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
-            saved = float(saved.decode('utf-8'))
+            saved = saved.decode('utf-8')
+            if "{" in saved:
+                js = json.loads(saved)
+                saved = float(js["usd"])
+                saved_btc = float(js["btc"])
+            else:
+                saved = float(saved)
+                saved_btc = 0
             changes = round(100 * (p - saved) / saved, 2)
-            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at {saved}, changed by {changes}%</pre>", parse_mode="HTML")
+            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
@@ -231,6 +238,12 @@ async def send_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
+        current_score = r.get("score_" + message.form_user.mention)
+        if current_score is None:
+            current_score = 0
+        else:
+            current_score = float(current_score.decode('utf-8'))
+        out = out + "\nTOTAL SCORE = " + str(round(current_score,2)) + "\n"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
@@ -273,6 +286,16 @@ async def set_user_prices(message: types.Message, regexp_command):
             await message.reply(f'{message.from_user.first_name} Fail. You Idiot. We only accept btc or usd prices. /userprices btc   or /userprices usd')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+
+@dp.message_handler(commands=['clearscore'])
+async def clear_user_balance(message: types.Message, regexp_command):
+    try:
+        user = message.from_user.mention
+        r.set("score_" + user, 0)
+        await message.reply(f'Reset Score for {user}')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
 
 def add_win_for_user(config, mention):
     mention = mention.strip()
@@ -377,12 +400,13 @@ async def set_sell_point(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list(symbols)
-        
+        user = message.from_user.mention
         out = ""
         for symbol in symbol_split:
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
-            js = r.get("At_" + symbol + "_" + message.from_user.mention).decode('utf-8')
+            js = r.get("At_" + symbol + "_" + user).decode('utf-8')
+            changes = 0
             if js is not None:
                 if "{" in js:
                     js = json.loads(js)
@@ -398,10 +422,20 @@ async def set_sell_point(message: types.Message, regexp_command):
                     changes_btc = "<UNKNOWN>"
                 if saved > 0:
                     changes = round(100 * (p - float(saved)) / float(saved), 2)
-                else:
-                    changes = "NA"
                 out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
-            r.delete("At_" + symbol + "_" + message.from_user.mention)
+            r.delete("At_" + symbol + "_" + user)
+            current_score = r.get("score_" + user)
+            if current_score is None:
+                current_score = 0
+            else:
+                current_score = float(current_score.decode('utf-8'))
+            if changes == "NA":
+                new_score = current_score
+            else:
+                new_score = current_score + changes
+            new_score = str(round(new_score,2))
+            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CURRENT SCORE = {new_score}'
+            r.set("score_" + user, current_score + changes)
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
