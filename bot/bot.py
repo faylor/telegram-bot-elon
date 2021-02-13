@@ -238,7 +238,7 @@ async def send_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        current_score = r.get("score_" + message.form_user.mention)
+        current_score = r.get("score_" + message.from_user.mention)
         if current_score is None:
             current_score = 0
         else:
