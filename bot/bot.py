@@ -77,18 +77,22 @@ async def send_help(message: types.Message):
 
                 Get Price: /$btc /$aave ..etc 
 
-                User Prices Setting: /userprices btc   or    /userprices usd   (Default is USD)
+                User Prices in BTC: /userprices btc   
+                User Prices in USD (Default): /userprices usd
 
                 WATCH COINS (PER CHAT):
                 Watch table: /$ /lambo /prices 
-                Add To watch: /watch <coin> eg: /watch eth
-                Remove from watch: /remove <coin>   eg: /remove aave
+                Add To watch: /watch <coin> (eg: /watch eth)
+                Remove from watch: /remove <coin> (eg: /remove aave)
  
                 VIRTUAL WALLET:
                 Buy: /buy btc     or multple: /buy eth btc ada
                 Sell: /sell btc    or mulitple: /sell eth btc aave
-                View Balance: /hodl    or in BTC: /hodl btc    or in USD  /hodl usd
-                Clear Score: /clearscore      (score simply adds togeher your sell USD change percentages)
+                View Balance (in user price setting): /hodl     
+                View Balance in BTC: /hodl btc     
+                View Balance in USD: /hodl usd
+                Clear Score**: /clearscore      
+                **Score is simply adding up change % on each sell action. 
 
                 GUESS THE PRICE GAME:
                 Start a new round: /startbets  
@@ -96,7 +100,9 @@ async def send_help(message: types.Message):
                 View current bets: /bets
                 Finish a round: /stopbets
                 View Winners: /totes or /leaderboard
-                Manual Updates: /clearbetstotals,   /add1,   /minus1    (If you need to adjust anything)
+                Clear Winner: /clearbetstotals
+                Update Winners, dds one to the user calling it: /add1
+                Update Winners, removes one from calling user: /minus1
 
                 Fun: 
                 /jelly <name>  
@@ -108,7 +114,7 @@ async def send_help(message: types.Message):
                 
                 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
     """
-    await message.reply(out)
+    await bot.send_message(chat_id=message.chat.id, text=out)
 
 @dp.message_handler(commands=['remind'])
 async def send_reminder(message: types.Message):
