@@ -73,55 +73,37 @@ async def send_green(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
 async def send_help(message: types.Message):
-    out = f"""
+    out = f"""  Elons A Bot: 
+
                 Get Price: /$btc /$aave ..etc 
-                \n
 
                 User Prices Setting: /userprices btc   or    /userprices usd   (Default is USD)
 
-                \n\n 
                 WATCH COINS (PER CHAT):
-                \n
                 Watch Table: /$ /lambo /prices 
-                \n 
                 Add Coin To Watch: /watch <coin> eg: /watch eth \n 
 
-                \n\n
                 VIRTUAL WALLET:
-                \n
                 Buy: /buy btc     or multple: /buy eth btc ada
-                \n 
                 Sell: /sell btc    or mulitple: /sell eth btc aave
-                \n 
                 View Balance: /hodl    or in BTC: /hodl btc    or in USD  /hodl usd
-                \n
                 Clear Score: /clearscore      (score simply adds togeher your sell USD change percentages)
 
-                \n\n 
                 GUESS THE PRICE GAME:
-                \n
                 Start a new round: /startbets  
-                \n
                 Add your bet: /bet btc 12.3k eth 1.2k 
-                \n 
                 View current bets: /bets
-                \n 
                 Finish a round: /stopbets
-                \n 
                 View Winners: /totes or /leaderboard
-                \n
                 Manual Updates: /clearbetstotals,   /add1,   /minus1    (If you need to adjust anything)
-                \n\n
 
-                Fun:
-                \n 
+                Fun: 
                 /jelly <name>  
-                \n /green<anything> 
-                \n /red<anything> 
-                \n /doge 
-                \n /cat 
-                \n /remind 
-                \n\n 
+                /green <anything> 
+                /red <anything> 
+                /doge 
+                /cat 
+                /remind
                 
                 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
     """
