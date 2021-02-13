@@ -231,7 +231,7 @@ async def send_price_of(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\news ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['news ([a-zA-Z]*)']))
 async def get_news(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
