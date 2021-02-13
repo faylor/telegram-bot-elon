@@ -288,7 +288,7 @@ async def set_user_prices(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 @dp.message_handler(commands=['clearscore'])
-async def clear_user_balance(message: types.Message, regexp_command):
+async def clear_user_balance(message: types.Message):
     try:
         user = message.from_user.mention
         r.set("score_" + user, 0)
