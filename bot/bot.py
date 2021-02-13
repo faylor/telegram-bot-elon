@@ -73,7 +73,7 @@ async def send_green(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
 async def send_help(message: types.Message):
-    message = f"""
+    out = f"""
                 Get Price: /$btc /$aave ..etc 
                 \n
 
@@ -125,7 +125,7 @@ async def send_help(message: types.Message):
                 
                 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
     """
-    await message.reply(message)
+    await message.reply(out)
 
 @dp.message_handler(commands=['remind'])
 async def send_reminder(message: types.Message):
