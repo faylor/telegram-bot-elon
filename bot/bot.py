@@ -446,7 +446,7 @@ async def totals_user_scores(message: types.Message):
                     out.append(f"{user} {score}")
         out.append("</pre>")
         s = "\n".join(out)
-        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode='HTML')
+        await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
     except Exception as e:
         logging.error("ERROR: " + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
