@@ -212,12 +212,12 @@ async def prices_alts(message: types.Message):
         
         if in_prices == "USD":
             c_value = c
-            change = get_change_label(c, 3)
-            change24 = get_change_label(c24, 3)
+            change = get_change_label(c, 4)
+            change24 = get_change_label(c24, 4)
         else:
             c_value = c_btc
-            change = get_change_label(c_btc, 3)
-            change24 = get_change_label(c_btc_24, 3)
+            change = get_change_label(c_btc, 4)
+            change24 = get_change_label(c_btc_24, 4)
         days_since = str(days_since).ljust(5, ' ')
         s = f"{l} {change} {change24} {days_since} {round(ath_down,1)}%"
         if len(change_list) >= 2:
