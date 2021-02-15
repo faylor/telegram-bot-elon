@@ -15,7 +15,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl
-from .prices import get_price, weekly_tally, get_abs_difference, round_sense, get_news
+from .prices import get_price, weekly_tally, get_abs_difference, round_sense, get_news, get_alt_watch
 
 r = redis.from_url(REDIS_URL)
 
@@ -83,7 +83,7 @@ SETTINGS:
 COIN INFORMATION:
   Get Price: /$btc /$aave ..etc
   News Summary: /news btc 
-  
+
 WATCH COINS (PER CHAT):
   Watch table: /$ /lambo /prices 
   Add To watch: /watch <coin> (eg: /watch eth)
@@ -175,6 +175,40 @@ def get_change_label(c):
     elif c > -3:
         label_on_change = "↘️"
     return label_on_change + str(round(c,1)).replace("-","")
+
+
+@dp.message_handler(commands=['alts'])
+async def prices_alts(message: types.Message):
+    chat_id = message.chat.id
+    mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO" "AAVE", "DOGE", "ZIL"]
+    try:
+        config = json.loads(r.get(message.chat.id))
+        logging.info(json.dumps(config))
+        if "watch_list_alts" in config:
+            mains = config["watch_list_alts"]
+    except Exception as ex:
+        logging.info("no config found, ignore")
+    in_prices = get_user_price_config(message.from_user.mention).upper()
+    out = f"<pre>{in_prices} 1hr  24hr | ATH days from | ATH % down\n"
+    totes = 0
+    for l in mains:
+        c, c24, c_btc, c_btc_24, days_since, ath_down = get_alt_watch(l)
+        l = l.ljust(5, ' ')
+        
+        if in_prices == "USD":
+            change = get_change_label(c)
+            change24 = get_change_label(c24)
+        else:
+            change = get_change_label(c_btc)
+            change24 = get_change_label(c_btc_24)
+        out = out + f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%\n"
+    if totes < 0:
+        out = out + "</pre>\n\n ☠️☠️☠️☠️☠️☠️" 
+    elif totes > 6:
+        out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
+    else:
+        out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
+    await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
@@ -305,9 +339,10 @@ async def send_balance(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
-    for key in r.scan_iter("BTC_*"):
+    cid = str(message.chat.id)
+    for key in r.scan_iter(f"{cid}_BTC_*"):
         r.delete(key)
-    for key in r.scan_iter("ETH_*"):
+    for key in r.scan_iter(f"{cid}_ETH_*"):
         r.delete(key)
     await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
 
@@ -525,6 +560,35 @@ async def add_to_prices(message: types.Message, regexp_command):
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watchalt ([a-zA-Z]*)']))
+async def add_to_prices_alts(message: types.Message, regexp_command):
+    try:
+        new_coin = regexp_command.group(1)
+        logging.info("config")
+        config = r.get(message.chat.id)
+        if config is None:
+            config = {}
+        else:
+            config = json.loads(config)
+        logging.info(json.dumps(config))
+        a, _, _, _ = get_price(new_coin)
+        if "watch_list_alts" not in config:
+            config["watch_list_alts"] = []
+        if a == 0:
+            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watchalt aave')
+        else:
+            new_coin = new_coin.lower()
+            if new_coin in config["watch_list_alts"]:
+                await message.reply(f'{message.from_user.first_name} Fail. Already Watching This One. ' + str(config["watch_list_alts"]))
+            else:
+                config["watch_list_alts"].append(new_coin)
+                r.set(message.chat.id, json.dumps(config))
+                await message.reply(f'Gotit. Added ' + new_coin)
+    except Exception as e:
+        logging.warn(str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['remove ([a-zA-Z]*)']))
 async def remove_from_prices(message: types.Message, regexp_command):
     try:
@@ -549,6 +613,32 @@ async def remove_from_prices(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['removealt ([a-zA-Z]*)']))
+async def remove_from_prices_alts(message: types.Message, regexp_command):
+    try:
+        new_coin = regexp_command.group(1)
+        logging.info("config")
+        config = r.get(message.chat.id)
+        if config is not None:
+            config = json.loads(config)
+            if "watch_list_alts" in config:
+                if new_coin in config["watch_list_alts"]:
+                    config["watch_list_alts"].remove(new_coin)
+                elif new_coin.lower() in config["watch_list_alts"]:
+                    config["watch_list_alts"].remove(new_coin.lower())
+                elif new_coin.upper() in config["watch_list_alts"]:
+                    config["watch_list_alts"].remove(new_coin.upper())
+                    
+                r.set(message.chat.id, json.dumps(config))
+                await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
+                return
+                
+        await message.reply(f'{message.from_user.first_name} Fail. Not found. ' + str(new_coin))
+    except Exception as e:
+        logging.warn(str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
+
 
 async def on_startup(dp):
     logging.warning('Starting connection.')

@@ -17,6 +17,37 @@ http.mount("https://", adapter)
 http.mount("http://", adapter)
 http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})
 
+def to_zero(js, key1, key2, key3):
+    try:
+        r = js[key1][key2][key3]
+        if r is None:
+            r = 0
+        return r
+    except Exception as e:
+        return 0
+
+def get_alt_watch(label):
+    price, change_1hr, change_24hr = 0, 0, 0
+    try:
+        url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
+        resp = http.get(url, timeout=(1, 1))
+        if resp.status_code == 200:
+            js = resp.json()
+            change_1hr = to_zero(js, "data", "market_data", "percent_change_usd_last_1_hour")
+            change_24hr = to_zero(js, "data", "market_data", "percent_change_usd_last_24_hours")
+            change_btc_1hr = to_zero(js, "data", "market_data", "percent_change_btc_last_1_hour")
+            change_btc_24hr = to_zero(js, "data", "market_data", "percent_change_btc_last_24_hours")
+            days_since_alt = to_zero(js, "data", "all_time_high", "days_since")
+            down_from_alt = to_zero(js, "data", "all_time_high", "percent_down")
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return 0,0,0,0
+    except Exception as e:
+        logging.error(e)
+        return 0, 0, 0, 0
+    return change_1hr, change_24hr, change_btc_1hr, change_btc_24hr, days_since_alt, down_from_alt
+
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
