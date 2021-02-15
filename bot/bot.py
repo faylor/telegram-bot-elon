@@ -423,7 +423,7 @@ async def totals_user_scores(message: types.Message):
     try:
         saves = r.scan_iter(str(message.chat.id) + "_score_*")
         out = "League Season Standings:\n"
-        out = out + "<pre>   Who Dat?  |  Score  \n"
+        out = out + "<pre>Who Dat?           Score\n"
         
         for key in saves:
             key = key.decode('utf-8')
