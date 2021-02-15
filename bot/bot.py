@@ -539,6 +539,12 @@ async def set_buy_point(message: types.Message, regexp_command):
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
+def get_open_trades(user):
+    saves = r.scan_iter("At_*_" + user)
+    if saves is None:
+        return 0
+    else:
+        return len(saves)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([\s0-9.,a-zA-Z]*)']))
 async def set_sell_point(message: types.Message, regexp_command):
@@ -552,6 +558,8 @@ async def set_sell_point(message: types.Message, regexp_command):
             p, _, _, btc_price = get_price(symbol)
             js = r.get("At_" + symbol + "_" + user).decode('utf-8')
             changes = 0
+            changes_btc = 0
+            prop_changes = 0
             if js is not None:
                 if "{" in js:
                     js = json.loads(js)
@@ -568,8 +576,12 @@ async def set_sell_point(message: types.Message, regexp_command):
                 if saved > 0:
                     changes = round(100 * (p - float(saved)) / float(saved), 2)
                 out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
+
+            trade_counts = get_open_trades(user)
+
             r.delete("At_" + symbol + "_" + user)
             current_score = r.get(str(message.chat.id) + "_score_" + user)
+            
             if current_score is None:
                 current_score = 0
             else:
@@ -577,9 +589,13 @@ async def set_sell_point(message: types.Message, regexp_command):
             if changes == "NA":
                 new_score = current_score
             else:
-                new_score = current_score + changes
+                if trade_counts > 0:
+                    prop_changes = changes/trade_counts
+                else:
+                    prop_changes = changes
+                new_score = current_score + prop_changes
             new_score = str(round(new_score,2))
-            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CURRENT SCORE = {new_score}'
+            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE SCORE = {changes} \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
             r.set(str(message.chat.id) + "_score_" + user, current_score + changes)
         await message.reply(out)
     except Exception as e:
