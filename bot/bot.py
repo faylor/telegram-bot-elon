@@ -99,7 +99,10 @@ VIRTUAL WALLET:
   View Balance (in user price setting): /hodl     
   View Balance in BTC: /hodl btc     
   View Balance in USD: /hodl usd
-  Clear Score**: /clearscore      
+  
+LEAGUE:
+  Start Season: /newseason
+  Show Standings: /league      
   ** Score is simply adding up change % on each sell action. 
 
 SUMMARY:
@@ -112,7 +115,7 @@ GUESS THE PRICE GAME:
   Finish a round: /stopbets
   View Winners: /totes or /leaderboard
   Clear Winner: /clearbetstotals
-  Update Winners, dds one to the user calling it: /add1
+  Update Winners, adds one to the user calling it: /add1
   Update Winners, removes one from calling user: /minus1
 
 Fun: 
@@ -352,7 +355,7 @@ async def send_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        current_score = r.get("score_" + message.from_user.mention)
+        current_score = r.get(str(message.chat.id) + "_score_" + message.from_user.mention)
         if current_score is None:
             current_score = 0
         else:
@@ -402,14 +405,32 @@ async def set_user_prices(message: types.Message, regexp_command):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-@dp.message_handler(commands=['clearscore'])
+@dp.message_handler(commands=['newseason'])
 async def clear_user_balance(message: types.Message):
     try:
         user = message.from_user.mention
-        r.set("score_" + user, 0)
-        await message.reply(f'Reset Score for {user}')
+        r.set(str(message.chat.id) + "_score_*", 0)
+        await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+@dp.message_handler(commands=['league'])
+async def totals_user_scores(message: types.Message):
+    try:
+        saves = r.scan_iter(str(message.chat.id) + "_score_*")
+        out = "League Season Standings:\n"
+        out = out + "<pre>   Who Dat?  |  Score  \n"
+        
+        for key in saves:
+            value = r.get(key)
+            user = key.replace(str(message.chat.id)+"_score_", "")
+            user = user.ljust(20, ' ')
+            score = round(float(value),2)
+            out = out + f"{user} {score}"
+        out = out + "</pre>"
+        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode='HTML')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
 
 def add_win_for_user(config, mention):
@@ -539,7 +560,7 @@ async def set_sell_point(message: types.Message, regexp_command):
                     changes = round(100 * (p - float(saved)) / float(saved), 2)
                 out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
             r.delete("At_" + symbol + "_" + user)
-            current_score = r.get("score_" + user)
+            current_score = r.get(str(message.chat.id) + "_score_" + user)
             if current_score is None:
                 current_score = 0
             else:
@@ -550,7 +571,7 @@ async def set_sell_point(message: types.Message, regexp_command):
                 new_score = current_score + changes
             new_score = str(round(new_score,2))
             out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CURRENT SCORE = {new_score}'
-            r.set("score_" + user, current_score + changes)
+            r.set(str(message.chat.id) + "_score_" + user, current_score + changes)
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
