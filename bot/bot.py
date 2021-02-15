@@ -547,11 +547,11 @@ async def set_buy_point_prices(message: types.Message, regexp_command):
         symbol_split = get_symbol_list(coin_price)
         
         symbol = symbol_split[0]
-        price = symbol_split[1]
+        price = float(symbol_split[1])
         if symbol == "btc":
             price_btc = 1
         else:
-            price_btc = symbol_split[2]
+            price_btc = float(symbol_split[2])
         
         symbol = symbol.strip().lower()
 
