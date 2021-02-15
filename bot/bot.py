@@ -210,7 +210,7 @@ async def prices_alts(message: types.Message):
         else:
             out.append(s)
 
-    await bot.send_message(chat_id=chat_id, text=out.join("\n") + "</pre>", parse_mode="HTML")
+    await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
