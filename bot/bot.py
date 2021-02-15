@@ -180,7 +180,7 @@ def get_change_label(c):
 @dp.message_handler(commands=['alts'])
 async def prices_alts(message: types.Message):
     chat_id = message.chat.id
-    mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO" "AAVE", "DOGE", "ZIL"]
+    mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO", "AAVE", "DOGE", "ZIL"]
     try:
         config = json.loads(r.get(message.chat.id))
         logging.info(json.dumps(config))
