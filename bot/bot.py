@@ -208,7 +208,7 @@ async def prices_alts(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = [f"<pre>{in_prices} 1hr  24hr | ATH -days | ATH %"]
+    out = [f"<pre>{in_prices}   1hr  24hr  ATH-days   ATH%"]
     change_list = [""]
     for l in mains:
         c, c24, c_btc, c_btc_24, days_since, ath_down = get_alt_watch(l)
@@ -223,7 +223,7 @@ async def prices_alts(message: types.Message):
             change = get_change_label(c_btc, 4)
             change24 = get_change_label(c_btc_24, 4)
         days_since = str(days_since).ljust(5, ' ')
-        s = f"{l} {change} {change24} {days_since} {round(ath_down,1)}%"
+        s = f"{l} {change} {change24}  {days_since} {round(ath_down,1)}%"
         if len(change_list) >= 2:
             i = 1
             while i < len(change_list) and c_value < change_list[i]:
