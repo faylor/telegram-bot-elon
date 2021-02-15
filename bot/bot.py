@@ -218,7 +218,7 @@ async def prices_alts(message: types.Message):
             change24 = get_change_label(c_btc_24)
         change24 = change24.ljust(5, ' ')
         days_since = str(days_since).ljust(5, ' ')
-        s = f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%"
+        s = f"{l} {change} {change24} {days_since} {round(ath_down,1)}%"
         if len(change_list) >= 2:
             i = 1
             while i < len(change_list) and c_value < change_list[i]:
