@@ -190,7 +190,7 @@ async def prices_alts(message: types.Message):
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
     out = [f"<pre>{in_prices} 1hr  24hr | ATH days from | ATH % down"]
-    
+    change_list = [""]
     for l in mains:
         c, c24, c_btc, c_btc_24, days_since, ath_down = get_alt_watch(l)
         l = l.ljust(5, ' ')
@@ -201,14 +201,17 @@ async def prices_alts(message: types.Message):
         else:
             change = get_change_label(c_btc)
             change24 = get_change_label(c_btc_24)
+        change_list.app
         s = f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%"
-        if len(out) > 2:
+        if len(change_list) > 2:
             i = 1
-            while i < len(out) and change < out[i]:
+            while i < len(change_list) and change < change_list[i]:
                 i = i + 1
             out.insert(i, s)
+            change_list.insert(i,change)
         else:
             out.append(s)
+            change_list.append(change)
 
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
