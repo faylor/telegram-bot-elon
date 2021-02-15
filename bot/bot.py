@@ -202,7 +202,7 @@ async def prices_alts(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = [f"<pre>{in_prices} 1hr  24hr | ATH -days | ATH Down"]
+    out = [f"<pre>{in_prices} 1hr  24hr | ATH -days | ATH %"]
     change_list = [""]
     for l in mains:
         c, c24, c_btc, c_btc_24, days_since, ath_down = get_alt_watch(l)
