@@ -422,9 +422,10 @@ async def totals_user_scores(message: types.Message):
         out = out + "<pre>   Who Dat?  |  Score  \n"
         
         for key in saves:
+            key = key.decode('utf-8')
             value = r.get(key)
             if value is not None:
-                value = value.decode('UTF-8')
+                value = value.decode('utf-8')
                 user = key.replace(str(message.chat.id)+"_score_", "")
                 user = user.ljust(20, ' ')
                 score = round(float(value), 2)
