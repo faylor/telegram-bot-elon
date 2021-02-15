@@ -189,8 +189,8 @@ async def prices_alts(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = f"<pre>{in_prices} 1hr  24hr | ATH days from | ATH % down\n"
-    totes = 0
+    out = [f"<pre>{in_prices} 1hr  24hr | ATH days from | ATH % down"]
+    
     for l in mains:
         c, c24, c_btc, c_btc_24, days_since, ath_down = get_alt_watch(l)
         l = l.ljust(5, ' ')
@@ -201,9 +201,16 @@ async def prices_alts(message: types.Message):
         else:
             change = get_change_label(c_btc)
             change24 = get_change_label(c_btc_24)
-        out = out + f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%\n"
+        s = f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%"
+        if len(out) > 2:
+            i = 1
+            while i < len(out) and change < out[i]:
+                i = i + 1
+            out.insert(i, s)
+        else:
+            out.append(s)
 
-    await bot.send_message(chat_id=chat_id, text=out + "</pre>", parse_mode="HTML")
+    await bot.send_message(chat_id=chat_id, text=out.join("\n") + "</pre>", parse_mode="HTML")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
