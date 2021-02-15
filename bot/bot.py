@@ -544,7 +544,10 @@ def get_open_trades(user):
     if saves is None:
         return 0
     else:
-        return len(saves)
+        c = 0
+        for s in saves:
+            c = c + 1
+        return c
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell ([\s0-9.,a-zA-Z]*)']))
 async def set_sell_point(message: types.Message, regexp_command):
