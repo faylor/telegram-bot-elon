@@ -291,7 +291,10 @@ async def find_news(message: types.Message, regexp_command):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodl([\sa-zA-Z]*)']))
 async def send_balance(message: types.Message, regexp_command):
     try:
-        bysymbol = regexp_command.group(1)
+        if regexp_command is not None:
+            bysymbol = regexp_command.group(1)
+        else: 
+            bysymbol = None
         saves = r.scan_iter("At_*_" + message.from_user.mention)
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.mention)
