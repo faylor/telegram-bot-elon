@@ -422,9 +422,9 @@ async def new_season_reset(message: types.Message):
 async def totals_user_scores(message: types.Message):
     try:
         saves = r.scan_iter(str(message.chat.id) + "_score_*")
-        out = "League Season Standings:\n"
-        out = out + "<pre>Who Dat?           Score\n"
-        
+        out = "League Season Standings:\n\n"
+        out = ["<pre>Who Dat?             Score\n"]
+        scores = []
         for key in saves:
             key = key.decode('utf-8')
             value = r.get(key)
@@ -435,8 +435,17 @@ async def totals_user_scores(message: types.Message):
                 user = key.replace(str(message.chat.id)+"_score_", "")
                 user = user.ljust(20, ' ')
                 score = round(float(value), 2)
-                out = out + f"{user} {score}\n"
-        out = out + "</pre>"
+                if len(scores) > 1:
+                    i = 0
+                    while i < len(scores) and score < scores[i]:
+                        i = i + 1
+                    out.insert(i, f"{user} {score}")
+                    scores.insert(i, score)
+                else:
+                    scores.append(score)
+                    out.append(f"{user} {score}")
+        out.append("</pre>")
+        s = "\n".join(out)
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode='HTML')
     except Exception as e:
         logging.error("ERROR: " + str(e))
