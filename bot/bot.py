@@ -171,7 +171,7 @@ def get_user_price_config(user):
     except Exception as e:
         return "usd"
 
-def get_change_label(c):
+def get_change_label(c, lpad=None):
     label_on_change = "🔻"
     if c > 3:
         label_on_change = "🚀"
@@ -181,6 +181,8 @@ def get_change_label(c):
         label_on_change = "  "
     elif c > -3:
         label_on_change = "↘️"
+    if lpad is not None:
+        return label_on_change + str(round(c,1)).replace("-","").ljust(lpad, ' ')
     return label_on_change + str(round(c,1)).replace("-","")
 
 
@@ -210,13 +212,12 @@ async def prices_alts(message: types.Message):
         
         if in_prices == "USD":
             c_value = c
-            change = get_change_label(c)
-            change24 = get_change_label(c24)
+            change = get_change_label(c, 3)
+            change24 = get_change_label(c24, 3)
         else:
             c_value = c_btc
-            change = get_change_label(c_btc)
-            change24 = get_change_label(c_btc_24)
-        change24 = change24.ljust(5, ' ')
+            change = get_change_label(c_btc, 3)
+            change24 = get_change_label(c_btc_24, 3)
         days_since = str(days_since).ljust(5, ' ')
         s = f"{l} {change} {change24} {days_since} {round(ath_down,1)}%"
         if len(change_list) >= 2:
