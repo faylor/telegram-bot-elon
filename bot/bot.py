@@ -427,7 +427,9 @@ async def totals_user_scores(message: types.Message):
         for key in saves:
             key = key.decode('utf-8')
             value = r.get(key)
-            if value is not None:
+            if "*" in key:
+                r.delete(key)
+            elif value is not None:
                 value = value.decode('utf-8')
                 user = key.replace(str(message.chat.id)+"_score_", "")
                 user = user.ljust(20, ' ')
