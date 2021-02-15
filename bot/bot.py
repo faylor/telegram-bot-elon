@@ -203,7 +203,7 @@ async def prices_alts(message: types.Message):
             change24 = get_change_label(c_btc_24)
         out = out + f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%\n"
 
-    await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
+    await bot.send_message(chat_id=chat_id, text=out + "</pre>", parse_mode="HTML")
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 async def prices(message: types.Message):
