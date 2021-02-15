@@ -423,13 +423,16 @@ async def totals_user_scores(message: types.Message):
         
         for key in saves:
             value = r.get(key)
-            user = key.replace(str(message.chat.id)+"_score_", "")
-            user = user.ljust(20, ' ')
-            score = round(float(value),2)
-            out = out + f"{user} {score}"
+            if value is not None:
+                value = value.decode('UTF-8')
+                user = key.replace(str(message.chat.id)+"_score_", "")
+                user = user.ljust(20, ' ')
+                score = round(float(value), 2)
+                out = out + f"{user} {score}"
         out = out + "</pre>"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode='HTML')
     except Exception as e:
+        logging.error("ERROR: " + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
 
