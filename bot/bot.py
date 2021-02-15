@@ -71,7 +71,7 @@ async def send_jelly(message: types.Message, regexp_command):
 async def send_green(message: types.Message, regexp_command):
     await bot.send_sticker(chat_id=message.chat.id, sticker="https://tenor.com/view/spacex-bitcoin-rd_btc-elon-musk-elon-gif-20158067")
 
-@dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me'])
+@dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me', 'start'])
 async def send_help(message: types.Message):
     out = """  
 Elons A Bot: 
@@ -89,6 +89,10 @@ WATCH COINS (PER CHAT):
   Add To watch: /watch <coin> (eg: /watch eth)
   Remove from watch: /remove <coin> (eg: /remove aave)
 
+  Watch ATH on Alts: /alts
+  Add To Alts: /watchalt <coin> (eg: /watchalt zil)
+  Remove from watchalt: /removealt <coin> (eg: /removealt aave)
+
 VIRTUAL WALLET:
   Buy: /buy btc     or multple: /buy eth btc ada
   Sell: /sell btc    or mulitple: /sell eth btc aave
@@ -97,6 +101,9 @@ VIRTUAL WALLET:
   View Balance in USD: /hodl usd
   Clear Score**: /clearscore      
   ** Score is simply adding up change % on each sell action. 
+
+SUMMARY:
+  Prices, Alts and Virtual Wallet: /summary
 
 GUESS THE PRICE GAME:
   Start a new round: /startbets  
