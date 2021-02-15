@@ -95,6 +95,7 @@ WATCH COINS (PER CHAT):
 
 VIRTUAL WALLET:
   Buy: /buy btc     or multple: /buy eth btc ada
+  BuyAt: /buyat eth 34521.23 0.21   (Price in USD and BTC)
   Sell: /sell btc    or mulitple: /sell eth btc aave
   View Balance (in user price setting): /hodl     
   View Balance in BTC: /hodl btc     
@@ -538,6 +539,33 @@ async def set_buy_point(message: types.Message, regexp_command):
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buyat ([\s0-9.,a-zA-Z]*)']))
+async def set_buy_point_prices(message: types.Message, regexp_command):
+    try:
+        coin_price = regexp_command.group(1)
+        symbol_split = get_symbol_list(coin_price)
+        
+        symbol = symbol_split[0]
+        price = symbol_split[1]
+        if symbol == "btc":
+            price_btc = 1
+        else:
+            price_btc = symbol_split[2]
+        
+        symbol = symbol.strip().lower()
+
+        js = {}
+        js["usd"] = price
+        js["btc"] = price_btc
+        r.set("At_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+        out = f"Gotit. Hope this isnt a doge move. Gedit. {symbol} at ${round_sense(price)} or {round(price_btc,8)} BTC marked \n"
+        
+        await message.reply(out)
+    except Exception as e:
+        logging.error("BUY ERROR:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buyat btc 23450 1')
+
 
 def get_open_trades(user):
     saves = r.scan_iter("At_*_" + user)
