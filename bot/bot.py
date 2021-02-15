@@ -203,7 +203,6 @@ async def prices_alts(message: types.Message):
             c_value = c_btc
             change = get_change_label(c_btc)
             change24 = get_change_label(c_btc_24)
-        change_list.app
         s = f"{l} {change}   {change24} | {days_since} | {round(ath_down,1)}%"
         if len(change_list) > 2:
             i = 1
