@@ -599,7 +599,7 @@ async def set_sell_point(message: types.Message, regexp_command):
                 new_score = current_score + prop_changes
             new_score = str(round(new_score,2))
             out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE PROFIT/LOSS = {changes}% \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
-            r.set(str(message.chat.id) + "_score_" + user, current_score + changes)
+            r.set(str(message.chat.id) + "_score_" + user, new_score)
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
