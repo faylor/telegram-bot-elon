@@ -406,10 +406,13 @@ async def set_user_prices(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 @dp.message_handler(commands=['newseason'])
-async def clear_user_balance(message: types.Message):
+async def new_season_reset(message: types.Message):
     try:
         user = message.from_user.mention
-        r.set(str(message.chat.id) + "_score_*", 0)
+        saves = r.scan_iter(str(message.chat.id) + "_score_*")
+        for key in saves:
+            key = key.decode('utf-8')
+            r.set(key, 0)
         await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -429,7 +432,7 @@ async def totals_user_scores(message: types.Message):
                 user = key.replace(str(message.chat.id)+"_score_", "")
                 user = user.ljust(20, ' ')
                 score = round(float(value), 2)
-                out = out + f"{user} {score}"
+                out = out + f"{user} {score}\n"
         out = out + "</pre>"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode='HTML')
     except Exception as e:
