@@ -179,9 +179,9 @@ def get_change_label(c):
 
 @dp.message_handler(commands=['summary'])
 async def send_summary(message: types.Message):
-    prices(message)
-    prices_alts(message)
-    send_balance(message, None)
+    await prices(message)
+    await prices_alts(message)
+    await send_balance(message, None)
 
 @dp.message_handler(commands=['alts'])
 async def prices_alts(message: types.Message):
