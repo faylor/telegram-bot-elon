@@ -101,7 +101,7 @@ class Twits:
     def set_stream_rules(self):
         # You can adjust the rules if needed
         sample_rules = [
-            {"value": "from:elonmusk", "tag": "doge 5dog12"},
+            {"value": "Dogecoin from:elonmusk", "tag": "doge 5dog12"},
             {"value": "from:tyler", "tag": "ty 5dog12"},
             {"value": "from:cameron", "tag": "cam 5dog12"}
         ]
