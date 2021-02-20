@@ -14,7 +14,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 
 from .twits import Twits, get_stream
-from .thecats import getTheApiUrl, get_a_fox
+from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, weekly_tally, get_abs_difference, round_sense, get_news, get_alt_watch
 
 r = redis.from_url(REDIS_URL)
@@ -61,6 +61,15 @@ async def sendCatImage(message: types.Message):
 async def sendFoxImage(message: types.Message):
     url = get_a_fox()
     await bot.send_photo(chat_id=message.chat.id, photo=url)
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['pix ([\sa-zA-Z]*)']))
+async def get_pix(message: types.Message, regexp_command):
+    name = regexp_command.group(1)
+    url = search_pix(name)
+    if url is None:
+        await bot.send_message(chat_id=message.chat.id, text=f'Sorry Nothing Found.')
+    else:
+        await bot.send_photo(chat_id=message.chat.id, photo=url)
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['red([a-zA-Z]*)']))
 async def send_red(message: types.Message, regexp_command):
