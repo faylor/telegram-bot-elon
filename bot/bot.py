@@ -62,7 +62,7 @@ async def sendFoxImage(message: types.Message):
     url = get_a_fox()
     await bot.send_photo(chat_id=message.chat.id, photo=url)
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['pix ([\sa-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['pix ([\s0-9.,a-zA-Z]*)']))
 async def get_pix(message: types.Message, regexp_command):
     name = regexp_command.group(1)
     url = search_pix(name)
