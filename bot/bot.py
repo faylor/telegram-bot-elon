@@ -27,6 +27,7 @@ twits = Twits()
 from .watchalts import *
 from .watchlist import *
 from .wallet import *
+from .virtualwallet import *
 from .bets import *
 from .user import *
 
