@@ -26,7 +26,7 @@ def to_zero(js, key1, key2, key3):
     except Exception as e:
         return 0
 
-def get_alt_watch(label):
+def get_price_extended(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
@@ -109,6 +109,21 @@ def round_sense(price):
     return round(price, 4)
 
 
+def get_change_label(c, lpad=None):
+    label_on_change = "🔻"
+    if c > 3:
+        label_on_change = "🚀"
+    elif c > 0:
+        label_on_change = "↗️"
+    elif c == 0:
+        label_on_change = "  "
+    elif c > -3:
+        label_on_change = "↘️"
+    if lpad is not None:
+        return label_on_change + str(round(c,1)).replace("-","").ljust(lpad, ' ')
+    return label_on_change + str(round(c,1)).replace("-","")
+
+
 def get_abs_difference(s, p):
     estimate = -999999
     try:
@@ -125,38 +140,3 @@ def get_abs_difference(s, p):
         return -999999
 
 
-def weekly_tally(message: types.Message, r):
-    p_btc, _, _, _ = get_price("btc")
-    p_eth, _, _, _ = get_price("eth")
-    out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
-    winning = ""
-    winning_diff = 99999
-    cid = str(message.chat.id)
-    for key in r.scan_iter(f"{cid}_BTC_*"):
-        a = r.get(key).decode('utf-8') or "NONE"
-        d = get_abs_difference(a, p_btc)
-        name = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning = winning + ", " + name
-            else:
-                winning = name
-                winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING BTC == " + winning + "\n"
-    out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
-    winning_eth = ""
-    winning_diff = 99999
-    for key in r.scan_iter(f"{cid}_ETH_*"):
-        a = r.get(key).decode('utf-8') or "NONE"
-        d = get_abs_difference(a, p_eth)
-        name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning_eth = winning_eth + ", " + name
-            else:
-                winning_eth = name
-                winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth + "\n"
-    return out, winning, winning_eth
