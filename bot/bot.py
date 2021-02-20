@@ -16,6 +16,11 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news
+from .watchlist import *
+from .watchlist import *
+from .wallet import *
+from .bets import *
+from .user import *
 
 r = redis.from_url(REDIS_URL)
 
