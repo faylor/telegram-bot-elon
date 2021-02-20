@@ -6,3 +6,9 @@ def getTheApiUrl(animal):
     print(js)
     url = js[0]["url"]
     return url
+
+def get_a_fox():
+    contents = requests.get("https://randomfox.ca/floof/?ref=apilist.fun")
+    js = contents.json()
+    url = js["image"]
+    return url
