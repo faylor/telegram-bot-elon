@@ -23,7 +23,12 @@ def search_pix(query):
     js = contents.json()
     hits = js["hits"]
     if len(hits) > 0:
-        url = hits[0]["imageURL"]
+        first_hit = hits[0]
+        print(first_hit)
+        if "imageURL" in first_hit:
+            url = first_hit["imageURL"]
+        else:
+            url = None
     else:
         url = None 
     return url
