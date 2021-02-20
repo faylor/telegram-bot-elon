@@ -22,15 +22,14 @@ def search_pix(query):
     contents = requests.get(url)
     js = contents.json()
     hits = js["hits"]
+    url = None 
     if len(hits) > 0:
         first_hit = hits[0]
         print(first_hit)
-        if "imageURL" in first_hit:
-            url = first_hit["imageURL"]
-        else:
-            url = None
-    else:
-        url = None 
+        if "previewURL" in first_hit:
+            url = first_hit["previewURL"]
+        elif "webformatURL" in first_hit:
+            url = first_hit["webformatURL"]
     return url
 	
     

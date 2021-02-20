@@ -138,7 +138,9 @@ Fun:
   /green <anything> 
   /red <anything> 
   /doge 
-  /cat 
+  /cat
+  /fox  or /foxy
+  /pix <anything>
   /remind
 
 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
