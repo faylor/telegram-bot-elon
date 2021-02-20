@@ -147,7 +147,6 @@ async def totals_user_scores2(message: types.Message):
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
 
-
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy2 ([0-9a-zA-Z]*)']))
 async def set_buy_point2(message: types.Message, regexp_command):
     try:
