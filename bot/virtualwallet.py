@@ -274,10 +274,10 @@ async def process_spend(message: types.Message, state: FSMContext):
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'])),
-                    md.text('Price USD:', md.code(data['price_usd'])),
-                    md.text('Price BTC:', md.code(data['price_btc'])),
+                    md.text('Price USD:', md.text(data['price_usd'])),
+                    md.text('Price BTC:', md.bold(data['price_btc'])),
                     md.text('Total Spent USD:', md.code(message.text)),
-                    md.text('Total Coins:', md.code(str(coins))),
+                    md.text('Total Coins:', md.text(str(coins))),
                     sep='\n',
                 ),
                 reply_markup=markup,
