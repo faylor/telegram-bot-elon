@@ -102,8 +102,8 @@ async def finish_weekly(message: types.Message):
     
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
-    await bot.send_message(chat_id=message.chat.id, text=f'Added To Table: ' + json.dumps(config["winners_list"]))
     await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
+    await total_weekly(message)
 
 @dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
 async def total_weekly(message: types.Message):
