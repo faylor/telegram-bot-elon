@@ -203,6 +203,9 @@ async def set_sell_point(message: types.Message, regexp_command):
         for symbol in symbol_split:
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
+            if p == 0:
+                await message.reply("Sorry the API is not responding, try in a minute.")
+                return
             js = r.get("At_" + symbol + "_" + user).decode('utf-8')
             changes = 0
             changes_btc = 0
