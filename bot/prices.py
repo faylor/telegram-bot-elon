@@ -42,10 +42,10 @@ def get_price_extended(label):
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
-            return 0,0,0,0, 0, 0
+            return 0,0,0,0,0,0
     except Exception as e:
         logging.error(e)
-        return 0, 0, 0, 0
+        return 0,0,0,0,0,0
     return change_1hr, change_24hr, change_btc_1hr, change_btc_24hr, days_since_alt, down_from_alt
 
 def get_price(label):
