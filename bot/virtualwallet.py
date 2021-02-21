@@ -226,7 +226,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         name = chat_member.user.mention
         if p == 0:
             return await message.reply(f"Hey {name}, {symbol} is at not returning a price from API. Please try again.")
-        await Form.volume.set()
+        await Form.spent.set()
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
             proxy['price_usd'] = p
             proxy['price_btc'] = btc_price
@@ -248,7 +248,7 @@ async def process_age_invalid(message: types.Message):
 
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=Form.spent)
-async def process_volume(message: types.Message, state: FSMContext):
+async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             spend = float(data["spent"])
