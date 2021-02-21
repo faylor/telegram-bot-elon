@@ -23,6 +23,7 @@ async def weekly_tally(message: types.Message, r):
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     winning = ""
     winning_name = ""
+    winning_eth_name = ""
     winning_diff = 99999
     cid = str(message.chat.id)
     for key in r.scan_iter(f"{cid}_BTC_*"):
@@ -61,14 +62,14 @@ async def weekly_tally(message: types.Message, r):
             mention_name = member.user.mention
             if d == winning_diff:
                 winning_eth = winning_eth + ", " + user_id
-                winning_name = winning_name + ", " + mention_name
+                winning_eth_name = winning_eth_name + ", " + mention_name
             else:
                 winning_eth = user_id
-                winning_name = mention_name
+                winning_eth_name = mention_name
                 winning_diff = d
-        out = out + winning_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        out = out + winning_eth_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth + "\n"
-    return out, winning, winning_eth
+    return out, winning, winning_eth, winning_name, winning_eth_name
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
@@ -81,15 +82,15 @@ async def start_weekly(message: types.Message):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _, _ = await weekly_tally(message, r)
+    out, _, _, _, _ = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    out, winning_btc, winning_eth = await weekly_tally(message, r)
+    out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
-    await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_btc}, ETH winner = {winning_eth}')
+    await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
     config = r.get(message.chat.id)
     if config is None:
         config = {}
