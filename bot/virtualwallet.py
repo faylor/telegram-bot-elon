@@ -283,14 +283,14 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             proxy['coin'] = symbol
             proxy['balance'] = usd
         force_reply = types.force_reply.ForceReply()
-        await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Balance = ${usd} available. Buy $? worth?", reply_markup=force_reply)
+        await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Balance = ${usd} available. Buy $? worth (all for all)?", reply_markup=force_reply)
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit(), state=Form.spent)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text.lower() != "all", state=Form.spent)
 async def process_spent_invalid(message: types.Message):
     """
     If age is invalid
