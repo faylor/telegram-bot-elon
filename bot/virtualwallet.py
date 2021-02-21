@@ -240,7 +240,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
 
 
 @dp.message_handler(lambda message: not message.text.isdigit(), state=Form.spent)
-async def process_age_invalid(message: types.Message):
+async def process_spent_invalid(message: types.Message):
     """
     If age is invalid
     """
@@ -251,7 +251,7 @@ async def process_age_invalid(message: types.Message):
 async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            spend = float(data["spent"])
+            spend = float(message.text)
             price = float(data['price_usd'])
 
             if spend <= 0 or price == 0:
@@ -276,7 +276,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Coin:', md.code(data['coin'])),
                     md.text('Price USD:', md.code(data['price_usd'])),
                     md.text('Price BTC:', md.code(data['price_btc'])),
-                    md.text('Total Spent USD:', md.code(data['spent'])),
+                    md.text('Total Spent USD:', md.code(message.text)),
                     md.text('Total Coins:', md.code(coins)),
                     sep='\n',
                 ),
