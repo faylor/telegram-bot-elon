@@ -167,7 +167,7 @@ async def send_user_balance(message: types.Message, regexp_command):
                     total_change = total_change + change
                     counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
-                    symbol = symbol.ljust(4, ' ')
+                    symbol = symbol.upper()
                     coins = round_sense(coins)
                     out = out + f"\n{symbol}:\n{buy_price} | {price} | {change} | {coins}\n"
             else:
