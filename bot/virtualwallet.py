@@ -393,6 +393,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 name = chat_member.user.mention
                 await SaleForm.coins.set()
                 async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+                    proxy['coin'] = symbol
                     proxy['price_usd'] = price_usd
                     proxy['price_btc'] = price_btc
                     proxy['sale_price_usd'] = sale_price_usd
@@ -410,14 +411,14 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
 
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text != "", state=SaleForm.coins)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text.lower() != "all", state=SaleForm.coins)
 async def process_sell_invalid(message: types.Message):
     """
     If age is invalid
     """
     return await message.reply("Total Coins to sell has gotta be a number or empty.\n Sell how many coins (digits only)?")
 
-@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text == "", state=SaleForm.coins)
+@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text.lower() == "all", state=SaleForm.coins)
 async def process_sell(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
