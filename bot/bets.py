@@ -109,7 +109,10 @@ async def total_weekly(message: types.Message):
         out = "TOTES WINNERS: \n"
         logging.error(config["winners_list"])
         for k, v in config["winners_list"].items():
-            out = out + str(k) + " == " + str(v) + "\n"
+            key = str(k)
+            chat_member = await bot.get_chat_member(message.chat.id, key)
+            name = chat_member.user.mention
+            out = out + name + " == " + str(v) + "\n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     else:
         await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
@@ -120,8 +123,8 @@ async def set_weekly(message: types.Message, regexp_command):
         amount = regexp_command.group(1)
         amount_eth = regexp_command.group(2)
         cid = str(message.chat.id)
-        r.set(f"{cid}_BTC_" + message.from_user.mention, amount)
-        r.set(f"{cid}_ETH_" + message.from_user.mention, amount_eth)
+        r.set(f"{cid}_BTC_" + message.from_user.id, amount)
+        r.set(f"{cid}_ETH_" + message.from_user.id, amount_eth)
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
@@ -138,8 +141,7 @@ async def clear_weekly_totals(message: types.Message):
 
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
-    logging.warn('user:' + message.from_user.mention)
-    await message.reply('user:' + message.from_user.mention)
+    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is None:
         config = {}
@@ -147,21 +149,77 @@ async def add_user(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
-    if message.from_user.mention not in config["winners_list"]:
-        config["winners_list"][message.from_user.mention] = 1
+    if message.from_user.id not in config["winners_list"]:
+        config["winners_list"][message.from_user.id] = 1
     else:
-        config["winners_list"][message.from_user.mention] = int(config["winners_list"][message.from_user.mention]) + 1
+        config["winners_list"][message.from_user.id] = int(config["winners_list"][message.from_user.id]) + 1
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
+
+@dp.message_handler(commands=['add2'])
+async def add_user(message: types.Message):
+    logging.warn('user:' + message.from_user.id)
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
+    if "winners_list" not in config:
+        config["winners_list"] = []
+    if message.from_user.id not in config["winners_list"]:
+        config["winners_list"][message.from_user.id] = 2
+    else:
+        config["winners_list"][message.from_user.id] = int(config["winners_list"][message.from_user.id]) + 2
+    logging.info(json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
+
+@dp.message_handler(commands=['add3'])
+async def add_user(message: types.Message):
+    logging.warn('user:' + message.from_user.id)
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
+    if "winners_list" not in config:
+        config["winners_list"] = []
+    if message.from_user.id not in config["winners_list"]:
+        config["winners_list"][message.from_user.id] = 3
+    else:
+        config["winners_list"][message.from_user.id] = int(config["winners_list"][message.from_user.id]) + 3
+    logging.info(json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
+
+@dp.message_handler(commands=['add4'])
+async def add_user(message: types.Message):
+    logging.warn('user:' + message.from_user.id)
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
+    if "winners_list" not in config:
+        config["winners_list"] = []
+    if message.from_user.id not in config["winners_list"]:
+        config["winners_list"][message.from_user.id] = 4
+    else:
+        config["winners_list"][message.from_user.id] = int(config["winners_list"][message.from_user.id]) + 4
+    logging.info(json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
 
 @dp.message_handler(commands=['minus1'])
 async def minus_user(message: types.Message):
-    logging.warn('user:' + message.from_user.mention)
-    await message.reply('user:' + message.from_user.mention)
+    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is not None:
         config = json.loads(config)
-        if "winners_list" in config and message.from_user.mention in config["winners_list"]:
-            config["winners_list"][message.from_user.mention] = int(config["winners_list"][message.from_user.mention]) - 1
+        if "winners_list" in config and message.from_user.id in config["winners_list"]:
+            config["winners_list"][message.from_user.id] = int(config["winners_list"][message.from_user.id]) - 1
             logging.info(json.dumps(config))
             r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
+    
