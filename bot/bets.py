@@ -60,10 +60,10 @@ async def weekly_tally(message: types.Message, r):
             member = await bot.get_chat_member(message.chat.id, user_id)
             mention_name = member.user.mention
             if d == winning_diff:
-                winning_eth = winning_eth + ", " + mention_name
+                winning_eth = winning_eth + ", " + user_id
                 winning_name = winning_name + ", " + mention_name
             else:
-                winning_eth = mention_name
+                winning_eth = user_id
                 winning_name = mention_name
                 winning_diff = d
         out = out + winning_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
