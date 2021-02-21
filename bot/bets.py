@@ -123,8 +123,8 @@ async def set_weekly(message: types.Message, regexp_command):
         amount = regexp_command.group(1)
         amount_eth = regexp_command.group(2)
         cid = str(message.chat.id)
-        r.set(f"{cid}_BTC_" + message.from_user.id, amount)
-        r.set(f"{cid}_ETH_" + message.from_user.id, amount_eth)
+        r.set(f"{cid}_BTC_" + str(message.from_user.id), amount)
+        r.set(f"{cid}_ETH_" + str(message.from_user.id), amount_eth)
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
@@ -142,7 +142,7 @@ async def clear_weekly_totals(message: types.Message):
 
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
-    logging.warn('user:' + message.from_user.id)
+    logging.warn('user:' + str(message.from_user.id))
     config = r.get(message.chat.id)
     if config is None:
         config = {}
@@ -160,7 +160,6 @@ async def add_user(message: types.Message):
 
 @dp.message_handler(commands=['add2'])
 async def add_user(message: types.Message):
-    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is None:
         config = {}
@@ -178,7 +177,6 @@ async def add_user(message: types.Message):
 
 @dp.message_handler(commands=['add3'])
 async def add_user(message: types.Message):
-    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is None:
         config = {}
@@ -196,7 +194,6 @@ async def add_user(message: types.Message):
 
 @dp.message_handler(commands=['add4'])
 async def add_user(message: types.Message):
-    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is None:
         config = {}
@@ -214,7 +211,6 @@ async def add_user(message: types.Message):
 
 @dp.message_handler(commands=['minus1'])
 async def minus_user(message: types.Message):
-    logging.warn('user:' + message.from_user.id)
     config = r.get(message.chat.id)
     if config is not None:
         config = json.loads(config)

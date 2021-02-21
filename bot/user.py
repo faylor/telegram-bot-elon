@@ -40,10 +40,10 @@ def get_user_price_config(user):
     except Exception as e:
         return "usd"
 
-def add_win_for_user(config, mention):
-    mention = mention.strip()
-    if mention not in config["winners_list"]:
-        config["winners_list"][mention] = 1
+def add_win_for_user(config, user_id):
+    user_id = int(user_id)
+    if user_id not in config["winners_list"]:
+        config["winners_list"][user_id] = 1
     else:
-        config["winners_list"][mention] = int(config["winners_list"][mention]) + 1
+        config["winners_list"][user_id] = int(config["winners_list"][user_id]) + 1
     
