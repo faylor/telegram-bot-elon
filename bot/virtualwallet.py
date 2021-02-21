@@ -35,6 +35,8 @@ class SaleForm(StatesGroup):
     coin = State()
     price_usd = State()
     price_btc = State()
+    sale_price_usd = State()
+    sale_price_btc = State()
     available_coins = State()  # Will be represented in storage as 'Form:available_coins'
     coins = State()  # Will be represented in storage as 'Form:coins'
 
@@ -373,8 +375,8 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         if len(symbol_split) > 0:
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
-            p, _, _, btc_price = get_price(symbol)
-            if p == 0:
+            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            if sale_price_usd == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
             else:
                 js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
@@ -393,9 +395,11 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
                     proxy['price_usd'] = price_usd
                     proxy['price_btc'] = price_btc
+                    proxy['sale_price_usd'] = sale_price_usd
+                    proxy['sale_price_btc'] = sale_price_btc
                     proxy['available_coins'] = available_coins
                 force_reply = types.force_reply.ForceReply()
-                await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Coins = {available_coins} available. Sell ? coins (blank for all)?", reply_markup=force_reply)
+                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Coins = {available_coins} available. Sell ? coins (blank for all)?", reply_markup=force_reply)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
@@ -419,29 +423,34 @@ async def process_sell(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             coins = float(message.text)
             symbol = float(data['coin'])
-            price = float(data['price_usd'])
+            buy_price = float(data['price_usd'])
+            buy_price_btc = float(data['price_btc'])
+            sale_price_usd = float(data['sale_price_usd'])
+            sale_price_btc = float(data['sale_price_btc'])
             available_coins = float(data['available_coins'])
             chat_id = str(message.chat.id)
             user_id = str(message.from_user.id)
-            if coins <= 0 or available_coins == 0 or price == 0:
+            if coins <= 0 or available_coins == 0 or sale_price_usd == 0:
                 return await message.reply("Total Coins, Available Coins and Price has gotta be a more than 0.\n Try again (digits only)")
 
             if available_coins < coins:
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
             r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)    
-            sale_usd = coins * price
+            sale_usd = coins * sale_price_usd
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
-            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n Adding To Bag USD Balance: ${sale_usd}\n'
+            
             # And send message
             await bot.send_message(
                 message.chat.id,
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
-                    md.text('Price USD:', md.text(data['price_usd'])),
-                    md.text('Price BTC:', md.text(data['price_btc'])),
+                    md.text('Buy Price USD:', md.text(data['price_usd'])),
+                    md.text('Buy Price BTC:', md.text(data['price_btc'])),
+                    md.text('Sale Price USD:', md.text(data['sale_price_usd'])),
+                    md.text('Sale Price BTC:', md.text(data['sale_price_btc'])),
                     md.text('Total Coins Sold:', md.text(str(coins))),
                     md.text('Remaining Coins:', md.text(str(remaining_balance))),
                     md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
