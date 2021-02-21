@@ -78,11 +78,15 @@ def get_user_bag_score(chat_id, user_id):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
-def update_user_usd(chat_id, user_id, live, usd):
+def user_spent_usd(chat_id, user_id, usd):
     try:
-        js = {"live": live, "usd": usd}
+        _, account_usd = get_user_bag_score(chat_id, user_id)
+        if account_usd is None:
+            account_usd = 0
+        new_account_usd = account_usd - usd
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
-        r.set(key, json.dumps(json))
+        js = {"live": 0, "usd": new_account_usd}
+        r.set(key, json.dumps(js))
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
@@ -239,7 +243,8 @@ async def process_spend(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             spend = float(message.text)
             price = float(data['price_usd'])
-
+            chat_id = str(message.chat.id)
+            user_id = str(message.from_user.id)
             if spend <= 0 or price == 0:
                 return await message.reply("Total Spend or price has gotta be a more than 0.\nHow old are you? (digits only)")
 
@@ -250,10 +255,10 @@ async def process_spend(message: types.Message, state: FSMContext):
             js = {}
             js["usd"] = data['price_usd']
             js["btc"] = data['price_btc']
-            js["coins"] = coins
-            logging.error("BUY here 1:" )    
-            r.set("At_" + str(message.chat.id) + "_" + data['coin'] + "_" + str(message.from_user.id), json.dumps(js))
-            logging.error("BUY here:" )    
+            js["coins"] = coins 
+            
+            r.set("At_" + chat_id + "_" + data['coin'] + "_" + user_id, json.dumps(js))
+            user_spent_usd(chat_id, user_id, spend)
             # And send message
             await bot.send_message(
                 message.chat.id,
