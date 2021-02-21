@@ -92,7 +92,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         chat_id = str(message.chat.id)
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
-        in_prices = get_user_price_config(message.from_user.user_id)
+        in_prices = get_user_price_config(message.from_user.id)
         out = out + "<pre>       Buy At   |  Price   |  +/-  | Vol\n"
         total_change = float(0.00)
         counter = 0
