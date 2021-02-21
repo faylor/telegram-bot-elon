@@ -295,11 +295,14 @@ async def process_spent_invalid(message: types.Message):
     """
     return await message.reply("Total Spend has gotta be a number.\nHow old are you? (digits only)")
 
-@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit(), state=Form.spent)
+@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text.lower() == "all", state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            spend = float(message.text)
+            if message.text.lower().strip() == "all":
+                spend = float(data['balance'])
+            else:
+                spend = float(message.text)
             price = float(data['price_usd'])
             chat_id = str(message.chat.id)
             user_id = str(message.from_user.id)
@@ -400,7 +403,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                     proxy['sale_price_btc'] = sale_price_btc
                     proxy['available_coins'] = available_coins
                 force_reply = types.force_reply.ForceReply()
-                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Coins = {available_coins} available. Sell ? coins (blank for all)?", reply_markup=force_reply)
+                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Coins = {available_coins} available. Sell ? coins (all for all)?", reply_markup=force_reply)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
@@ -422,7 +425,10 @@ async def process_sell_invalid(message: types.Message):
 async def process_sell(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            coins = float(message.text)
+            if message.text.lower().strip() == "all":
+                coins = float(data['available_coins'])
+            else:
+                coins = float(message.text)
             symbol = float(data['coin'])
             sale_price_usd = float(data['sale_price_usd'])
             available_coins = float(data['available_coins'])
@@ -461,5 +467,5 @@ async def process_sell(message: types.Message, state: FSMContext):
         # Finish conversation
         await state.finish()
     except Exception as e:
-        logging.error("BUY ERROR:" + str(e))
+        logging.error("SALE PROCESS ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
