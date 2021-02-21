@@ -219,7 +219,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
         
         _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
-        chat_member = bot.get_chat_member(message.chat.id, message.from_user.id)
+        chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         name = chat_member.user.mention
 
 
