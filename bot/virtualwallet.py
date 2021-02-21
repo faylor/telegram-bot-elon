@@ -51,11 +51,24 @@ def get_symbol_list2(symbols):
         symbol_split = [symbols]
     return symbol_split
 
-@dp.message_handler(commands=['newbaggies'])
-async def new_bag_reset(message: types.Message):
+@dp.message_handler(commands=['clearbags'])
+async def reset_bags(message: types.Message):
     try:
         user = str(message.from_user.id)
-        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
+        link = "At_" + str(message.chat.id) + "_*_*"
+        saves = r.scan_iter(link)
+        for key in saves:
+            key = key.decode('utf-8')
+            r.delete(key)
+        await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+@dp.message_handler(commands=['gimme'])
+async def add_bag_usd(message: types.Message):
+    try:
+        user = str(message.from_user.id)
+        saves = r.get(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
             js = {"live": 0, "usd": 1000}
