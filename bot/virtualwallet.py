@@ -12,9 +12,21 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
+import aiogram.utils.markdown as md
+from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .prices import get_price, round_sense
 from .user import get_user_price_config
+
+SCORE_KEY = "{chat_id}_bagescore_{mention}"
+
+# States
+class Form(StatesGroup):
+    volume = State()  # Will be represented in storage as 'Form:volume'
+
 
 def get_open_trades2(user, chat_id):
     saves = r.scan_iter("At_" + chat_id + "_*_" + user)
@@ -35,18 +47,38 @@ def get_symbol_list2(symbols):
         symbol_split = [symbols]
     return symbol_split
 
-@dp.message_handler(commands=['newseason2'])
+@dp.message_handler(commands=['newbaggies'])
 async def new_season2_reset(message: types.Message):
     try:
         user = message.from_user.mention
-        saves = r.scan_iter(str(message.chat.id) + "_score2_*")
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), mention="*"))
         for key in saves:
             key = key.decode('utf-8')
-            r.set(key, 100)
+            js = {"live": 0, "usd": 1000}
+            r.set(key, json.dumps(json))
         await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
+def get_user_bag_score(chat_id, mention):
+    try:
+        key =  SCORE_KEY.format(chat_id=str(chat_id), mention=mention)
+        js = r.get(key, json.dumps(json))
+        if js is not None:
+            js = js.decode('utf-8')
+            js = json.loads(js)
+            return float(js["live"]), float(js["usd"])
+        return 0, 0
+    except Exception as e:
+        logging.error("FAILED to save user score for bag:" + str(e))
+
+def update_user_usd(chat_id, mention, live, usd):
+    try:
+        js = {"live": live, "usd": usd}
+        key =  SCORE_KEY.format(chat_id=str(chat_id), mention=mention)
+        r.set(key, json.dumps(json))
+    except Exception as e:
+        logging.error("FAILED to save user score for bag:" + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
@@ -59,7 +91,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + message.from_user.mention)
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.mention)
-        out = out + "<pre>       Buy At   |  Price   |  +/-  \n"
+        out = out + "<pre>       Buy At   |  Price   |  +/-  | Vol\n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -116,9 +148,9 @@ async def send_user_balance(message: types.Message, regexp_command):
 @dp.message_handler(commands=['league2'])
 async def totals_user_scores2(message: types.Message):
     try:
-        saves = r.scan_iter(str(message.chat.id) + "_score2_*")
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), mention="*"))
         out = "League Season Standings:\n\n"
-        out = ["<pre>Who Dat?             Score\n"]
+        out = ["<pre>Who Dat?             Live Score  |  USD\n"]
         scores = []
         for key in saves:
             key = key.decode('utf-8')
@@ -129,16 +161,20 @@ async def totals_user_scores2(message: types.Message):
                 value = value.decode('utf-8')
                 user = key.replace(str(message.chat.id)+"_score2_", "")
                 user = user.ljust(20, ' ')
-                score = round(float(value), 2)
-                if len(scores) > 1:
+                js = json.loads(value)
+                score_live = round(float(js["live"]), 2)
+                score_usd = round(float(js["usd"]), 2)
+                score_total = score_live + score_usd
+                if len(score_total) > 1:
                     i = 0
-                    while i < len(scores) and score < scores[i]:
+                    while i < len(score_total) and score_total < scores[i]:
                         i = i + 1
-                    out.insert(i, f"{user} {score}")
-                    scores.insert(i, score)
+                    out.insert(i, f"{user} {score_live} {score_usd}")
+                    
+                    scores.insert(i, score_total)
                 else:
-                    scores.append(score)
-                    out.append(f"{user} {score}")
+                    scores.append(score_total)
+                    out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
         s = "\n".join(out)
         await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
@@ -147,33 +183,79 @@ async def totals_user_scores2(message: types.Message):
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buy2 ([0-9a-zA-Z]*)']))
-async def set_buy_point2(message: types.Message, regexp_command):
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
+async def grab_point(message: types.Message, regexp_command):
     try:
-        keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
-        # default row_width is 3, so here we can omit it actually
-        # kept for clearness
+        # keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
+        # # default row_width is 3, so here we can omit it actually
+        # # kept for clearness
 
-        text_and_data = (
-            ('Yes!', 'yes'),
-            ('No!', 'no'),
-        )
-        # in real life for the callback_data the callback data factory should be used
-        # here the raw string is used for the simplicity
-        row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
+        # text_and_data = (
+        #     ('Yes!', 'yes'),
+        #     ('No!', 'no'),
+        # )
+        # # in real life for the callback_data the callback data factory should be used
+        # # here the raw string is used for the simplicity
+        # row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
 
-        keyboard_markup.row(*row_btns)
-        keyboard_markup.add(
-            # url buttons have no callback data
-            types.InlineKeyboardButton('aiogram source', url='https://github.com/aiogram/aiogram'),
-        )
-
-        await message.reply("Hi!\nDo you love aiogram?", reply_markup=keyboard_markup)
+        # keyboard_markup.row(*row_btns)
+        # keyboard_markup.add(
+        #     # url buttons have no callback data
+        #     types.InlineKeyboardButton('aiogram source', url='https://github.com/aiogram/aiogram'),
+        # )
+        await Form.volume.set()
+        await message.reply("Hi there! How much?")
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
+# Check age. Age gotta be digit
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.age)
+async def process_age_invalid(message: types.Message):
+    """
+    If age is invalid
+    """
+    return await message.reply("Age gotta be a number.\nHow old are you? (digits only)")
+
+
+@dp.message_handler(lambda message: message.text.isdigit(), state=Form.volume)
+async def process_volume(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['volume'] = message.text
+
+        # Remove keyboard
+        markup = types.ReplyKeyboardRemove()
+
+        # And send message
+        await bot.send_message(
+            message.chat.id,
+            md.text(
+                md.text('Volume:', md.code(data['volume'])),
+                sep='\n',
+            ),
+            reply_markup=markup,
+            parse_mode=ParseMode.MARKDOWN,
+        )
+
+    # Finish conversation
+    await state.finish()
+
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    """
+    Allow user to cancel any action
+    """
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    logging.info('Cancelling state %r', current_state)
+    # Cancel state and inform user about it
+    await state.finish()
+    # And remove keyboard (just in case)
+    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
 # Use multiple registrators. Handler will execute when one of the filters is OK
@@ -243,7 +325,7 @@ async def set_buy_point_prices2(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buyat btc 23450 1')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['sell2 ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_sell_point2(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
