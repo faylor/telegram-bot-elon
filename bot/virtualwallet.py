@@ -87,6 +87,7 @@ def user_spent_usd(chat_id, user_id, usd):
         new_account_usd = account_usd - usd
         if new_account_usd < 0:
             return None
+        new_account_usd = round(new_account_usd, 2)    
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = {"live": 0, "usd": new_account_usd}
         r.set(key, json.dumps(js))
