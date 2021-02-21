@@ -57,18 +57,31 @@ WATCH COINS (PER CHAT):
   Add To Alts: /watchalt <coin> (eg: /watchalt zil)
   Remove from watchalt: /removealt <coin> (eg: /removealt aave)
 
-VIRTUAL WALLET:
+BAGS WALLET (Advanced - Per Chat):
+  Buy: /grab btc
+  Sell: /dump btc
+  View Balance (in user price setting): /bag     
+  View Balance in BTC: /bag btc     
+  View Balance in USD: /bag usd
+  
+  LEAGUE (Advanced):
+    Clear Bags: /clearbags
+    Give Everone 1000: /gimme
+    View Ladder: /ladder   
+    ** Score based on USD. 
+
+HODL WALLET (Basic - Warning Per User!):
   Buy: /buy btc     or multple: /buy eth btc ada
   BuyAt: /buyat eth 34521.23 0.21   (Price in USD and BTC)
   Sell: /sell btc    or mulitple: /sell eth btc aave
   View Balance (in user price setting): /hodl     
   View Balance in BTC: /hodl btc     
   View Balance in USD: /hodl usd
-  
-LEAGUE:
-  Start Season: /newseason
-  Show Standings: /league      
-  ** Score is simply adding up change % on each sell action. 
+
+  LEAGUE (Basic):
+    Start Season: /newseason
+    Show Standings: /league      
+    ** Score is simply adding up change % on each sell action. 
 
 SUMMARY:
   Prices, Alts and Virtual Wallet: /summary
