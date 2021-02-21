@@ -390,6 +390,7 @@ async def set_sell_point2(message: types.Message, regexp_command):
                         js = json.loads(js)
                         saved = js["usd"]
                         saved_btc = js["btc"]
+                        coins = js["coins"]
                         if saved_btc > 0:
                             changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
                         else:
@@ -398,32 +399,18 @@ async def set_sell_point2(message: types.Message, regexp_command):
                         saved = float(js)
                         saved_btc = 1
                         changes_btc = "<UNKNOWN>"
+                        coins = 1
                     if saved > 0:
                         changes = round(100 * (p - float(saved)) / float(saved), 2)
                     out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
 
-                trade_counts = get_open_trades2(user_id, chat_id)
-
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
-                current_score = r.get(str(message.chat.id) + "_score_" + user_id)
                 
-                if current_score is None:
-                    current_score = 0
-                else:
-                    current_score = float(current_score.decode('utf-8'))
-                if changes == "NA":
-                    new_score = current_score
-                else:
-                    if trade_counts > 0:
-                        prop_changes = round(changes/trade_counts,2)
-                    else:
-                        prop_changes = changes
-                    new_score = current_score + prop_changes
-                new_score = str(round(new_score,2))
-                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE PROFIT/LOSS = {changes}% \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
-                new_balance = user_spent_usd(chat_id, user_id, -1 * new_score)
+                sale_usd = coins * p
+                new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n Adding To Bag USD Balance: ${sale_usd}\n'
                 
-        out = out + f'\nBALANCE: ${new_balance}'        
+        out = out + f'\FINAL BALANCE: ${new_balance}'        
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
