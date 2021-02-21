@@ -237,14 +237,14 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
-@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.spent)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit(), state=Form.spent)
 async def process_spent_invalid(message: types.Message):
     """
     If age is invalid
     """
     return await message.reply("Total Spend has gotta be a number.\nHow old are you? (digits only)")
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=Form.spent)
+@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit(), state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
