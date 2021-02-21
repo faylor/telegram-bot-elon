@@ -169,10 +169,10 @@ async def add_user(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
-    if message.from_user.id not in config["winners_list"]:
+    if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 1
     else:
-        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][message.from_user.id]) + 1
+        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 1
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await message.reply('user:' + message.from_user.mention)
@@ -186,10 +186,10 @@ async def add_user(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
-    if message.from_user.id not in config["winners_list"]:
+    if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 2
     else:
-        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][message.from_user.id]) + 2
+        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 2
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await message.reply('user:' + message.from_user.mention)
@@ -203,10 +203,10 @@ async def add_user(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
-    if message.from_user.id not in config["winners_list"]:
+    if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 3
     else:
-        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][message.from_user.id]) + 3
+        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 3
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await message.reply('user:' + message.from_user.mention)
@@ -220,10 +220,10 @@ async def add_user(message: types.Message):
         config = json.loads(config)
     if "winners_list" not in config:
         config["winners_list"] = []
-    if message.from_user.id not in config["winners_list"]:
+    if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 4
     else:
-        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][message.from_user.id]) + 4
+        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 4
     logging.info(json.dumps(config))
     r.set(message.chat.id, json.dumps(config))
     await message.reply('user:' + message.from_user.mention)
