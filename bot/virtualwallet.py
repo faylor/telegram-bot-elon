@@ -226,8 +226,8 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
             proxy['price'] = p
             proxy['coin'] = symbol
-        
-        await message.reply("Hey " + {name} + ",  " + {symbol} + " is at $" + {p} + " You have $" + {usd} + " available so how much do you want to spend?")
+        logging.info("USD:" + str(usd))
+        await message.reply(f"Hey {name},  {symbol} is at ${p}. You have ${usd} available so how much do you want to spend?")
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
