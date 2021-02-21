@@ -60,7 +60,7 @@ async def reset_bags(message: types.Message):
         for key in saves:
             key = key.decode('utf-8')
             r.delete(key)
-        await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
+        await message.reply(f'Ok emptied all bags, enjoy. Reset funds with /gimme')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
@@ -73,7 +73,7 @@ async def add_bag_usd(message: types.Message):
             key = key.decode('utf-8')
             js = {"live": 0, "usd": 1000}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
