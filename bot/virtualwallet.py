@@ -129,7 +129,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>       Buy At   |  Price   |  +/-  | Coins\n"
+        out = out + "<pre>Buy At   |  Price   |  +/-  | Coins\n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -168,7 +168,8 @@ async def send_user_balance(message: types.Message, regexp_command):
                     counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
                     symbol = symbol.ljust(4, ' ')
-                    out = out + f"{symbol} | {buy_price} | {price} | {change} | {coins}\n"
+                    coins = round_sense(coins)
+                    out = out + f"\n{symbol}:\n{buy_price} | {price} | {change} | {coins}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
         total_change = round(total_change, 2)
