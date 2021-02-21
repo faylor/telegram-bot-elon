@@ -17,13 +17,12 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from .bot import bot, dp, r, get_change_label
 from .prices import get_price, round_sense
 from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagescore_{mention}"
-storage = MemoryStorage()
+
 # States
 class Form(StatesGroup):
     volume = State()  # Will be represented in storage as 'Form:volume'

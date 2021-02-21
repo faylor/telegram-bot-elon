@@ -13,6 +13,8 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news
@@ -20,7 +22,8 @@ from .prices import get_price, round_sense, get_news
 r = redis.from_url(REDIS_URL)
 
 bot = Bot(token=TELEGRAM_BOT)
-dp = Dispatcher(bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
 
