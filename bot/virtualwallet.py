@@ -221,17 +221,19 @@ async def totals_user_scores2(message: types.Message):
                 user_member = await bot.get_chat_member(chat_id, user_id)
                 user = user_member.user.mention.ljust(20, ' ')
                 js = json.loads(value)
-                score_live = get_users_live_value(chat_id, user_id).ljust(10, ' ')
+                score_live = get_users_live_value(chat_id, user_id)
                 score_usd = float(js["usd"])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 0
                     while i < score_total and score_total < scores[i]:
                         i = i + 1
+                    score_live = str(score_live).ljust(10, ' ')
                     out.insert(i, f"{user} {score_live} {score_usd}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
+                    score_live = str(score_live).ljust(10, ' ')
                     out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
         s = "\n".join(out)
