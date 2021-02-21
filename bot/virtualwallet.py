@@ -166,7 +166,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        current_score = r.get(str(message.chat.id) + "_score2_" + str(message.from_user.id))
+        current_score = r.get(str(message.chat.id) + "_bagscore_" + str(message.from_user.id))
         if current_score is None:
             current_score = 0
         else:
@@ -193,7 +193,7 @@ async def totals_user_scores2(message: types.Message):
                 r.delete(key)
             elif value is not None:
                 value = value.decode('utf-8')
-                user = key.replace(str(message.chat.id)+"_score2_", "")
+                user = key.replace(str(message.chat.id)+"_bagscore_", "")
                 user = user.ljust(20, ' ')
                 js = json.loads(value)
                 score_live = round(float(js["live"]), 2)
