@@ -429,7 +429,7 @@ async def process_sell(message: types.Message, state: FSMContext):
                 coins = float(data['available_coins'])
             else:
                 coins = float(message.text)
-            symbol = float(data['coin'])
+            symbol = data['coin']
             sale_price_usd = float(data['sale_price_usd'])
             available_coins = float(data['available_coins'])
             chat_id = str(message.chat.id)
