@@ -25,6 +25,8 @@ SCORE_KEY = "{chat_id}_bagescore_{mention}"
 
 # States
 class Form(StatesGroup):
+    coin = State()
+    price = State()
     volume = State()  # Will be represented in storage as 'Form:volume'
 
 
@@ -184,7 +186,7 @@ async def totals_user_scores2(message: types.Message):
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
-async def grab_point(message: types.Message, regexp_command):
+async def grab_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         # keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
         # # default row_width is 3, so here we can omit it actually
@@ -203,8 +205,29 @@ async def grab_point(message: types.Message, regexp_command):
         #     # url buttons have no callback data
         #     types.InlineKeyboardButton('aiogram source', url='https://github.com/aiogram/aiogram'),
         # )
+        symbols = regexp_command.group(1)
+        symbol_split = get_symbol_list2(symbols)
+        
+        out = ""
+        for symbol in symbol_split:
+            symbol = symbol.strip().lower()
+            p, _, _, btc_price = get_price(symbol)
+            js = {}
+            js["usd"] = p
+            js["btc"] = btc_price
+            r.set("At_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+            out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
+        
+        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=message.from_user.id)
+        chat_member = bot.getChatMember(message.chat.id, message.from_user.id)
+        name = chat_member.user.mention
+
+
+        await Form.coin.set(symbol)
+        await Form.price.set(p)
         await Form.volume.set()
-        await message.reply("Hi there! How much?")
+        
+        await message.reply("Hey " + {name} + ",  " + {symbol} + " is at $" + {p} + " You have $" + {usd} + " available so how much do you want to spend?")
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
@@ -231,7 +254,9 @@ async def process_volume(message: types.Message, state: FSMContext):
         await bot.send_message(
             message.chat.id,
             md.text(
-                md.text('Volume:', md.code(data['volume'])),
+                md.text('Coin:', md.code(data['coin'])),
+                md.text('Price:', md.code(data['price'])),
+                md.text('Purchased:', md.code(data['volume'])),
                 sep='\n',
             ),
             reply_markup=markup,
