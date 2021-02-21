@@ -28,6 +28,7 @@ def weekly_tally(message: types.Message, r):
         d = get_abs_difference(a, p_btc)
         name = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
         if not name.isdigit():
+            r.delete(key.decode('utf-8'))
             logging.error("User Id not stored in DB as int " + str(name) + " ignoring.")
             break
         if d <= winning_diff:
@@ -46,6 +47,7 @@ def weekly_tally(message: types.Message, r):
         d = get_abs_difference(a, p_eth)
         name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
         if not name.isdigit():
+            r.delete(key.decode('utf-8'))
             logging.error("User Id ETH not stored in DB as int " + str(name) + " ignoring.")
             break
         if d <= winning_diff:
