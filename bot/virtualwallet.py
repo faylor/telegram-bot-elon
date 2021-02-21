@@ -218,7 +218,7 @@ async def totals_user_scores2(message: types.Message):
             elif value is not None:
                 value = value.decode('utf-8')
                 user_id = key.replace(chat_id + "_bagscore_", "")
-                user_member = bot.get_chat_member(chat_id, user_id)
+                user_member = await bot.get_chat_member(chat_id, user_id)
                 user = user_member.user.mention.ljust(20, ' ')
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id).ljust(10, ' ')
