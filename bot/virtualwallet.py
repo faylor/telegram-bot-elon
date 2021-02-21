@@ -21,7 +21,7 @@ from .bot import bot, dp, r, get_change_label
 from .prices import get_price, round_sense
 from .user import get_user_price_config
 
-SCORE_KEY = "{chat_id}_bagescore_{mention}"
+SCORE_KEY = "{chat_id}_bagescore_{user_id}"
 
 # States
 class Form(StatesGroup):
@@ -52,8 +52,8 @@ def get_symbol_list2(symbols):
 @dp.message_handler(commands=['newbaggies'])
 async def new_season2_reset(message: types.Message):
     try:
-        user = message.from_user.mention
-        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), mention="*"))
+        user = str(message.from_user.id)
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
             js = {"live": 0, "usd": 1000}
@@ -62,9 +62,9 @@ async def new_season2_reset(message: types.Message):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
-def get_user_bag_score(chat_id, mention):
+def get_user_bag_score(chat_id, user_id):
     try:
-        key =  SCORE_KEY.format(chat_id=str(chat_id), mention=mention)
+        key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = r.get(key, json.dumps(json))
         if js is not None:
             js = js.decode('utf-8')
@@ -74,10 +74,10 @@ def get_user_bag_score(chat_id, mention):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
-def update_user_usd(chat_id, mention, live, usd):
+def update_user_usd(chat_id, user_id, live, usd):
     try:
         js = {"live": live, "usd": usd}
-        key =  SCORE_KEY.format(chat_id=str(chat_id), mention=mention)
+        key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         r.set(key, json.dumps(json))
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
@@ -90,14 +90,14 @@ async def send_user_balance(message: types.Message, regexp_command):
         else: 
             bysymbol = None
         chat_id = str(message.chat.id)
-        saves = r.scan_iter("At_" + chat_id + "_*_" + message.from_user.mention)
+        saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
-        in_prices = get_user_price_config(message.from_user.mention)
+        in_prices = get_user_price_config(message.from_user.user_id)
         out = out + "<pre>       Buy At   |  Price   |  +/-  | Vol\n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
-            symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + message.from_user.mention,"")
+            symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
             p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
@@ -137,7 +137,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        current_score = r.get(str(message.chat.id) + "_score2_" + message.from_user.mention)
+        current_score = r.get(str(message.chat.id) + "_score2_" + str(message.from_user.id))
         if current_score is None:
             current_score = 0
         else:
@@ -150,7 +150,7 @@ async def send_user_balance(message: types.Message, regexp_command):
 @dp.message_handler(commands=['league2'])
 async def totals_user_scores2(message: types.Message):
     try:
-        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), mention="*"))
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         out = "League Season Standings:\n\n"
         out = ["<pre>Who Dat?             Live Score  |  USD\n"]
         scores = []
@@ -215,10 +215,10 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             js = {}
             js["usd"] = p
             js["btc"] = btc_price
-            r.set("At_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+            r.set("At_" + symbol + "_" + str(message.from_user.id), json.dumps(js))
             out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
         
-        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=message.from_user.id)
+        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
         chat_member = bot.getChatMember(message.chat.id, message.from_user.id)
         name = chat_member.user.mention
 
@@ -283,24 +283,6 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
-# Use multiple registrators. Handler will execute when one of the filters is OK
-@dp.callback_query_handler(text='no')  # if cb.data == 'no'
-@dp.callback_query_handler(text='yes')  # if cb.data == 'yes'
-async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
-    answer_data = query.data
-    # always answer callback queries, even if you have nothing to say
-    await query.answer(f'You answered with {answer_data!r}')
-
-    if answer_data == 'yes':
-        text = 'Great, me too!'
-    elif answer_data == 'no':
-        text = 'Oh no...Why so?'
-    else:
-        text = f'Unexpected callback data {answer_data!r}!'
-
-    await bot.send_message(query.from_user.id, text)
-
-
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buysplit2 ([\s0-9.,a-zA-Z]*)']))
 async def set_buy_point2(message: types.Message, regexp_command):
     try:
@@ -314,7 +296,7 @@ async def set_buy_point2(message: types.Message, regexp_command):
             js = {}
             js["usd"] = p
             js["btc"] = btc_price
-            r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+            r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.id, json.dumps(js))
             out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
         
         await message.reply(out)
@@ -341,7 +323,7 @@ async def set_buy_point_prices2(message: types.Message, regexp_command):
         js = {}
         js["usd"] = price
         js["btc"] = price_btc
-        r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.mention, json.dumps(js))
+        r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.id, json.dumps(js))
         out = f"Gotit. Hope this isnt a doge move. Gedit. {symbol} at ${round_sense(price)} or {round(price_btc,8)} BTC marked \n"
         
         await message.reply(out)
@@ -355,14 +337,14 @@ async def set_sell_point2(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
-        user = message.from_user.mention
+        user_id = str(message.from_user.id)
         chat_id = str(message.chat.id)
         
         out = ""
         for symbol in symbol_split:
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
-            js = r.get("At_" + chat_id + "_" + symbol + "_" + user).decode('utf-8')
+            js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
             changes = 0
             changes_btc = 0
             prop_changes = 0
@@ -383,10 +365,10 @@ async def set_sell_point2(message: types.Message, regexp_command):
                     changes = round(100 * (p - float(saved)) / float(saved), 2)
                 out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
 
-            trade_counts = get_open_trades2(user, chat_id)
+            trade_counts = get_open_trades2(user_id, chat_id)
 
-            r.delete("At_" + chat_id + "_" + symbol + "_" + user)
-            current_score = r.get(str(message.chat.id) + "_score_" + user)
+            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
+            current_score = r.get(str(message.chat.id) + "_score_" + user_id)
             
             if current_score is None:
                 current_score = 0
