@@ -179,12 +179,36 @@ async def send_user_balance(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
 
-@dp.message_handler(commands=['league2'])
+def get_users_live_value(chat_id, user_id):
+    try:
+        saves = r.scan_iter("At_" + chat_id + "_*_" + user_id)
+        total_value = float(0.00)
+        for key in saves:
+            symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + user_id,"")
+            p, c, c24, btc_price = get_price(symbol)
+            if float(p) > 0:
+                value = r.get(key)
+                if value is not None:
+                    value = value.decode('utf-8')
+                    if "{" in value:
+                        js = json.loads(value)
+                        coins = float(js["coins"])
+                    else:
+                        coins = 1
+                    total_value = total_value + (coins * p)
+        return total_value
+    except Exception as e:
+        logging.warn("Couldnt get live values data:" + str(e))
+        return 0
+
+@dp.message_handler(commands=['ladder'])
 async def totals_user_scores2(message: types.Message):
     try:
-        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
+        chat_id = str(message.chat.id)
+        
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         out = "League Season Standings:\n\n"
-        out = ["<pre>Who Dat?             Live Score  |  USD\n"]
+        out = ["<pre>Who Dat?             Live Value  |  Account USD\n"]
         scores = []
         for key in saves:
             key = key.decode('utf-8')
@@ -193,25 +217,24 @@ async def totals_user_scores2(message: types.Message):
                 r.delete(key)
             elif value is not None:
                 value = value.decode('utf-8')
-                user = key.replace(str(message.chat.id)+"_bagscore_", "")
-                user = user.ljust(20, ' ')
+                user_id = key.replace(chat_id + "_bagscore_", "")
+                user = user_id.ljust(20, ' ')
                 js = json.loads(value)
-                score_live = round(float(js["live"]), 2)
-                score_usd = round(float(js["usd"]), 2)
+                score_live = get_users_live_value(chat_id, user_id)
+                score_usd = float(js["usd"])
                 score_total = score_live + score_usd
-                if len(score_total) > 1:
+                if score_total > 1:
                     i = 0
-                    while i < len(score_total) and score_total < scores[i]:
+                    while i < score_total and score_total < scores[i]:
                         i = i + 1
                     out.insert(i, f"{user} {score_live} {score_usd}")
-                    
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
                     out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
         s = "\n".join(out)
-        await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
+        await bot.send_message(chat_id=chat_id, text=s, parse_mode='HTML')
     except Exception as e:
         logging.error("ERROR: " + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
