@@ -265,9 +265,9 @@ async def process_spend(message: types.Message, state: FSMContext):
             js["usd"] = data['price_usd']
             js["btc"] = data['price_btc']
             js["coins"] = coins
-
-            r.set("At_" + str(message.chat.id) + "_" + data['coin'] + "_" + message.from_user.id, json.dumps(js))
-                
+            logging.error("BUY here 1:" )    
+            r.set("At_" + str(message.chat.id) + "_" + data['coin'] + "_" + str(message.from_user.id), json.dumps(js))
+            logging.error("BUY here:" )    
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -277,7 +277,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Price USD:', md.code(data['price_usd'])),
                     md.text('Price BTC:', md.code(data['price_btc'])),
                     md.text('Total Spent USD:', md.code(message.text)),
-                    md.text('Total Coins:', md.code(coins)),
+                    md.text('Total Coins:', md.code(str(coins))),
                     sep='\n',
                 ),
                 reply_markup=markup,
