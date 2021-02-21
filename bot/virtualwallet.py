@@ -307,6 +307,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     """
     current_state = await state.get_state()
     if current_state is None:
+        logging.info('Cancelling state None')
         return
 
     logging.info('Cancelling state %r', current_state)
