@@ -211,7 +211,7 @@ async def grab_point(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 # Check age. Age gotta be digit
-@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.age)
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.volume)
 async def process_age_invalid(message: types.Message):
     """
     If age is invalid
