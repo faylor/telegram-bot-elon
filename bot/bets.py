@@ -45,7 +45,7 @@ async def weekly_tally(message: types.Message, r):
                 winning_name = mention_name
                 winning_diff = d
         out = out + winning_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING BTC == " + winning + "\n"
+    out = out + "\n LOOK WHO IS WINNING BTC == " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     winning_eth = ""
     winning_diff = 99999
@@ -68,7 +68,7 @@ async def weekly_tally(message: types.Message, r):
                 winning_eth_name = mention_name
                 winning_diff = d
         out = out + winning_eth_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth + "\n"
+    out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth_name + "\n"
     return out, winning, winning_eth, winning_name, winning_eth_name
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
