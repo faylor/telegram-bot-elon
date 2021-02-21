@@ -31,6 +31,13 @@ class Form(StatesGroup):
     balance = State()
     spent = State()  # Will be represented in storage as 'Form:spent'
 
+class SaleForm(StatesGroup):
+    coin = State()
+    price_usd = State()
+    price_btc = State()
+    available_coins = State()  # Will be represented in storage as 'Form:available_coins'
+    coins = State()  # Will be represented in storage as 'Form:coins'
+
 
 def get_open_trades2(user, chat_id):
     saves = r.scan_iter("At_" + chat_id + "_*_" + user)
@@ -244,7 +251,10 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         symbol_split = get_symbol_list2(symbols)
         
         out = ""
-        for symbol in symbol_split:
+        if len(symbol_split) > 1:
+            await bot.send_message(chat_id=message.chat.id, text='Only 1 coin allowed at the moment, using first value')
+        if len(symbol_split) > 0:
+            symbol = symbol_split[0]
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
             js = {}
@@ -300,8 +310,6 @@ async def process_spend(message: types.Message, state: FSMContext):
 
             coins = spend/price
             
-            # Remove keyboard
-            markup = types.ReplyKeyboardRemove()
             js = {}
             js["usd"] = data['price_usd']
             js["btc"] = data['price_btc']
@@ -322,7 +330,6 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Remaining Balance USD:', md.text(str(remaining_balance))),
                     sep='\n',
                 ),
-                reply_markup=markup,
                 parse_mode=ParseMode.MARKDOWN,
             )
 
@@ -351,57 +358,9 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buysplit2 ([\s0-9.,a-zA-Z]*)']))
-async def set_buy_point2(message: types.Message, regexp_command):
-    try:
-        symbols = regexp_command.group(1)
-        symbol_split = get_symbol_list2(symbols)
-        chat_id = str(message.chat.id)
-        out = ""
-        for symbol in symbol_split:
-            symbol = symbol.strip().lower()
-            p, _, _, btc_price = get_price(symbol)
-            js = {}
-            js["usd"] = p
-            js["btc"] = btc_price
-            r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.id, json.dumps(js))
-            out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
-        
-        await message.reply(out)
-    except Exception as e:
-        logging.error("BUY ERROR:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
-
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['buyat2 ([\s0-9.,a-zA-Z]*)']))
-async def set_buy_point_prices2(message: types.Message, regexp_command):
-    try:
-        coin_price = regexp_command.group(1)
-        symbol_split = get_symbol_list2(coin_price)
-        chat_id = str(message.chat.id)
-        
-        symbol = symbol_split[0]
-        price = float(symbol_split[1])
-        if symbol == "btc":
-            price_btc = 1
-        else:
-            price_btc = float(symbol_split[2])
-        
-        symbol = symbol.strip().lower()
-
-        js = {}
-        js["usd"] = price
-        js["btc"] = price_btc
-        r.set("At_" + chat_id + "_" + symbol + "_" + message.from_user.id, json.dumps(js))
-        out = f"Gotit. Hope this isnt a doge move. Gedit. {symbol} at ${round_sense(price)} or {round(price_btc,8)} BTC marked \n"
-        
-        await message.reply(out)
-    except Exception as e:
-        logging.error("BUY ERROR:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buyat btc 23450 1')
-
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
-async def set_sell_point2(message: types.Message, regexp_command):
+async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
@@ -409,41 +368,91 @@ async def set_sell_point2(message: types.Message, regexp_command):
         chat_id = str(message.chat.id)
         
         out = ""
-        for symbol in symbol_split:
+        if len(symbol_split) > 1:
+            await bot.send_message(chat_id=message.chat.id, text='Only 1 coin allowed at the moment, using first value')
+        if len(symbol_split) > 0:
+            symbol = symbol_split[0]
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
             if p == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
             else:
                 js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
-                changes = 0
-                changes_btc = 0
                 if js is not None:
-                    if "{" in js:
-                        js = json.loads(js)
-                        saved = js["usd"]
-                        saved_btc = js["btc"]
-                        coins = js["coins"]
-                        if saved_btc > 0:
-                            changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
-                        else:
-                            changes_btc = "NA"
-                    else:
-                        saved = float(js)
-                        saved_btc = 1
-                        changes_btc = "<UNKNOWN>"
-                        coins = 1
-                    if saved > 0:
-                        changes = round(100 * (p - float(saved)) / float(saved), 2)
-                    
-                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
-                
-                sale_usd = coins * p
-                new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
-                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n Adding To Bag USD Balance: ${sale_usd}\n'
-                
-        out = out + f'\nFINAL BALANCE: ${new_balance}'        
-        await message.reply(out)
+                    js = json.loads(js)
+                    price_usd = js["usd"]
+                    price_btc = js["btc"]
+                    available_coins = js["coins"]
+                else:
+                    price_btc = 0
+                    price_btc = 0
+                    available_coins = 0
+                chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+                name = chat_member.user.mention
+                await SaleForm.coins.set()
+                async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+                    proxy['price_usd'] = price_usd
+                    proxy['price_btc'] = price_btc
+                    proxy['available_coins'] = available_coins
+                force_reply = types.force_reply.ForceReply()
+                await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Coins = {available_coins} available. Sell ? coins (blank for all)?", reply_markup=force_reply)
+        else:
+            await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
+        # out = out + f'\nFINAL BALANCE: ${new_balance}'        
+        # await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
+
+
+
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text != "", state=Form.coins)
+async def process_sell_invalid(message: types.Message):
+    """
+    If age is invalid
+    """
+    return await message.reply("Total Coins to sell has gotta be a number or empty.\n Sell how many coins (digits only)?")
+
+@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text == "", state=Form.coins)
+async def process_sell(message: types.Message, state: FSMContext):
+    try:
+        async with state.proxy() as data:
+            coins = float(message.text)
+            symbol = float(data['coin'])
+            price = float(data['price_usd'])
+            available_coins = float(data['available_coins'])
+            chat_id = str(message.chat.id)
+            user_id = str(message.from_user.id)
+            if coins <= 0 or available_coins == 0 or price == 0:
+                return await message.reply("Total Coins, Available Coins and Price has gotta be a more than 0.\n Try again (digits only)")
+
+            if available_coins < coins:
+                return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
+
+            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)    
+            sale_usd = coins * price
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            remaining_balance = available_coins - coins
+            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n Adding To Bag USD Balance: ${sale_usd}\n'
+            # And send message
+            await bot.send_message(
+                message.chat.id,
+                md.text(
+                    md.text('User:', md.code(message.from_user.mention)),
+                    md.text('Coin:', md.code(data['coin'].upper())),
+                    md.text('Price USD:', md.text(data['price_usd'])),
+                    md.text('Price BTC:', md.text(data['price_btc'])),
+                    md.text('Total Coins Sold:', md.text(str(coins))),
+                    md.text('Remaining Coins:', md.text(str(remaining_balance))),
+                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    sep='\n',
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
+        # Finish conversation
+        await state.finish()
+    except Exception as e:
+        logging.error("BUY ERROR:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
