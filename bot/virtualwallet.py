@@ -323,7 +323,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             js["coins"] = coins 
             
             r.set("At_" + chat_id + "_" + data['coin'] + "_" + user_id, json.dumps(js))
-            
+            markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -337,6 +337,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Remaining Balance USD:', md.text(str(remaining_balance))),
                     sep='\n',
                 ),
+                reply_markup=markup,
                 parse_mode=ParseMode.MARKDOWN,
             )
 
@@ -446,7 +447,7 @@ async def process_sell(message: types.Message, state: FSMContext):
             sale_usd = coins * sale_price_usd
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
-            
+            markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -463,6 +464,7 @@ async def process_sell(message: types.Message, state: FSMContext):
                     md.text('New Bag Balance USD:', md.text(str(new_balance))),
                     sep='\n',
                 ),
+                reply_markup=markup,
                 parse_mode=ParseMode.MARKDOWN,
             )
 
