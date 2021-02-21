@@ -34,7 +34,7 @@ async def weekly_tally(message: types.Message, r):
             logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
             break
         if d <= winning_diff:
-            member = await bot.get_chat_member(message.chat.it, user_id)
+            member = await bot.get_chat_member(message.chat.id, user_id)
             mention_name = member.user.mention
             if d == winning_diff:
                 winning = winning + ", " + user_id
@@ -57,7 +57,7 @@ async def weekly_tally(message: types.Message, r):
             logging.error("User Id ETH not stored in DB as int " + str(user_id) + " ignoring.")
             break
         if d <= winning_diff:
-            member = await bot.get_chat_member(message.chat.it, user_id)
+            member = await bot.get_chat_member(message.chat.id, user_id)
             mention_name = member.user.mention
             if d == winning_diff:
                 winning_eth = winning_eth + ", " + mention_name
