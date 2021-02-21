@@ -67,7 +67,7 @@ async def reset_bags(message: types.Message):
 @dp.message_handler(commands=['gimme'])
 async def add_bag_usd(message: types.Message):
     try:
-        saves = r.get(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))   
         for key in saves:
             key = key.decode('utf-8')
             js = {"live": 0, "usd": 1000}
