@@ -397,7 +397,6 @@ async def set_sell_point2(message: types.Message, regexp_command):
                 js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
                 changes = 0
                 changes_btc = 0
-                prop_changes = 0
                 if js is not None:
                     if "{" in js:
                         js = json.loads(js)
@@ -415,15 +414,14 @@ async def set_sell_point2(message: types.Message, regexp_command):
                         coins = 1
                     if saved > 0:
                         changes = round(100 * (p - float(saved)) / float(saved), 2)
-                    out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
-
+                    
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
                 
                 sale_usd = coins * p
                 new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
                 out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n Adding To Bag USD Balance: ${sale_usd}\n'
                 
-        out = out + f'\FINAL BALANCE: ${new_balance}'        
+        out = out + f'\nFINAL BALANCE: ${new_balance}'        
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
