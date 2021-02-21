@@ -28,6 +28,7 @@ class Form(StatesGroup):
     coin = State()
     price_usd = State()
     price_btc = State()
+    balance = State()
     spent = State()  # Will be represented in storage as 'Form:spent'
 
 
@@ -84,11 +85,15 @@ def user_spent_usd(chat_id, user_id, usd):
         if account_usd is None:
             account_usd = 0
         new_account_usd = account_usd - usd
+        if new_account_usd < 0:
+            return None
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = {"live": 0, "usd": new_account_usd}
         r.set(key, json.dumps(js))
+        return new_account_usd
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
+        return None
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
@@ -224,7 +229,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             proxy['price_usd'] = p
             proxy['price_btc'] = btc_price
             proxy['coin'] = symbol
-        logging.info("USD:" + str(usd))
+            proxy['balance'] = usd
         await message.reply(f"Hey {name},  {symbol} is at ${p}. You have ${usd} available so how much do you want to spend?")
 
     except Exception as e:
@@ -239,7 +244,6 @@ async def process_spent_invalid(message: types.Message):
     """
     return await message.reply("Total Spend has gotta be a number.\nHow old are you? (digits only)")
 
-
 @dp.message_handler(lambda message: message.text.isdigit(), state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
     try:
@@ -251,6 +255,10 @@ async def process_spend(message: types.Message, state: FSMContext):
             if spend <= 0 or price == 0:
                 return await message.reply("Total Spend or price has gotta be a more than 0.\nHow old are you? (digits only)")
 
+            remaining_balance = user_spent_usd(chat_id, user_id, spend)
+            if remaining_balance is None:
+                return await message.reply("Total Spend is more than Account Balance\nHow old are you? (digits only)")
+
             coins = spend/price
             
             # Remove keyboard
@@ -261,7 +269,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             js["coins"] = coins 
             
             r.set("At_" + chat_id + "_" + data['coin'] + "_" + user_id, json.dumps(js))
-            user_spent_usd(chat_id, user_id, spend)
+            
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -272,6 +280,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Price BTC:', md.text(data['price_btc'])),
                     md.text('Total Spent USD:', md.text(message.text)),
                     md.text('Total Coins:', md.text(str(coins))),
+                    md.text('Remaining Balance USD:', md.text(str(remaining_balance))),
                     sep='\n',
                 ),
                 reply_markup=markup,
