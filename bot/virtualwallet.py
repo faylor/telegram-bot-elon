@@ -21,7 +21,7 @@ from .bot import bot, dp, r, get_change_label
 from .prices import get_price, round_sense
 from .user import get_user_price_config
 
-SCORE_KEY = "{chat_id}_bagescore_{user_id}"
+SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 
 # States
 class Form(StatesGroup):
@@ -51,14 +51,14 @@ def get_symbol_list2(symbols):
     return symbol_split
 
 @dp.message_handler(commands=['newbaggies'])
-async def new_season2_reset(message: types.Message):
+async def new_bag_reset(message: types.Message):
     try:
         user = str(message.from_user.id)
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
             js = {"live": 0, "usd": 1000}
-            r.set(key, json.dumps(json))
+            r.set(key, json.dumps(js))
         await message.reply(f'Sup. Welcome to a NEW season for trade scores for this chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -71,7 +71,10 @@ def get_user_bag_score(chat_id, user_id):
             js = js.decode('utf-8')
             js = json.loads(js)
             return float(js["live"]), float(js["usd"])
-        return 0, 0
+        else:
+            js = {"live": 0, "usd": 1000}
+            r.set(key, json.dumps(js))
+            return 0, 1000
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
@@ -191,23 +194,6 @@ async def totals_user_scores2(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
 async def grab_point(message: types.Message, regexp_command, state: FSMContext):
     try:
-        # keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
-        # # default row_width is 3, so here we can omit it actually
-        # # kept for clearness
-
-        # text_and_data = (
-        #     ('Yes!', 'yes'),
-        #     ('No!', 'no'),
-        # )
-        # # in real life for the callback_data the callback data factory should be used
-        # # here the raw string is used for the simplicity
-        # row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
-
-        # keyboard_markup.row(*row_btns)
-        # keyboard_markup.add(
-        #     # url buttons have no callback data
-        #     types.InlineKeyboardButton('aiogram source', url='https://github.com/aiogram/aiogram'),
-        # )
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
         
@@ -273,10 +259,10 @@ async def process_spend(message: types.Message, state: FSMContext):
                 message.chat.id,
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
-                    md.text('Coin:', md.code(data['coin'])),
+                    md.text('Coin:', md.code(data['coin'].upper())),
                     md.text('Price USD:', md.text(data['price_usd'])),
-                    md.text('Price BTC:', md.bold(data['price_btc'])),
-                    md.text('Total Spent USD:', md.code(message.text)),
+                    md.text('Price BTC:', md.text(data['price_btc'])),
+                    md.text('Total Spent USD:', md.text(message.text)),
                     md.text('Total Coins:', md.text(str(coins))),
                     sep='\n',
                 ),
