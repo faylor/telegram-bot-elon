@@ -129,8 +129,11 @@ async def total_weekly(message: types.Message):
         logging.error(config["winners_list"])
         for k, v in config["winners_list"].items():
             key = str(k)
-            chat_member = await bot.get_chat_member(message.chat.id, key)
-            name = chat_member.user.mention
+            if key.isdigit():
+                chat_member = await bot.get_chat_member(message.chat.id, key)
+                name = chat_member.user.mention
+            else:
+                name = key
             out = out + name + " == " + str(v) + "\n"
         await bot.send_message(chat_id=message.chat.id, text=out)
     else:
