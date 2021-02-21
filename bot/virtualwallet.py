@@ -129,7 +129,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>Buy At   |  Price   |  +/-  | Coins\n"
+        out = out + "<pre>Buy At   |  Price   |  +/-  | Coins"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -172,13 +172,14 @@ async def send_user_balance(message: types.Message, regexp_command):
                     out = out + f"\n{symbol}:\n{buy_price} | {price} | {change} | {coins}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
+        
+        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+        out = out + "\nUNUSED USD = " + str(round(usd,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-        out = out + "\nACCOUNT USD = " + str(round(usd,2)) + "\n"
-        
+       
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
