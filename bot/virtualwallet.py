@@ -166,12 +166,6 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\nAVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        current_score = r.get(str(message.chat.id) + "_bagscore_" + str(message.from_user.id))
-        if current_score is None:
-            current_score = 0
-        else:
-            current_score = float(current_score.decode('utf-8'))
-        out = out + "\nTOTAL SCORE = " + str(round(current_score,2)) + "\n"
         _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
         out = out + "\nACCOUNT USD = " + str(round(usd,2)) + "\n"
         
