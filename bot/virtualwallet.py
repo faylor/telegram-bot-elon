@@ -268,7 +268,8 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             proxy['price_btc'] = btc_price
             proxy['coin'] = symbol
             proxy['balance'] = usd
-        await message.reply(f"Hey {name},  {symbol} is at ${p}. You have ${usd} available so how much do you want to spend?")
+        force_reply = types.force_reply.ForceReply()
+        await message.reply(f"Hey {name},  {symbol} is at ${p}. You have ${usd} available so how much do you want to spend?", reply_markup=force_reply)
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
