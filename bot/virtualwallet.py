@@ -220,11 +220,15 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             r.set("At_" + symbol + "_" + str(message.from_user.id), json.dumps(js))
             out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
         
-        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
-        chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-        name = chat_member.user.mention
         if p == 0:
             return await message.reply(f"Hey {name}, {symbol} is at not returning a price from API. Please try again.")
+        
+        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+        if usd <= 0:
+            return await message.reply(f"You have no USD, you fool.")
+        
+        chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+        name = chat_member.user.mention
         await Form.spent.set()
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
             proxy['price_usd'] = p
