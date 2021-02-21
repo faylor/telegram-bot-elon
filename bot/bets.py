@@ -127,6 +127,7 @@ async def set_weekly(message: types.Message, regexp_command):
         r.set(f"{cid}_ETH_" + message.from_user.id, amount_eth)
         await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
     except Exception as e:
+        logging.error("Cannot bet: " + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
 @dp.message_handler(commands=['clearbetstotals'])
