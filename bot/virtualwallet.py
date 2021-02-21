@@ -222,10 +222,10 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         name = chat_member.user.mention
 
-
-        await Form.coin.set(symbol)
-        await Form.price.set(p)
         await Form.volume.set()
+        async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+            proxy['price'] = p
+            proxy['coin'] = symbol
         
         await message.reply("Hey " + {name} + ",  " + {symbol} + " is at $" + {p} + " You have $" + {usd} + " available so how much do you want to spend?")
 
