@@ -208,7 +208,7 @@ async def totals_user_scores2(message: types.Message):
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         out = "League Season Standings:\n\n"
-        out = ["<pre>Who Dat?             Live Value  |  Account USD\n"]
+        out = ["<pre>Who is that            Live Value  |  Account USD\n"]
         scores = []
         for key in saves:
             key = key.decode('utf-8')
@@ -218,9 +218,10 @@ async def totals_user_scores2(message: types.Message):
             elif value is not None:
                 value = value.decode('utf-8')
                 user_id = key.replace(chat_id + "_bagscore_", "")
-                user = user_id.ljust(20, ' ')
+                user_member = bot.get_chat_member(chat_id, user_id)
+                user = user_member.user.mention.ljust(20, ' ')
                 js = json.loads(value)
-                score_live = get_users_live_value(chat_id, user_id)
+                score_live = get_users_live_value(chat_id, user_id).ljust(10, ' ')
                 score_usd = float(js["usd"])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
