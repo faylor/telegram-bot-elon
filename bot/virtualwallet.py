@@ -153,6 +153,9 @@ async def send_user_balance(message: types.Message, regexp_command):
         else:
             current_score = float(current_score.decode('utf-8'))
         out = out + "\nTOTAL SCORE = " + str(round(current_score,2)) + "\n"
+        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+        out = out + "\nACCOUNT USD = " + str(round(usd,2)) + "\n"
+        
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
