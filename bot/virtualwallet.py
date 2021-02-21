@@ -220,13 +220,10 @@ async def totals_user_scores2(message: types.Message):
                 user_id = key.replace(chat_id + "_bagscore_", "")
                 user = user_id.ljust(20, ' ')
                 js = json.loads(value)
-                logging.error("HERE1")
                 score_live = get_users_live_value(chat_id, user_id)
-                logging.error("HERE2")
                 score_usd = float(js["usd"])
-                logging.error("HERE3")
                 score_total = score_live + score_usd
-                if score_total > 1:
+                if len(scores) > 1:
                     i = 0
                     while i < score_total and score_total < scores[i]:
                         i = i + 1
