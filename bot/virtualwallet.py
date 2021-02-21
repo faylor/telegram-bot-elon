@@ -222,13 +222,13 @@ async def totals_user_scores2(message: types.Message):
                     i = 0
                     while i < score_total and score_total < scores[i]:
                         i = i + 1
-                    score_live = str(score_live).ljust(10, ' ')
+                    score_live = str(round(score_live,2)).ljust(10, ' ')
                     out.insert(i, f"{user} {score_live} {score_usd}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
-                    score_live = str(score_live).ljust(10, ' ')
-                    out.append(f"{user} {round(score_live,2)} {score_usd}")
+                    score_live = str(round(score_live,2)).ljust(10, ' ')
+                    out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
         s = "\n".join(out)
         await bot.send_message(chat_id=chat_id, text=s, parse_mode='HTML')
