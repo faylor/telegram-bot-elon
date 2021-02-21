@@ -410,23 +410,20 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
 
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text != "", state=Form.coins)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text != "", state=SaleForm.coins)
 async def process_sell_invalid(message: types.Message):
     """
     If age is invalid
     """
     return await message.reply("Total Coins to sell has gotta be a number or empty.\n Sell how many coins (digits only)?")
 
-@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text == "", state=Form.coins)
+@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text == "", state=SaleForm.coins)
 async def process_sell(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             coins = float(message.text)
             symbol = float(data['coin'])
-            buy_price = float(data['price_usd'])
-            buy_price_btc = float(data['price_btc'])
             sale_price_usd = float(data['sale_price_usd'])
-            sale_price_btc = float(data['sale_price_btc'])
             available_coins = float(data['available_coins'])
             chat_id = str(message.chat.id)
             user_id = str(message.from_user.id)
