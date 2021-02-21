@@ -67,7 +67,6 @@ async def reset_bags(message: types.Message):
 @dp.message_handler(commands=['gimme'])
 async def add_bag_usd(message: types.Message):
     try:
-        user = str(message.from_user.id)
         saves = r.get(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
@@ -75,6 +74,7 @@ async def add_bag_usd(message: types.Message):
             r.set(key, json.dumps(js))
         await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.')
     except Exception as e:
+        logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
 def get_user_bag_score(chat_id, user_id):
