@@ -26,8 +26,9 @@ SCORE_KEY = "{chat_id}_bagescore_{user_id}"
 # States
 class Form(StatesGroup):
     coin = State()
-    price = State()
-    volume = State()  # Will be represented in storage as 'Form:volume'
+    price_usd = State()
+    price_btc = State()
+    spent = State()  # Will be represented in storage as 'Form:spent'
 
 
 def get_open_trades2(user, chat_id):
@@ -93,7 +94,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>       Buy At   |  Price   |  +/-  | Vol\n"
+        out = out + "<pre>       Buy At   |  Price   |  +/-  | Coins\n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -107,9 +108,11 @@ async def send_user_balance(message: types.Message, regexp_command):
                         js = json.loads(value)
                         usd_price = float(js["usd"])
                         buy_btc_price = float(js["btc"])
+                        coins = float(js["coins"])
                     else:
                         usd_price = float(value)
                         buy_btc_price = "UNKNOWN"
+                        coins = "UNKNOWN"
                     
                     if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
                         price = str(round(btc_price,8)).ljust(10,' ')
@@ -130,9 +133,9 @@ async def send_user_balance(message: types.Message, regexp_command):
                     counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
                     symbol = symbol.ljust(4, ' ')
-                    out = out + f"{symbol} | {buy_price} | {price} | {change}\n"
+                    out = out + f"{symbol} | {buy_price} | {price} | {change} | {coins}\n"
             else:
-                out = out + f"| {symbol} | NA | NA | NA | \n"
+                out = out + f"| {symbol} | NA | NA | NA | NA\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
@@ -221,10 +224,12 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
         chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
         name = chat_member.user.mention
-
+        if p == 0:
+            return await message.reply(f"Hey {name}, {symbol} is at not returning a price from API. Please try again.")
         await Form.volume.set()
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-            proxy['price'] = p
+            proxy['price_usd'] = p
+            proxy['price_btc'] = btc_price
             proxy['coin'] = symbol
         logging.info("USD:" + str(usd))
         await message.reply(f"Hey {name},  {symbol} is at ${p}. You have ${usd} available so how much do you want to spend?")
@@ -233,38 +238,58 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
-# Check age. Age gotta be digit
-@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.volume)
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.spent)
 async def process_age_invalid(message: types.Message):
     """
     If age is invalid
     """
-    return await message.reply("Age gotta be a number.\nHow old are you? (digits only)")
+    return await message.reply("Total Spend has gotta be a number.\nHow old are you? (digits only)")
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=Form.volume)
+@dp.message_handler(lambda message: message.text.isdigit(), state=Form.spent)
 async def process_volume(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['volume'] = message.text
+    try:
+        async with state.proxy() as data:
+            spend = float(data["spent"])
+            price = float(data['price_usd'])
 
-        # Remove keyboard
-        markup = types.ReplyKeyboardRemove()
+            if spend <= 0 or price == 0:
+                return await message.reply("Total Spend or price has gotta be a more than 0.\nHow old are you? (digits only)")
 
-        # And send message
-        await bot.send_message(
-            message.chat.id,
-            md.text(
-                md.text('Coin:', md.code(data['coin'])),
-                md.text('Price:', md.code(data['price'])),
-                md.text('Purchased:', md.code(data['volume'])),
-                sep='\n',
-            ),
-            reply_markup=markup,
-            parse_mode=ParseMode.MARKDOWN,
-        )
+            coins = spend/price
+            
+            # Remove keyboard
+            markup = types.ReplyKeyboardRemove()
+            js = {}
+            js["usd"] = data['price_usd']
+            js["btc"] = data['price_btc']
+            js["coins"] = coins
 
-    # Finish conversation
-    await state.finish()
+            r.set("At_" + str(message.chat.id) + "_" + data['coin'] + "_" + message.from_user.id, json.dumps(js))
+                
+            # And send message
+            await bot.send_message(
+                message.chat.id,
+                md.text(
+                    md.text('User:', md.code(message.from_user.mention)),
+                    md.text('Coin:', md.code(data['coin'])),
+                    md.text('Price USD:', md.code(data['price_usd'])),
+                    md.text('Price BTC:', md.code(data['price_btc'])),
+                    md.text('Total Spent USD:', md.code(data['spent'])),
+                    md.text('Total Coins:', md.code(coins)),
+                    sep='\n',
+                ),
+                reply_markup=markup,
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
+        # Finish conversation
+        await state.finish()
+    except Exception as e:
+        logging.error("BUY ERROR:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
+
 
 @dp.message_handler(state='*', commands='cancel')
 @dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
@@ -344,47 +369,50 @@ async def set_sell_point2(message: types.Message, regexp_command):
         for symbol in symbol_split:
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
-            js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
-            changes = 0
-            changes_btc = 0
-            prop_changes = 0
-            if js is not None:
-                if "{" in js:
-                    js = json.loads(js)
-                    saved = js["usd"]
-                    saved_btc = js["btc"]
-                    if saved_btc > 0:
-                        changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
+            if p == 0:
+                await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
+            else:
+                js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
+                changes = 0
+                changes_btc = 0
+                prop_changes = 0
+                if js is not None:
+                    if "{" in js:
+                        js = json.loads(js)
+                        saved = js["usd"]
+                        saved_btc = js["btc"]
+                        if saved_btc > 0:
+                            changes_btc = round(100 * (btc_price - float(saved_btc)) / float(saved_btc), 2)
+                        else:
+                            changes_btc = "NA"
                     else:
-                        changes_btc = "NA"
-                else:
-                    saved = float(js)
-                    saved_btc = 1
-                    changes_btc = "<UNKNOWN>"
-                if saved > 0:
-                    changes = round(100 * (p - float(saved)) / float(saved), 2)
-                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
+                        saved = float(js)
+                        saved_btc = 1
+                        changes_btc = "<UNKNOWN>"
+                    if saved > 0:
+                        changes = round(100 * (p - float(saved)) / float(saved), 2)
+                    out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n'
 
-            trade_counts = get_open_trades2(user_id, chat_id)
+                trade_counts = get_open_trades2(user_id, chat_id)
 
-            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
-            current_score = r.get(str(message.chat.id) + "_score_" + user_id)
-            
-            if current_score is None:
-                current_score = 0
-            else:
-                current_score = float(current_score.decode('utf-8'))
-            if changes == "NA":
-                new_score = current_score
-            else:
-                if trade_counts > 0:
-                    prop_changes = round(changes/trade_counts,2)
+                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
+                current_score = r.get(str(message.chat.id) + "_score_" + user_id)
+                
+                if current_score is None:
+                    current_score = 0
                 else:
-                    prop_changes = changes
-                new_score = current_score + prop_changes
-            new_score = str(round(new_score,2))
-            out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE PROFIT/LOSS = {changes}% \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
-            r.set(str(message.chat.id) + "_score2_" + user, new_score)
+                    current_score = float(current_score.decode('utf-8'))
+                if changes == "NA":
+                    new_score = current_score
+                else:
+                    if trade_counts > 0:
+                        prop_changes = round(changes/trade_counts,2)
+                    else:
+                        prop_changes = changes
+                    new_score = current_score + prop_changes
+                new_score = str(round(new_score,2))
+                out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE PROFIT/LOSS = {changes}% \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
+                r.set(str(message.chat.id) + "_score2_" + user, new_score)
         await message.reply(out)
     except Exception as e:
         logging.error("Sell Error:" + str(e))
