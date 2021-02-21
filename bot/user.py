@@ -42,7 +42,7 @@ def get_user_price_config(user):
 
 def add_win_for_user(config, user_id):
     if len(user_id.strip()) > 0:
-        user_id = int(user_id)
+        user_id = str(user_id)
         if user_id not in config["winners_list"]:
             config["winners_list"][user_id] = 1
         else:
