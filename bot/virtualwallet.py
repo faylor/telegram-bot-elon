@@ -65,7 +65,7 @@ async def new_season2_reset(message: types.Message):
 def get_user_bag_score(chat_id, user_id):
     try:
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
-        js = r.get(key, json.dumps(json))
+        js = r.get(key)
         if js is not None:
             js = js.decode('utf-8')
             js = json.loads(js)
