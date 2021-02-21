@@ -16,28 +16,34 @@ from .bot import dp, bot, r
 from .user import add_win_for_user
 from .prices import get_abs_difference, get_price
 
-def weekly_tally(message: types.Message, r):
+
+async def weekly_tally(message: types.Message, r):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
     winning = ""
+    winning_name = ""
     winning_diff = 99999
     cid = str(message.chat.id)
     for key in r.scan_iter(f"{cid}_BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
-        name = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
-        if not name.isdigit():
+        user_id = str(key.decode('utf-8')).replace(f"{cid}_BTC_","")
+        if not user_id.isdigit():
             r.delete(key.decode('utf-8'))
-            logging.error("User Id not stored in DB as int " + str(name) + " ignoring.")
+            logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
             break
         if d <= winning_diff:
+            member = await bot.get_chat_member(message.chat.it, user_id)
+            mention_name = member.user.mention
             if d == winning_diff:
-                winning = winning + ", " + name
+                winning = winning + ", " + user_id
+                winning_name = winning_name + ", " + mention_name
             else:
-                winning = name
+                winning = user_id
+                winning_name = mention_name
                 winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        out = out + winning_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\n LOOK WHO IS WINNING BTC == " + winning + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     winning_eth = ""
@@ -45,18 +51,22 @@ def weekly_tally(message: types.Message, r):
     for key in r.scan_iter(f"{cid}_ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_eth)
-        name = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
-        if not name.isdigit():
+        user_id = str(key.decode('utf-8')).replace(f"{cid}_ETH_","")
+        if not user_id.isdigit():
             r.delete(key.decode('utf-8'))
-            logging.error("User Id ETH not stored in DB as int " + str(name) + " ignoring.")
+            logging.error("User Id ETH not stored in DB as int " + str(user_id) + " ignoring.")
             break
         if d <= winning_diff:
+            member = await bot.get_chat_member(message.chat.it, user_id)
+            mention_name = member.user.mention
             if d == winning_diff:
-                winning_eth = winning_eth + ", " + name
+                winning_eth = winning_eth + ", " + mention_name
+                winning_name = winning_name + ", " + mention_name
             else:
-                winning_eth = name
+                winning_eth = mention_name
+                winning_name = mention_name
                 winning_diff = d
-        out = out + name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        out = out + winning_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth + "\n"
     return out, winning, winning_eth
 
@@ -71,13 +81,13 @@ async def start_weekly(message: types.Message):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _, _ = weekly_tally(message, r)
+    out, _, _ = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
 
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    out, winning_btc, winning_eth = weekly_tally(message, r)
+    out, winning_btc, winning_eth = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_btc}, ETH winner = {winning_eth}')
     config = r.get(message.chat.id)
