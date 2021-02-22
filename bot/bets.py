@@ -134,7 +134,7 @@ async def total_weekly(message: types.Message):
                 name = chat_member.user.mention
             else:
                 name = key
-            name = name.ljust('15',' ')
+            name = name.ljust(15,' ')
             if len(scores) == 1:
                 scores.append(float(v))
                 out.append(f"{name} {v}")
