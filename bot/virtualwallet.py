@@ -430,6 +430,12 @@ async def process_spend(message: types.Message, state: FSMContext):
 
             coins = spend/price
             
+            js = r.get("At_" + chat_id + "_" + data['coin'] + "_" + user_id).decode('utf-8')
+            if js is not None:
+                js = json.loads(js)
+                current_coins = js["coins"]
+                coins = coins + float(current_coins)
+
             js = {}
             js["usd"] = data['price_usd']
             js["btc"] = data['price_btc']
