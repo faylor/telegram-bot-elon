@@ -73,13 +73,17 @@ async def reset_bags(message: types.Message):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
-@dp.message_handler(commands=['gimme'])
-async def add_bag_usd(message: types.Message):
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
+async def add_bag_usd(message: types.Message, regexp_command):
     try:
+        if regexp_command is not None:
+            amount = float(regexp_command.group(1).strip())
+        else: 
+            amount = None
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))   
         for key in saves:
             key = key.decode('utf-8')
-            js = {"live": 0, "usd": 1000}
+            js = {"live": 0, "usd": amount}
             r.set(key, json.dumps(js))
         await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.')
     except Exception as e:
