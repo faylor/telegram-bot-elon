@@ -187,7 +187,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                         the_chat_title = the_chat.title
                         if last_the_chat_title != the_chat_title:
                             out = out + f"{the_chat_title}\n"
-
+                            last_the_chat_title = the_chat_title
                         out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
                 else:
                     out = out + f"| {symbol} | NA | NA | NA | NA\n"
