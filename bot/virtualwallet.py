@@ -319,6 +319,7 @@ async def process_spent_invalid(message: types.Message):
 async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
+            markup = types.ReplyKeyboardRemove()
             spent_response = message.text.lower().strip()
             if spent_response == "100%":
                 spend = float(data['balance'])
@@ -330,7 +331,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 spend = float(data['balance']) * 0.25
             elif spent_response == "cancel":
                 await state.finish()
-                return await message.reply("Cancelled.")
+                return await message.reply("Cancelled.", reply_markup=markup)
             else:
                 spend = float(message.text)
             if spend <= 0:
@@ -355,7 +356,6 @@ async def process_spend(message: types.Message, state: FSMContext):
             js["coins"] = coins 
             
             r.set("At_" + chat_id + "_" + data['coin'] + "_" + user_id, json.dumps(js))
-            markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -562,6 +562,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             selected_percentage = str(message.text)
+            markup = types.ReplyKeyboardRemove()
             if selected_percentage == "100%":
                 coins = float(data['available_coins'])
             elif selected_percentage == "75%":
@@ -572,7 +573,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 coins = float(data['available_coins']) * 0.25
             elif selected_percentage.lower() == "cancel":
                 await state.finish()
-                return await message.reply("Cancelled.")
+                return await message.reply("Cancelled.", reply_markup=markup)
             else:
                 coins = float(message.text)
             if coins <= 0:
@@ -602,7 +603,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 js_set["coins"] = remaining_balance
                 r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
             
-            markup = types.ReplyKeyboardRemove()
+            
             # And send message
             await bot.send_message(
                 message.chat.id,
