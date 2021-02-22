@@ -227,7 +227,7 @@ async def totals_user_scores2(message: types.Message):
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         out = "League Season Standings:\n\n"
         out = ["<pre>Who?          Live Value  | USD\n"]
-        scores = []
+        scores = [0]
         for key in saves:
             key = key.decode('utf-8')
             value = r.get(key)
@@ -243,7 +243,7 @@ async def totals_user_scores2(message: types.Message):
                 score_usd = float(js["usd"])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
-                    i = 0
+                    i = 1
                     while i < len(scores) and score_total < scores[i]:
                         i = i + 1
                     score_live = str(round(score_live,2)).ljust(10, ' ')
