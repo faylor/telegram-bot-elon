@@ -125,7 +125,7 @@ async def total_weekly(message: types.Message):
         config = json.loads(config)
     
     if "winners_list" in config:
-        scores = []
+        scores = [0]
         out = ["<pre>Who?            Wins\n"]
         for k, v in config["winners_list"].items():
             key = str(k)
