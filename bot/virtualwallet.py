@@ -40,6 +40,15 @@ class SaleForm(StatesGroup):
     available_coins = State()  # Will be represented in storage as 'Form:available_coins'
     coins = State()  # Will be represented in storage as 'Form:coins'
 
+class SaleFormPercentage(StatesGroup):
+    coin = State()
+    price_usd = State()
+    price_btc = State()
+    sale_price_usd = State()
+    sale_price_btc = State()
+    available_coins = State()  # Will be represented in storage as 'Form:available_coins'
+    coins = State()  # Will be represented in storage as 'Form:coins'
+
 
 def get_open_trades2(user, chat_id):
     saves = r.scan_iter("At_" + chat_id + "_*_" + user)
@@ -286,7 +295,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             proxy['price_btc'] = btc_price
             proxy['coin'] = symbol
             proxy['balance'] = usd
-        force_reply = types.force_reply.ForceReply()
+        force_reply = types.force_reply.ForceReply(selective=True)
         await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Balance = ${usd} available. Buy $? worth (all for all)?", reply_markup=force_reply)
 
     except Exception as e:
@@ -410,7 +419,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                     proxy['sale_price_usd'] = sale_price_usd
                     proxy['sale_price_btc'] = sale_price_btc
                     proxy['available_coins'] = available_coins
-                force_reply = types.force_reply.ForceReply()
+                force_reply = types.force_reply.ForceReply(selective=True)
                 await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Coins = {available_coins} available. Sell ? coins (all for all)?", reply_markup=force_reply)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
@@ -438,6 +447,127 @@ async def process_sell(message: types.Message, state: FSMContext):
                 coins = float(data['available_coins'])
             else:
                 coins = float(message.text)
+            symbol = data['coin']
+            sale_price_usd = float(data['sale_price_usd'])
+            available_coins = float(data['available_coins'])
+            chat_id = str(message.chat.id)
+            user_id = str(message.from_user.id)
+            if coins <= 0 or available_coins == 0 or sale_price_usd == 0:
+                return await message.reply("Total Coins, Available Coins and Price has gotta be a more than 0.\n Try again (digits only)")
+
+            if available_coins < coins:
+                return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
+
+            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)    
+            sale_usd = coins * sale_price_usd
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            remaining_balance = available_coins - coins
+            markup = types.ReplyKeyboardRemove()
+            # And send message
+            await bot.send_message(
+                message.chat.id,
+                md.text(
+                    md.text('User:', md.code(message.from_user.mention)),
+                    md.text('Coin:', md.code(data['coin'].upper())),
+                    md.text('Buy Price USD:', md.text(data['price_usd'])),
+                    md.text('Buy Price BTC:', md.text(data['price_btc'])),
+                    md.text('Sale Price USD:', md.text(data['sale_price_usd'])),
+                    md.text('Sale Price BTC:', md.text(data['sale_price_btc'])),
+                    md.text('Total Coins Sold:', md.text(str(coins))),
+                    md.text('Remaining Coins:', md.text(str(remaining_balance))),
+                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    sep='\n',
+                ),
+                reply_markup=markup,
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
+        # Finish conversation
+        await state.finish()
+    except Exception as e:
+        logging.error("SALE PROCESS ERROR:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
+
+
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dumper ([\s0-9.,a-zA-Z]*)']))
+async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
+    try:
+        symbols = regexp_command.group(1)
+        symbol_split = get_symbol_list2(symbols)
+        user_id = str(message.from_user.id)
+        chat_id = str(message.chat.id)
+        
+        out = ""
+        if len(symbol_split) > 1:
+            await bot.send_message(chat_id=message.chat.id, text='Only 1 coin allowed at the moment, using first value')
+        if len(symbol_split) > 0:
+            symbol = symbol_split[0]
+            symbol = symbol.strip().lower()
+            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            if sale_price_usd == 0:
+                await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
+            else:
+                js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
+                if js is not None:
+                    js = json.loads(js)
+                    price_usd = js["usd"]
+                    price_btc = js["btc"]
+                    available_coins = js["coins"]
+                else:
+                    price_btc = 0
+                    price_btc = 0
+                    available_coins = 0
+                chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+                name = chat_member.user.mention
+                await SaleFormPercentage.coins.set()
+                async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+                    proxy['coin'] = symbol
+                    proxy['price_usd'] = price_usd
+                    proxy['price_btc'] = price_btc
+                    proxy['sale_price_usd'] = sale_price_usd
+                    proxy['sale_price_btc'] = sale_price_btc
+                    proxy['available_coins'] = available_coins
+                
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                markup.add("25%", "50%", "75%", "100%")
+                markup.add("Cancel")
+
+                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Sell how many coins?", reply_markup=markup)
+        else:
+            await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
+        # out = out + f'\nFINAL BALANCE: ${new_balance}'        
+        # await message.reply(out)
+    except Exception as e:
+        logging.error("Sell Error:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
+
+
+@dp.message_handler(lambda message: message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
+async def process_percentage_coin_invalid(message: types.Message):
+    """
+    In this example gender has to be one of: Male, Female, Other.
+    """
+    return await message.reply("Bad coin name. Choose your coins from the keyboard.")
+
+@dp.message_handler(state=SaleFormPercentage.coins)
+async def process_sell_percentage(message: types.Message, state: FSMContext):
+    try:
+        async with state.proxy() as data:
+            selected_percentage = str(message.text)
+            if selected_percentage == "100%":
+                coins = float(data['available_coins'])
+            elif selected_percentage == "75%":
+                coins = float(data['available_coins']) * 0.75
+            elif selected_percentage == "50%":
+                coins = float(data['available_coins']) * 0.5
+            elif selected_percentage == "25%":
+                coins = float(data['available_coins']) * 0.25
+            else:
+                await state.finish()
+                return await message.reply("Cancelled.")
+
             symbol = data['coin']
             sale_price_usd = float(data['sale_price_usd'])
             available_coins = float(data['available_coins'])
