@@ -79,7 +79,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         if regexp_command is not None:
             amount = float(regexp_command.group(1).strip())
         else: 
-            amount = None
+            amount = 1000
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))   
         for key in saves:
             key = key.decode('utf-8')
