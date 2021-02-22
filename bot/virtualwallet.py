@@ -132,6 +132,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "<pre>Buy At   |  +/-  | Coins   | $Value\n"
         total_change = float(0.00)
         counter = 0
+        total_value = 0
         for key in saves:
             symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
             p, c, c24, btc_price = get_price(symbol)
@@ -169,6 +170,7 @@ async def send_user_balance(message: types.Message, regexp_command):
                     change = get_change_label(change).ljust(5,' ')
                     symbol = symbol.upper()
                     usd_value = coins * p
+                    total_value = total_value + usd_value
                     coins = round_sense(coins)
                     out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
             else:
@@ -176,6 +178,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         
         _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
         out = out + "\nUNUSED USD = " + str(round(usd,2)) + "\n"
+        out = out + "\TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
