@@ -295,15 +295,19 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             proxy['price_btc'] = btc_price
             proxy['coin'] = symbol
             proxy['balance'] = usd
-        force_reply = types.force_reply.ForceReply(selective=True)
-        await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. Balance = ${usd} available. Buy $? worth (all for all)?", reply_markup=force_reply)
+        
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup.add("25%", "50%", "75%", "100%")
+        markup.add("Cancel")
+
+        await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
 
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text.lower() != "all", state=Form.spent)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=Form.spent)
 async def process_spent_invalid(message: types.Message):
     """
     If age is invalid
@@ -311,14 +315,28 @@ async def process_spent_invalid(message: types.Message):
     force_reply = types.force_reply.ForceReply()
     return await message.reply("Total Spend has gotta be a number.\nTYPE A NUMBER ONLY! (digits only)", reply_markup=force_reply)
 
-@dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text.lower() == "all", state=Form.spent)
+@dp.message_handler(state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            if message.text.lower().strip() == "all":
+            spent_response = message.text.lower().strip()
+            if spent_response == "100%":
                 spend = float(data['balance'])
+            elif spent_response == "75%":
+                spend = float(data['balance']) * 0.75
+            elif spent_response == "50%":
+                spend = float(data['balance']) * 0.75
+            elif spent_response == "25%":
+                spend = float(data['balance']) * 0.25
+            elif spent_response == "cancel":
+                await state.finish()
+                return await message.reply("Cancelled.")
             else:
                 spend = float(message.text)
+            if spend <= 0:
+                await state.finish()
+                return await message.reply("Coin error, <= 0.")
+
             price = float(data['price_usd'])
             chat_id = str(message.chat.id)
             user_id = str(message.from_user.id)
@@ -360,26 +378,6 @@ async def process_spend(message: types.Message, state: FSMContext):
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
-
-
-@dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
-async def cancel_handler(message: types.Message, state: FSMContext):
-    """
-    Allow user to cancel any action
-    """
-    current_state = await state.get_state()
-    if current_state is None:
-        logging.info('Cancelling state None')
-        return
-
-    logging.info('Cancelling state %r', current_state)
-    # Cancel state and inform user about it
-    await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
-
-
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dumpold ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
