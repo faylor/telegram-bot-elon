@@ -458,12 +458,18 @@ async def process_sell(message: types.Message, state: FSMContext):
             if available_coins < coins:
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
-            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)    
             sale_usd = coins * sale_price_usd
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
             if remaining_balance == 0:
-                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id) 
+                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
+            else:
+                value = r.get("At_" + chat_id + "_" + symbol + "_" + user_id)
+                value = value.decode('utf-8')
+                js_set = json.loads(value)
+                js_set["coins"] = remaining_balance
+                r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
+            
             markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
@@ -590,7 +596,14 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
             if remaining_balance == 0:
-                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id) 
+                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
+            else:
+                value = r.get("At_" + chat_id + "_" + symbol + "_" + user_id)
+                value = value.decode('utf-8')
+                js_set = json.loads(value)
+                js_set["coins"] = remaining_balance
+                r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
+            
             markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
