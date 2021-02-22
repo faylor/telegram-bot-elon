@@ -204,7 +204,7 @@ async def set_sell_point(message: types.Message, regexp_command):
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
             if p == 0:
-                await message.reply("Sorry the API is not responding, try in a minute.")
+                await message.reply(f"Sorry the API is not responding or the coin doesn't exist (remove with /deletecoins {symbols}).")
                 return
             js = r.get("At_" + symbol + "_" + user).decode('utf-8')
             changes = 0
@@ -248,6 +248,21 @@ async def set_sell_point(message: types.Message, regexp_command):
             out = out + f'Sold. {symbol} final diff in USD {changes}%  or in BTC {changes_btc} \n CHANGE PROFIT/LOSS = {changes}% \n OPEN TRADES = {trade_counts} \n TRADE SCORE = {prop_changes} \n  CURRENT SCORE = {new_score}'
             r.set(str(message.chat.id) + "_score_" + user, new_score)
         await message.reply(out)
+    except Exception as e:
+        logging.error("Sell Error:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
+
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['deletecoins ([\s0-9.,a-zA-Z]*)']))
+async def delete_coin(message: types.Message, regexp_command):
+    try:
+        symbols = regexp_command.group(1)
+        symbol_split = get_symbol_list(symbols)
+        user = message.from_user.mention
+        for symbol in symbol_split:
+            symbol = symbol.strip().lower()
+            r.delete("At_" + symbol + "_" + user)
+        await message.reply("Deleted coins.")
     except Exception as e:
         logging.error("Sell Error:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
