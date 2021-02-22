@@ -126,8 +126,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             bysymbol = regexp_command.group(1)
         else: 
             bysymbol = None
-        chat_id = str(message.chat.id)
-        saves = r.scan_iter("At_*_*_" + str(message.from_user.id))
+        this_chat_id = str(message.chat.id)
+        saves = r.scan_iter("At_*_" + str(message.from_user.id))
         out = ""
         in_prices = get_user_price_config(message.from_user.id)
         out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
@@ -136,7 +136,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         total_value = 0
         for key in saves:
             _key = key.decode('utf-8')
-            if "At_" + chat_id in _key:
+            if "At_" + this_chat_id in _key:
                 # not this chats
                 break    
             key_split = _key.split("_")
