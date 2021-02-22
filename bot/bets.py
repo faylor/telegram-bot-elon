@@ -125,8 +125,8 @@ async def total_weekly(message: types.Message):
         config = json.loads(config)
     
     if "winners_list" in config:
-        out = "TOTES WINNERS: \n"
-        logging.error(config["winners_list"])
+        scores = []
+        out = ["<pre>Who?            Wins\n"]
         for k, v in config["winners_list"].items():
             key = str(k)
             if key.isdigit():
@@ -134,7 +134,19 @@ async def total_weekly(message: types.Message):
                 name = chat_member.user.mention
             else:
                 name = key
-            out = out + name + " == " + str(v) + "\n"
+            name = name.ljust('15',' ')
+            if len(scores) == 1:
+                scores.append(float(v))
+                out.append(f"{name} {v}")
+            else:
+                i = 1
+                score = float(v)
+                while i < len(scores) and score < scores[i]:
+                    i = i + 1
+                out.insert(i, f"{name} {v}")
+                scores.insert(i, score)
+        out.append("</pre>")
+        s = "\n".join(out)
         await bot.send_message(chat_id=message.chat.id, text=out)
     else:
         await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")

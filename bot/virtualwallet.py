@@ -231,7 +231,7 @@ async def totals_user_scores2(message: types.Message):
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 0
-                    while i < score_total and score_total < scores[i]:
+                    while i < len(scores) and score_total < scores[i]:
                         i = i + 1
                     score_live = str(round(score_live,2)).ljust(10, ' ')
                     out.insert(i, f"{user} {score_live} {score_usd}")
