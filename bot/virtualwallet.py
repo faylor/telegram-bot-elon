@@ -136,6 +136,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         total_value = 0
         for key in saves:
             _key = key.decode('utf-8')
+            logging.error("KEY:" + str(_key))
             if "At_" + this_chat_id in _key:
                 # not this chats
                 break    
@@ -187,9 +188,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
         
-        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-        out = out + "\n             UNUSED USD = " + str(round(usd,2))
-        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
