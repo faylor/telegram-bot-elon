@@ -140,8 +140,10 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                 # not this chats
                 break    
             key_split = _key.split("_")
-            symbol = key_split[1]
-            chat_id = key_split[2]
+            if len(key_split) < 4:
+                break
+            symbol = key_split[2]
+            chat_id = key_split[1]
             p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
@@ -345,34 +347,30 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
-            js = {}
-            js["usd"] = p
-            js["btc"] = btc_price
-            r.set("At_" + symbol + "_" + str(message.from_user.id), json.dumps(js))
-            out = out + f"Gotit. {symbol} at ${round_sense(p)} or {round(btc_price,8)} BTC marked \n"
-        
-        if p == 0:
-            return await message.reply(f"Hey {name}, {symbol} is at not returning a price from API. Please try again.")
-        
-        _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
-        if usd <= 0:
-            return await message.reply(f"You have no USD, you fool.")
-        
-        chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-        name = chat_member.user.mention
-        await Form.spent.set()
-        async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-            proxy['price_usd'] = p
-            proxy['price_btc'] = btc_price
-            proxy['coin'] = symbol
-            proxy['balance'] = usd
-        
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-        markup.add("25%", "50%", "75%", "100%")
-        markup.add("Cancel")
 
-        await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
+            if p == 0:
+                return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
+            
+            _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+            if usd <= 0:
+                return await message.reply(f"You have no USD, you fool.")
+            
+            chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+            name = chat_member.user.mention
+            await Form.spent.set()
+            async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+                proxy['price_usd'] = p
+                proxy['price_btc'] = btc_price
+                proxy['coin'] = symbol
+                proxy['balance'] = usd
+            
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+            markup.add("25%", "50%", "75%", "100%")
+            markup.add("Cancel")
 
+            await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
+        else:
+            await message.reply(f"Add the Coin after grab, eg: /grab btc")
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
