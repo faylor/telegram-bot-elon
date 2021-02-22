@@ -381,7 +381,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dumpold ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -499,7 +499,7 @@ async def process_sell(message: types.Message, state: FSMContext):
 
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dumper ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -542,7 +542,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 markup.add("25%", "50%", "75%", "100%")
                 markup.add("Cancel")
 
-                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. \nEither enter coins = {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
+                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. \nEither enter number of coins from availble {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
