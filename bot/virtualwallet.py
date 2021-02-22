@@ -140,7 +140,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                 # not this chats
                 break    
             key_split = _key.split("_")
-            if len(key_split) < 4:
+            logging.error("KEYS:" + str(key_split))
+            if len(key_split) < 3:
                 break
             symbol = key_split[2]
             chat_id = key_split[1]
