@@ -147,7 +147,7 @@ async def total_weekly(message: types.Message):
                 scores.insert(i, score)
         out.append("</pre>")
         s = "\n".join(out)
-        await bot.send_message(chat_id=message.chat.id, text=out)
+        await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
     else:
         await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
 
