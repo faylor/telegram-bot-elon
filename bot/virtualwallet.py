@@ -299,7 +299,8 @@ async def process_spent_invalid(message: types.Message):
     """
     If age is invalid
     """
-    return await message.reply("Total Spend has gotta be a number.\nHow old are you? (digits only)")
+    force_reply = types.force_reply.ForceReply()
+    return await message.reply("Total Spend has gotta be a number.\nTYPE A NUMBER ONLY! (digits only)", reply_markup=force_reply)
 
 @dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text.lower() == "all", state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
@@ -426,7 +427,8 @@ async def process_sell_invalid(message: types.Message):
     """
     If age is invalid
     """
-    return await message.reply("Total Coins to sell has gotta be a number or empty.\n Sell how many coins (digits only)?")
+    force_reply = types.force_reply.ForceReply()
+    return await message.reply("Total Coins to sell has gotta be a number or empty.\n Sell how many coins (digits only)?", reply_markup=force_reply)
 
 @dp.message_handler(lambda message: message.text.replace(".", "", 1).isdigit() or message.text.lower() == "all", state=SaleForm.coins)
 async def process_sell(message: types.Message, state: FSMContext):
