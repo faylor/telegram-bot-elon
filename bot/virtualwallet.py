@@ -140,11 +140,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             logging.error("KEY:" + str(_key))
             if "At_" + this_chat_id in _key or len(key_split) < 4:
                 # not this chats
-                logging.error("KEY:" + str(_key))  
+                logging.info("Key not a bag key:" + str(_key))  
             else:
-                logging.error("KEYS:" + str(key_split))
-                if len(key_split) < 4:
-                    break
                 symbol = key_split[2]
                 chat_id = key_split[1]
                 p, c, c24, btc_price = get_price(symbol)
@@ -185,7 +182,9 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                         usd_value = coins * p
                         total_value = total_value + usd_value
                         coins = str(round_sense(coins)).ljust(6,' ')
-                        out = out + f"{chat_id} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+                        the_chat = await bot.get_chat(chat_id)
+                        the_chat_title = the_chat.title
+                        out = out + f"{the_chat_title} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
                 else:
                     out = out + f"| {symbol} | NA | NA | NA | NA\n"
         

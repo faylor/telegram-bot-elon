@@ -33,18 +33,18 @@ async def weekly_tally(message: types.Message, r):
         if not user_id.isdigit():
             r.delete(key.decode('utf-8'))
             logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
-            break
-        member = await bot.get_chat_member(message.chat.id, user_id)
-        mention_name = member.user.mention
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning = winning + ", " + user_id
-                winning_name = winning_name + ", " + mention_name
-            else:
-                winning = user_id
-                winning_name = mention_name
-                winning_diff = d
-        out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        else:
+            member = await bot.get_chat_member(message.chat.id, user_id)
+            mention_name = member.user.mention
+            if d <= winning_diff:
+                if d == winning_diff:
+                    winning = winning + ", " + user_id
+                    winning_name = winning_name + ", " + mention_name
+                else:
+                    winning = user_id
+                    winning_name = mention_name
+                    winning_diff = d
+            out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\n LOOK WHO IS WINNING BTC == " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     winning_eth = ""
@@ -56,18 +56,18 @@ async def weekly_tally(message: types.Message, r):
         if not user_id.isdigit():
             r.delete(key.decode('utf-8'))
             logging.error("User Id ETH not stored in DB as int " + str(user_id) + " ignoring.")
-            break
-        member = await bot.get_chat_member(message.chat.id, user_id)
-        mention_name = member.user.mention    
-        if d <= winning_diff:
-            if d == winning_diff:
-                winning_eth = winning_eth + ", " + user_id
-                winning_eth_name = winning_eth_name + ", " + mention_name
-            else:
-                winning_eth = user_id
-                winning_eth_name = mention_name
-                winning_diff = d
-        out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
+        else:
+            member = await bot.get_chat_member(message.chat.id, user_id)
+            mention_name = member.user.mention    
+            if d <= winning_diff:
+                if d == winning_diff:
+                    winning_eth = winning_eth + ", " + user_id
+                    winning_eth_name = winning_eth_name + ", " + mention_name
+                else:
+                    winning_eth = user_id
+                    winning_eth_name = mention_name
+                    winning_diff = d
+            out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
     out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth_name + "\n"
     return out, winning, winning_eth, winning_name, winning_eth_name
 
