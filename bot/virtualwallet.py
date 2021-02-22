@@ -462,6 +462,8 @@ async def process_sell(message: types.Message, state: FSMContext):
             sale_usd = coins * sale_price_usd
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
+            if remaining_balance == 0:
+                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id) 
             markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
@@ -540,8 +542,8 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
         # await message.reply(out)
     except Exception as e:
-        logging.error("Sell Error:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
+        logging.error("Sell Percentage Error:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /dumper btc')
 
 
 @dp.message_handler(lambda message: message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
@@ -579,10 +581,11 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             if available_coins < coins:
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
-            r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)    
             sale_usd = coins * sale_price_usd
             new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
             remaining_balance = available_coins - coins
+            if remaining_balance == 0:
+                r.delete("At_" + chat_id + "_" + symbol + "_" + user_id) 
             markup = types.ReplyKeyboardRemove()
             # And send message
             await bot.send_message(
