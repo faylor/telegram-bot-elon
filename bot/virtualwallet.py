@@ -141,8 +141,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                 break    
             key_split = _key.split("_")
             logging.error("kays" + str(key_split))
-            symbol = key_split[2]
-            chat_id = key_split[1]
+            symbol = key_split[1]
+            chat_id = key_split[2]
             logging.error("kays" + str(symbol))
             p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
