@@ -177,8 +177,8 @@ async def send_user_balance(message: types.Message, regexp_command):
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
         
         _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-        out = out + "\nUNUSED USD = " + str(round(usd,2))
-        out = out + "\nTOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+        out = out + "\n            UNUSED USD = " + str(round(usd,2))
+        out = out + "\n       TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\nSUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
