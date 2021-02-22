@@ -536,7 +536,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 markup.add("25%", "50%", "75%", "100%")
                 markup.add("Cancel")
 
-                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. Sell how many coins?", reply_markup=markup)
+                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. \nEither enter coins = {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
@@ -546,12 +546,12 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /dumper btc')
 
 
-@dp.message_handler(lambda message: message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() or message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
 async def process_percentage_coin_invalid(message: types.Message):
     """
     In this example gender has to be one of: Male, Female, Other.
     """
-    return await message.reply("Bad coin name. Choose your coins from the keyboard.")
+    return await message.reply("Bad number of coins. Choose your coins from the keyboard or enter amount.")
 
 @dp.message_handler(state=SaleFormPercentage.coins)
 async def process_sell_percentage(message: types.Message, state: FSMContext):
@@ -566,9 +566,14 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 coins = float(data['available_coins']) * 0.5
             elif selected_percentage == "25%":
                 coins = float(data['available_coins']) * 0.25
-            else:
+            elif selected_percentage.lower() == "cancel":
                 await state.finish()
                 return await message.reply("Cancelled.")
+            else:
+                coins = float(message.text)
+            if coins <= 0:
+                await state.finish()
+                return await message.reply("Coin error, <= 0.")
 
             symbol = data['coin']
             sale_price_usd = float(data['sale_price_usd'])
