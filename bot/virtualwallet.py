@@ -136,57 +136,58 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         total_value = 0
         for key in saves:
             _key = key.decode('utf-8')
-            logging.error("KEY:" + str(_key))
-            if "At_" + this_chat_id in _key:
-                # not this chats
-                break    
             key_split = _key.split("_")
-            logging.error("KEYS:" + str(key_split))
-            if len(key_split) < 4:
-                break
-            symbol = key_split[2]
-            chat_id = key_split[1]
-            p, c, c24, btc_price = get_price(symbol)
-            if float(p) > 0:
-                value = r.get(key)
-                if value is not None:
-                    value = value.decode('utf-8')
-                    logging.error("VALUE:" + str(value))
-                    if "{" in value:
-                        js = json.loads(value)
-                        usd_price = float(js["usd"])
-                        buy_btc_price = float(js["btc"])
-                        coins = float(js["coins"])
-                    else:
-                        usd_price = float(value)
-                        buy_btc_price = "UNKNOWN"
-                        coins = "UNKNOWN"
-                    
-                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                        price = str(round(btc_price,8))
-                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                            buy_price = buy_btc_price.ljust(8,' ')
-                            change = 0
-                        else:
-                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
-                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
-                    else:
-                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p))
-                        if usd_price == 0:
-                            change = 0
-                        else:
-                            change = round(100 * (p - usd_price) / usd_price, 2)
-                    total_change = total_change + change
-                    counter = counter + 1
-                    change = get_change_label(change).ljust(5,' ')
-                    symbol = symbol.upper()
-                    usd_value = coins * p
-                    total_value = total_value + usd_value
-                    coins = str(round_sense(coins)).ljust(6,' ')
-                    out = out + f"{chat_id} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+            logging.error("KEY:" + str(_key))
+            if "At_" + this_chat_id in _key or len(key_split) < 4:
+                # not this chats
+                logging.error("KEY:" + str(_key))  
             else:
-                out = out + f"| {symbol} | NA | NA | NA | NA\n"
+                logging.error("KEYS:" + str(key_split))
+                if len(key_split) < 4:
+                    break
+                symbol = key_split[2]
+                chat_id = key_split[1]
+                p, c, c24, btc_price = get_price(symbol)
+                if float(p) > 0:
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        logging.error("VALUE:" + str(value))
+                        if "{" in value:
+                            js = json.loads(value)
+                            usd_price = float(js["usd"])
+                            buy_btc_price = float(js["btc"])
+                            coins = float(js["coins"])
+                        else:
+                            usd_price = float(value)
+                            buy_btc_price = "UNKNOWN"
+                            coins = "UNKNOWN"
+                        
+                        if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
+                            price = str(round(btc_price,8))
+                            if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
+                                buy_price = buy_btc_price.ljust(8,' ')
+                                change = 0
+                            else:
+                                buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
+                                change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
+                        else:
+                            buy_price = str(round_sense(usd_price)).ljust(8,' ')
+                            price = str(round_sense(p))
+                            if usd_price == 0:
+                                change = 0
+                            else:
+                                change = round(100 * (p - usd_price) / usd_price, 2)
+                        total_change = total_change + change
+                        counter = counter + 1
+                        change = get_change_label(change).ljust(5,' ')
+                        symbol = symbol.upper()
+                        usd_value = coins * p
+                        total_value = total_value + usd_value
+                        coins = str(round_sense(coins)).ljust(6,' ')
+                        out = out + f"{chat_id} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+                else:
+                    out = out + f"| {symbol} | NA | NA | NA | NA\n"
         
         out = out + "\n        TOTAL USD VALUE = " + str(round(total_value,2)) + "\n"
         total_change = round(total_change, 2)
