@@ -552,7 +552,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /dumper btc')
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() or message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=SaleFormPercentage.coins)
 async def process_percentage_coin_invalid(message: types.Message):
     """
     In this example gender has to be one of: Male, Female, Other.
