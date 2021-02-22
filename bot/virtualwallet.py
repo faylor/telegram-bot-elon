@@ -129,7 +129,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = "HODLing:\n"
         in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>Buy At   |  +/-  | Coins   | Value"
+        out = out + "<pre>Buy At   |  +/-  | Coins   | $Value\n"
         total_change = float(0.00)
         counter = 0
         for key in saves:
@@ -150,7 +150,7 @@ async def send_user_balance(message: types.Message, regexp_command):
                         coins = "UNKNOWN"
                     
                     if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                        price = str(round(btc_price,8)).ljust(10,' ')
+                        price = str(round(btc_price,8))
                         if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
                             buy_price = buy_btc_price.ljust(8,' ')
                             change = 0
@@ -159,7 +159,7 @@ async def send_user_balance(message: types.Message, regexp_command):
                             change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
                     else:
                         buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p)).ljust(8,' ')
+                        price = str(round_sense(p))
                         if usd_price == 0:
                             change = 0
                         else:
