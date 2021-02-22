@@ -118,6 +118,85 @@ def user_spent_usd(chat_id, user_id, usd):
         logging.error("FAILED to save user score for bag:" + str(e))
         return None
 
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gobag([\sa-zA-Z]*)']))
+async def send_user_balance_from_other_chat(message: types.Message, regexp_command):
+    try:
+        if regexp_command is not None:
+            bysymbol = regexp_command.group(1)
+        else: 
+            bysymbol = None
+        chat_id = str(message.chat.id)
+        saves = r.scan_iter("At_*_*_" + str(message.from_user.id))
+        out = ""
+        in_prices = get_user_price_config(message.from_user.id)
+        out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
+        total_change = float(0.00)
+        counter = 0
+        total_value = 0
+        for key in saves:
+            _key = key.decode('utf-8')
+            if "At_" + chat_id in _key:
+                # not this chats
+                break    
+            key_split = _key.split("_")
+            symbol = key_split[2]
+            chat_id = key_split[1]
+            p, c, c24, btc_price = get_price(symbol)
+            if float(p) > 0:
+                value = r.get(key)
+                if value is not None:
+                    value = value.decode('utf-8')
+                    if "{" in value:
+                        js = json.loads(value)
+                        usd_price = float(js["usd"])
+                        buy_btc_price = float(js["btc"])
+                        coins = float(js["coins"])
+                    else:
+                        usd_price = float(value)
+                        buy_btc_price = "UNKNOWN"
+                        coins = "UNKNOWN"
+                    
+                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
+                        price = str(round(btc_price,8))
+                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
+                            buy_price = buy_btc_price.ljust(8,' ')
+                            change = 0
+                        else:
+                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
+                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
+                    else:
+                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
+                        price = str(round_sense(p))
+                        if usd_price == 0:
+                            change = 0
+                        else:
+                            change = round(100 * (p - usd_price) / usd_price, 2)
+                    total_change = total_change + change
+                    counter = counter + 1
+                    change = get_change_label(change).ljust(5,' ')
+                    symbol = symbol.upper()
+                    usd_value = coins * p
+                    total_value = total_value + usd_value
+                    coins = str(round_sense(coins)).ljust(6,' ')
+                    out = out + f"{chat_id} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+            else:
+                out = out + f"| {symbol} | NA | NA | NA | NA\n"
+        
+        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+        out = out + "\n             UNUSED USD = " + str(round(usd,2))
+        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+        total_change = round(total_change, 2)
+        out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
+        if counter > 0:
+            out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
+       
+        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
+    except Exception as e:
+        logging.warn("Couldnt get hodl data:" + str(e))
+
+
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
     try:
