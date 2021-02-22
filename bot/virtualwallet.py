@@ -134,6 +134,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         total_change = float(0.00)
         counter = 0
         total_value = 0
+        last_the_chat_title = ""
+        chat_id = None
         for key in saves:
             _key = key.decode('utf-8')
             key_split = _key.split("_")
@@ -184,11 +186,18 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                         coins = str(round_sense(coins)).ljust(6,' ')
                         the_chat = await bot.get_chat(chat_id)
                         the_chat_title = the_chat.title
-                        out = out + f"{the_chat_title} - {symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+                        if last_the_chat_title != the_chat_title:
+                            out = out + f"{the_chat_title}\n"
+
+                        out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
                 else:
                     out = out + f"| {symbol} | NA | NA | NA | NA\n"
-        
-        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value,2)) + "\n"
+        if chat_id is not None:
+            _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+            out = out + "\n             UNUSED USD = " + str(round(usd,2))
+            out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+        else:
+            out = out + "\n        TOTAL USD VALUE = " + str(round(total_value,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
