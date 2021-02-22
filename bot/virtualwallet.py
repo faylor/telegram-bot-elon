@@ -151,7 +151,6 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                     value = r.get(key)
                     if value is not None:
                         value = value.decode('utf-8')
-                        logging.error("VALUE:" + str(value))
                         if "{" in value:
                             js = json.loads(value)
                             usd_price = float(js["usd"])
