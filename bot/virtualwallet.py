@@ -568,11 +568,13 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
             else:
                 value = r.get("At_" + chat_id + "_" + symbol + "_" + user_id)
-                value = value.decode('utf-8')
-                js_set = json.loads(value)
-                js_set["coins"] = remaining_balance
-                r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
-            
+                if value is not None:
+                    value = value.decode('utf-8')
+                    js_set = json.loads(value)
+                    js_set["coins"] = remaining_balance
+                    r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
+                else:
+                    return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
             
             # And send message
             await bot.send_message(
