@@ -14,10 +14,10 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_last_50_trades
+from .prices import get_last_trades
 
 import pygal
-from pygal.style import LightSolarizedStyle
+from pygal.style import DarkStyle, DefaultStyle
 
 @dp.message_handler(commands=['chart'])
 async def chart(message: types.Message):
@@ -28,8 +28,8 @@ async def chart(message: types.Message):
         for t in trades:
             points.append(t[2])
 
-        chart = pygal.Line(style=LightSolarizedStyle)
-        chart.add('', points)
+        chart = pygal.StackedLine(fill=True, interpolate='cubic', style=DefaultStyle) # Setting style here is not necessary
+        chart.add('BTC', points)
         chart.render_sparkline(width=500, height=25, show_dots=True)
         chart.render_to_png('chart.png')
         
