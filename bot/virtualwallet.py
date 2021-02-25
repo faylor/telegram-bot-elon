@@ -239,7 +239,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         except:
             logging.error("FAILED TO GET COIN PRICES")
 
-        for key in symbols:
+        for key in saves:
             symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
 
             if coins is None or symbol.upper() not in coins:
