@@ -97,10 +97,7 @@ def coin_price(labels):
             coins = {}
             data = response.json()
             data_arr = data["data"]
-            for coin in data_arr:
-                quotes = coin["quote"]
-                coins[coin["symbol"]] = coin["quote"]
-            return coins
+            return data_arr
 
 #         "USD": {
 #             "price": 6602.60701122,
