@@ -23,14 +23,14 @@ from pygal.style import DarkStyle, DefaultStyle
 async def chart(message: types.Message):
     chat_id = message.chat.id
     try:
-        trades = get_last_trades(300)
+        trades = get_last_trades(1000)
         points = []
         for t in trades:
             points.append(t[2])
 
         chart = pygal.StackedLine(fill=True, interpolate='cubic', style=DefaultStyle) # Setting style here is not necessary
         chart.add('BTC', points)
-        chart.render_sparkline(width=500, height=25, show_dots=True)
+        chart.render_sparkline(width=500, height=25, show_dots=False)
         chart.render_to_png('chart.png')
         
         await bot.send_photo(chat_id=chat_id, photo=InputFile('chart.png'))
