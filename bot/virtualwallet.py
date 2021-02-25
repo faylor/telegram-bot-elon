@@ -309,10 +309,31 @@ async def send_user_balance(message: types.Message, regexp_command):
 def get_users_live_value(chat_id, user_id):
     try:
         saves = r.scan_iter("At_" + chat_id + "_*_" + user_id)
-        total_value = float(0.00)
+
+        symbols = []
+        keys = []
         for key in saves:
-            symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + user_id,"")
-            p, c, c24, btc_price = get_price(symbol)
+            symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + user_id,""))
+            keys.append(key.decode('utf-8'))
+        
+        try:
+            coin_prices = None
+            coin_prices = coin_price(symbols)
+        except:
+            logging.error("FAILED TO GET COIN PRICES")
+
+        total_value = float(0.00)
+        i = 0
+        for key in keys:
+            symbol = symbols[i]
+
+            if coin_prices is not None and symbol.upper() in coin_prices:
+                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                c = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
+                c24 = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
+                btc_price = 1
+            else:
+                p, c, c24, btc_price = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None:
@@ -323,6 +344,7 @@ def get_users_live_value(chat_id, user_id):
                     else:
                         coins = 1
                     total_value = total_value + (coins * p)
+            i = i + 1
         return total_value
     except Exception as e:
         logging.warn("Couldnt get live values data:" + str(e))
