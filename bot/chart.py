@@ -47,8 +47,8 @@ async def chart(message: types.Message):
     chat_id = message.chat.id
     try:
         trades = get_ohcl_trades('btc')
-        
-        df = pd.read_json(trades, index_col=0, parse_dates=True)
+
+        df = pd.DataFrame(data=trades, index_col=0, parse_dates=True)
 
         mpf.plot(df, type='candle', style='charles',
             title='S&P 500, Nov 2019',

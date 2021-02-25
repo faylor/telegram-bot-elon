@@ -148,7 +148,7 @@ def get_ohcl_trades(coin):
         else:
             coins = {}
             data = response.json()
-            data_arr = data["results"][60]
+            data_arr = data["result"]["60"]
             return data_arr
     
     except (ConnectionError, Timeout, TooManyRedirects) as e:
