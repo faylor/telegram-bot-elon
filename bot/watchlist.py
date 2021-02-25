@@ -110,7 +110,7 @@ async def remove_from_prices(message: types.Message, regexp_command):
                 elif new_coin.upper() in config["watch_list"]:
                     config["watch_list"].remove(new_coin.upper())
                     
-                r.set(message.chat.id, json.dumps(config))
+                r.delete(message.chat.id, json.dumps(config))
                 await message.reply(f'{message.from_user.first_name}, done. Removed ' + str(new_coin))
                 return
                 
