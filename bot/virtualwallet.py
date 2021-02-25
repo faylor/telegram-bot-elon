@@ -143,14 +143,14 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         for key in saves:
             _key = key.decode('utf-8')
             key_split = _key.split("_")
-            logging.error("KEY:" + str(_key))
             if "At_" + this_chat_id in _key or len(key_split) < 4:
                 # not this chats
-                logging.info("Key not a bag key:" + str(_key))  
+                logging.info("Not a chat_id key:" + str(_key))  
             else:
                 symbol = key_split[2]
                 chat_id = key_split[1]
                 p, c, c24, btc_price = get_price(symbol)
+                logging.info("PRICE FOR KEY::" + str(p)) 
                 if float(p) > 0:
                     value = r.get(key)
                     if value is not None:
