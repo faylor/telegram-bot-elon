@@ -242,14 +242,15 @@ async def send_user_balance(message: types.Message, regexp_command):
         for key in saves:
             symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
 
-            if coins is None or symbol.upper() not in coins:
-                p, c, c24, btc_price = get_price(symbol)
-            else:
+            if coins is not None and symbol.upper() in coins:
                 logging.info("Got Coins:" + symbol)
                 p = coins[symbol.upper()]["quote"]["USD"]["price"]
                 c = coins[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
                 c24 = coins[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
                 btc_price = 1
+            else:
+                logging.info("NOT Got Coins:" + symbol)
+                p, c, c24, btc_price = get_price(symbol)                
             
             if float(p) > 0:
                 value = r.get(key)
