@@ -21,14 +21,19 @@ from pygal.style import LightSolarizedStyle
 @dp.message_handler(commands=['chart'])
 async def chart(message: types.Message):
     chat_id = message.chat.id
-    trades = get_last_50_trades()
-    points = []
-    for t in trades:
-        points.append(t[2])
+    try:
+        trades = get_last_50_trades()
+        points = []
+        for t in trades:
+            points.append(t[2])
 
-
-    chart = pygal.Line(style=LightSolarizedStyle)
-    chart.add('', points)
-    chart.render_sparkline(width=500, height=25, show_dots=True)
-    await bot.send_message(chat_id=chat_id, text="out", parse_mode="HTML")
+        chart = pygal.Line(style=LightSolarizedStyle)
+        chart.add('', points)
+        chart.render_sparkline(width=500, height=25, show_dots=True)
+        chart.render_to_png('chart.png')
+        
+        await bot.send_photo(chat_id=chat_id, photo='chart.png')
+    except Exception as e:
+        logging.error("ERROR Making chart:" + str(e))
+        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 

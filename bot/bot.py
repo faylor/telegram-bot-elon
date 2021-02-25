@@ -33,6 +33,7 @@ from .wallet import *
 from .virtualwallet import *
 from .bets import *
 from .user import *
+from .chart import *
 
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me', 'start'])
