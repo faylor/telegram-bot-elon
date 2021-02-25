@@ -115,12 +115,12 @@ def coin_price(labels):
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
 
-def get_last_50_trades():
+def get_last_trades(x):
     http.headers.clear()
     url = 'https://api.cryptowat.ch/markets/binance/btcusdt/trades'
-    # parameters = {
-    #     'limit': 100
-    # }
+    parameters = {
+        'limit': x
+    }
 
     try:
         response = http.get(url)

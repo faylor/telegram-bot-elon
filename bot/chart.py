@@ -23,7 +23,7 @@ from pygal.style import LightSolarizedStyle
 async def chart(message: types.Message):
     chat_id = message.chat.id
     try:
-        trades = get_last_50_trades()
+        trades = get_last_trades(300)
         points = []
         for t in trades:
             points.append(t[2])
