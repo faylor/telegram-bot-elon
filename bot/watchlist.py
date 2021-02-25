@@ -40,14 +40,14 @@ async def prices(message: types.Message):
         logging.error("FAILED TO GET COIN PRICES")
 
     for l in mains:
-        if coins is None or l not in coins:
+        if coins is None or l.upper() not in coins:
             logging.info("NOT Got Coins" + l)
             p, c, c24, btc_price = get_price(l)
         else:
             logging.info("Got Coins:" + l)
-            p = coins[l]["quote"]["USD"]["price"]
-            c = coins[l]["quote"]["USD"]["percent_change_1h"]
-            c24 = coins[l]["quote"]["USD"]["percent_change_24h"]
+            p = coins[l.upper()]["quote"]["USD"]["price"]
+            c = coins[l.upper()]["quote"]["USD"]["percent_change_1h"]
+            c24 = coins[l.upper()]["quote"]["USD"]["percent_change_24h"]
             btc_price = 1
         totes = totes + c
         l = l.ljust(5, ' ')
