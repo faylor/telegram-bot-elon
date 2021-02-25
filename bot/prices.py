@@ -1,5 +1,8 @@
 import logging
 import requests
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+
 import os
 from aiogram import types
 from requests.adapters import HTTPAdapter
@@ -7,15 +10,14 @@ from requests.packages.urllib3.util.retry import Retry
 
 retry_strategy = Retry(
     total=1,
-    status_forcelist=[429, 500, 502, 503, 504],
+    status_forcelist=[500, 502, 503, 504],
     method_whitelist=["HEAD", "GET", "OPTIONS"],
     backoff_factor=1
 )
 adapter = HTTPAdapter(max_retries=retry_strategy)
-http = requests.Session()
+http = Session()
 http.mount("https://", adapter)
 http.mount("http://", adapter)
-http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})
 
 def to_zero(js, key1, key2, key3):
     try:
@@ -27,6 +29,7 @@ def to_zero(js, key1, key2, key3):
         return 0
 
 def get_price_extended(label):
+    http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})
     price, change_1hr, change_24hr = 0, 0, 0
     try:
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
@@ -75,6 +78,45 @@ def get_price(label):
     if price_btc is None:
         price_btc = 0
     return price, change_1hr, change_24hr, price_btc
+
+def coin_price(labels):
+    http.headers.update({"X-CMC_PRO_API_KEY": os.environ["b54bcf4d-1bca-4e8e-9a24-22ff2c3d462c"]})
+    s = ",".join(labels)
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+    parameters = {
+        'symbol':s,
+        'convert':'USD,BTC'
+    }
+
+    try:
+        response = http.get(url, params=parameters)
+        if response.status_code == 429:
+            # use mess
+            logging.error("HIT LIMIT")
+        else:
+            coins = {}
+            data = response.json()
+            data_arr = data["data"]
+            for coin in data_arr:
+                quotes = coin["quote"]
+                q = {'usd':0, 'btc':0}
+                coins[coin["symbol"]] = coin["quote"]
+            return coins
+
+#         "USD": {
+#             "price": 6602.60701122,
+#             "volume_24h": 4314444687.5194,
+#             "percent_change_1h": 0.988615,
+#             "percent_change_24h": 4.37185,
+#             "percent_change_7d": -12.1352,
+#             "percent_change_30d": -12.1352,
+#             "market_cap": 113563929433.21645,
+#             "last_updated": "2018-08-09T21:56:28.000Z"
+
+        
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print(e)
+
 
 def get_news(label):
     try:

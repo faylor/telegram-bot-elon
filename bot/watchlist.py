@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_price, round_sense, get_change_label
+from .prices import get_price, coin_price, round_sense, get_change_label
 from .user import get_user_price_config
 
 @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
@@ -30,8 +30,21 @@ async def prices(message: types.Message):
     in_prices = get_user_price_config(message.from_user.mention).upper()
     out = f"<pre>       {in_prices}    | 1hr      24hr\n"
     totes = 0
+
+    try:
+        coins = None
+        coins = coin_price(mains)
+    except:
+        logging.error("FAILED TO GET COIN PRICES")
+
     for l in mains:
-        p, c, c24, btc_price = get_price(l)
+        if coins is None:
+            p, c, c24, btc_price = get_price(l)
+        else:
+            p = coins["USD"]["price"]
+            c = coins["USD"]["percent_change_1h"]
+            c24 = coins["USD"]["percent_change_24h"]
+            btc_price = coins["BTC"]["price"]
         totes = totes + c
         l = l.ljust(5, ' ')
         
