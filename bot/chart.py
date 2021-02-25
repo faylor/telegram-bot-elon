@@ -4,6 +4,7 @@ import requests
 import redis
 import asyncio
 from aiogram import Bot, types
+from aiogram.types.input_file import InputFile
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils.executor import start_webhook
@@ -32,7 +33,7 @@ async def chart(message: types.Message):
         chart.render_sparkline(width=500, height=25, show_dots=True)
         chart.render_to_png('chart.png')
         
-        await bot.send_photo(chat_id=chat_id, photo='chart.png')
+        await bot.send_photo(chat_id=chat_id, photo=InputFile('chart.png'))
     except Exception as e:
         logging.error("ERROR Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
