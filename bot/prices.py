@@ -29,6 +29,7 @@ def to_zero(js, key1, key2, key3):
         return 0
 
 def get_price_extended(label):
+    http.headers.clear()
     http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})
     price, change_1hr, change_24hr = 0, 0, 0
     try:
@@ -80,6 +81,7 @@ def get_price(label):
     return price, change_1hr, change_24hr, price_btc
 
 def coin_price(labels):
+    http.headers.clear()
     http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
     s = ",".join(labels)
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
@@ -110,6 +112,27 @@ def coin_price(labels):
 #             "last_updated": "2018-08-09T21:56:28.000Z"
 
         
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print(e)
+
+def get_last_50_trades():
+    http.headers.clear()
+    url = 'https://api.cryptowat.ch/markets/binance/btcusdt/trades'
+    # parameters = {
+    #     'limit': 100
+    # }
+
+    try:
+        response = http.get(url)
+        if response.status_code == 429:
+            # use mess
+            logging.error("HIT LIMIT")
+        else:
+            coins = {}
+            data = response.json()
+            data_arr = data["result"]
+            return data_arr
+    
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
 

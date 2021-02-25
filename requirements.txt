@@ -23,3 +23,8 @@ uvloop==0.14.0
 yarl==1.6.3
 requests==2.25.0
 redis
+pygal==2.4.0
+lxml==4.6.2
+tinycss
+cssselect
+cairosvg==2.5.1
