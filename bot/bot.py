@@ -74,7 +74,7 @@ HODL WALLET (Basic - Warning Per User!):
   Buy: /buy btc     or multple: /buy eth btc ada
   BuyAt: /buyat eth 34521.23 0.21   (Price in USD and BTC)
   Sell: /sell btc    or mulitple: /sell eth btc aave
-  Remove:/ remove doge aave etc.  Deletes without counting score
+  Remove:/deletecoin doge aave etc.  Deletes without counting score
   View Balance (in user price setting): /hodl     
   View Balance in BTC: /hodl btc     
   View Balance in USD: /hodl usd
