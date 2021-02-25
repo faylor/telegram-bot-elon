@@ -230,18 +230,19 @@ async def send_user_balance(message: types.Message, regexp_command):
         total_value = 0
 
         symbols = []
+        keys = []
         for key in saves:
             symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
+            keys.append(key.decode('utf-8'))
         
         try:
             coins = None
             coins = coin_price(symbols)
         except:
             logging.error("FAILED TO GET COIN PRICES")
-
-        for key in saves:
-            symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
-
+        i = 0
+        for key in keys:
+            symbol = symbols[i]
             if coins is not None and symbol.upper() in coins:
                 logging.info("Got Coins:" + symbol)
                 p = coins[symbol.upper()]["quote"]["USD"]["price"]
@@ -291,6 +292,7 @@ async def send_user_balance(message: types.Message, regexp_command):
                     out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
+            i = i + 1
         
         _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
         out = out + "\n             UNUSED USD = " + str(round(usd,2))
