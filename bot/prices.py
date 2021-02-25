@@ -139,7 +139,7 @@ def get_last_trades(x):
 def get_ohcl_trades(coin):
     http.headers.clear()
     url = 'https://api.cryptowat.ch/markets/binance/' + coin + 'usdt/ohlc?periods=60'
-
+# https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
     try:
         response = http.get(url)
         if response.status_code == 429:
