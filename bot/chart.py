@@ -3,6 +3,9 @@ import json
 import requests
 import redis
 import asyncio
+import pandas as pd
+import mplfinance as mpf
+ 
 from aiogram import Bot, types
 from aiogram.types.input_file import InputFile
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -14,7 +17,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_last_trades
+from .prices import get_last_trades, get_ohcl_trades
 
 import pygal
 from pygal.style import DarkStyle, DefaultStyle
@@ -37,4 +40,28 @@ async def chart(message: types.Message):
     except Exception as e:
         logging.error("ERROR Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+
+
+@dp.message_handler(commands=['candle'])
+async def chart(message: types.Message):
+    chat_id = message.chat.id
+    try:
+        trades = get_ohcl_trades('btc')
+        
+        df = pd.read_json(trades, index_col=0, parse_dates=True)
+
+        mpf.plot(df, type='candle', style='charles',
+            title='S&P 500, Nov 2019',
+            ylabel='Price ($)',
+            ylabel_lower='Shares \nTraded',
+            volume=True, 
+            mav=(3,6,9), 
+            savefig='test-mplfiance.png')
+        
+        await bot.send_photo(chat_id=chat_id, photo=InputFile('test-mplfiance.png'))
+    except Exception as e:
+        logging.error("ERROR Making chart:" + str(e))
+        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+
+
 

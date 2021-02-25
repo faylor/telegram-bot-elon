@@ -136,6 +136,23 @@ def get_last_trades(x):
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
 
+def get_ohcl_trades(coin):
+    http.headers.clear()
+    url = 'https://api.cryptowat.ch/markets/binance/' + coin + 'usdt/ohlc?periods=60'
+
+    try:
+        response = http.get(url)
+        if response.status_code == 429:
+            # use mess
+            logging.error("HIT LIMIT")
+        else:
+            coins = {}
+            data = response.json()
+            data_arr = data["result"][60]
+            return data_arr
+    
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print(e)
 
 def get_news(label):
     try:
