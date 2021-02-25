@@ -80,7 +80,7 @@ def get_price(label):
     return price, change_1hr, change_24hr, price_btc
 
 def coin_price(labels):
-    http.headers.update({"X-CMC_PRO_API_KEY": os.environ["b54bcf4d-1bca-4e8e-9a24-22ff2c3d462c"]})
+    http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
     s = ",".join(labels)
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
     parameters = {
