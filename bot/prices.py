@@ -85,7 +85,7 @@ def coin_price(labels):
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
     parameters = {
         'symbol':s,
-        'convert':'USD,BTC'
+        'skip_invalid': True
     }
 
     try:
