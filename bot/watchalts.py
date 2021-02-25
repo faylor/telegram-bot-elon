@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, bot, r
-from .prices import get_price, get_change_label, get_price_extended
+from .prices import get_price, coin_price, get_change_label, get_price_extended
 from .user import get_user_price_config
 
 @dp.message_handler(commands=['alts'])
@@ -28,6 +28,7 @@ async def prices_alts(message: types.Message):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
+
     out = [f"<pre>{in_prices}   1hr  24hr  ATH-days   ATH%"]
     change_list = [""]
     for l in mains:

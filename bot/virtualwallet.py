@@ -18,7 +18,7 @@ from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
-from .prices import get_price, round_sense
+from .prices import get_price, coin_price, round_sense
 from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
@@ -140,6 +140,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         total_value = 0
         last_the_chat_title = ""
         chat_id = None
+
         for key in saves:
             _key = key.decode('utf-8')
             key_split = _key.split("_")
@@ -227,9 +228,29 @@ async def send_user_balance(message: types.Message, regexp_command):
         total_change = float(0.00)
         counter = 0
         total_value = 0
+
+        symbols = []
         for key in saves:
+            symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
+        
+        try:
+            coins = None
+            coins = coin_price(symbols)
+        except:
+            logging.error("FAILED TO GET COIN PRICES")
+
+        for key in symbols:
             symbol = key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),"")
-            p, c, c24, btc_price = get_price(symbol)
+
+            if coins is None or symbol.upper() not in coins:
+                p, c, c24, btc_price = get_price(symbol)
+            else:
+                logging.info("Got Coins:" + symbol)
+                p = coins[symbol.upper()]["quote"]["USD"]["price"]
+                c = coins[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
+                c24 = coins[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
+                btc_price = 1
+            
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None:

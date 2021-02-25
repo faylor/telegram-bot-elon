@@ -34,8 +34,6 @@ async def prices(message: types.Message):
     try:
         coins = None
         coins = coin_price(mains)
-        logging.info("Got Coins")
-        logging.info(len(coins))
     except:
         logging.error("FAILED TO GET COIN PRICES")
 
