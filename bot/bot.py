@@ -205,6 +205,28 @@ async def send_price_of(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\chart ([a-zA-Z]*)']))
+async def send_price_of(message: types.Message, regexp_command):
+    try:
+        symbol = regexp_command.group(1)
+        p, c, c24, btc_price = get_price(symbol)
+        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
+        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
+        if saved is not None:
+            saved = saved.decode('utf-8')
+            if "{" in saved:
+                js = json.loads(saved)
+                saved = float(js["usd"])
+                saved_btc = float(js["btc"])
+            else:
+                saved = float(saved)
+                saved_btc = 0
+            changes = round(100 * (p - saved) / saved, 2)
+            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
+    except Exception as e:
+        logging.warn("Could convert saved point:" + str(e))
+
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['news ([a-zA-Z]*)']))
 async def find_news(message: types.Message, regexp_command):
     try:
