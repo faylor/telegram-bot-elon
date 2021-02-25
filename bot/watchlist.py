@@ -39,10 +39,8 @@ async def prices(message: types.Message):
 
     for l in mains:
         if coins is None or l.upper() not in coins:
-            logging.info("NOT Got Coins" + l)
             p, c, c24, btc_price = get_price(l)
         else:
-            logging.info("Got Coins:" + l)
             p = coins[l.upper()]["quote"]["USD"]["price"]
             c = coins[l.upper()]["quote"]["USD"]["percent_change_1h"]
             c24 = coins[l.upper()]["quote"]["USD"]["percent_change_24h"]
