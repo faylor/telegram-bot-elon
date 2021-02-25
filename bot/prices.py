@@ -99,7 +99,6 @@ def coin_price(labels):
             data_arr = data["data"]
             for coin in data_arr:
                 quotes = coin["quote"]
-                q = {'usd':0, 'btc':0}
                 coins[coin["symbol"]] = coin["quote"]
             return coins
 

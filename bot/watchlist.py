@@ -44,7 +44,7 @@ async def prices(message: types.Message):
             p = coins["USD"]["price"]
             c = coins["USD"]["percent_change_1h"]
             c24 = coins["USD"]["percent_change_24h"]
-            btc_price = coins["BTC"]["price"]
+            btc_price = 1
         totes = totes + c
         l = l.ljust(5, ' ')
         
