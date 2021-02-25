@@ -329,11 +329,8 @@ def get_users_live_value(chat_id, user_id):
 
             if coin_prices is not None and symbol.upper() in coin_prices:
                 p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
-                c = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
-                c24 = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
-                btc_price = 1
             else:
-                p, c, c24, btc_price = get_price(symbol)
+                p, _, _, _ = get_price(symbol)
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None:
