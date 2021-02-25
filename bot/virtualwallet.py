@@ -236,18 +236,18 @@ async def send_user_balance(message: types.Message, regexp_command):
             keys.append(key.decode('utf-8'))
         
         try:
-            coins = None
-            coins = coin_price(symbols)
+            coin_prices = None
+            coin_prices = coin_price(symbols)
         except:
             logging.error("FAILED TO GET COIN PRICES")
         i = 0
         for key in keys:
             symbol = symbols[i]
-            if coins is not None and symbol.upper() in coins:
+            if coin_prices is not None and symbol.upper() in coin_prices:
                 logging.info("Got Coins:" + symbol)
-                p = coins[symbol.upper()]["quote"]["USD"]["price"]
-                c = coins[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
-                c24 = coins[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
+                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                c = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
+                c24 = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
                 btc_price = 1
             else:
                 logging.info("NOT Got Coins:" + symbol)
