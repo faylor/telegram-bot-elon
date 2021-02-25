@@ -123,7 +123,7 @@ def get_last_trades(x):
     }
 
     try:
-        response = http.get(url)
+        response = http.get(url, parameters=parameters)
         if response.status_code == 429:
             # use mess
             logging.error("HIT LIMIT")
