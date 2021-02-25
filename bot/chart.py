@@ -26,7 +26,7 @@ from pygal.style import DarkStyle, DefaultStyle
 async def chart(message: types.Message):
     chat_id = message.chat.id
     try:
-        trades = get_last_trades(1000)
+        trades = get_last_trades(500)
         points = []
         for t in trades:
             points.append(t[2])
@@ -43,12 +43,12 @@ async def chart(message: types.Message):
 
 
 @dp.message_handler(commands=['candle'])
-async def chart(message: types.Message):
+async def candle(message: types.Message):
     chat_id = message.chat.id
     try:
-        trades = get_ohcl_trades('btc')
-
-        df = pd.DataFrame(data=trades, index_col=0, parse_dates=True)
+        # trades = get_ohcl_trades('btc')
+        arr = [[1614232980,41547.93,41572.28,41516.31,41532.75,1.062377,44130.68208997],[1614233040,41530.75,41532.75,41471.28,41474.81,0.74467,30908.75414289],[1614233100,41477.08,41537.03,41475.2,41500.39,0.864615,35878.76945827]]
+        df = pd.DataFrame(data=arr, index_col=0, parse_dates=True)
 
         mpf.plot(df, type='candle', style='charles',
             title='S&P 500, Nov 2019',
