@@ -141,8 +141,10 @@ def fibs(df):
         thickness_forth_line = abs(bottom_third_line - price_min)
         center_of_forth_line = bottom_third_line - thickness_forth_line/2
         
+        fix = 4.7
         h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
                         colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
-                        linewidths=[thickness_top_line/5, thickness_second_line/5, thickness_third_line/5, thickness_forth_line/5],
+                        linewidths=[thickness_top_line/fix, thickness_second_line/fix, thickness_third_line/fix, thickness_forth_line/fix],
                         alpha=0.4)
+
     return h_lines
