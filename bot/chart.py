@@ -57,7 +57,7 @@ async def candle(message: types.Message, regexp_command):
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
 
-        df = df.tail(25)
+        df = df.tail(30)
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
@@ -74,4 +74,75 @@ async def candle(message: types.Message, regexp_command):
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibs ([a-zA-Z]*)']))
+async def fibs_chart(message: types.Message, regexp_command):
+    chat_id = message.chat.id
+    try:
+        coin = regexp_command.group(1)
+        trades = get_ohcl_trades(coin)
+        trades = trades[-60:]
+        df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
+        df['time'] = pd.DatetimeIndex(df['time']*10**9)
+        df.set_index('time', inplace=True)
 
+        df['MA20'] = df['close'].rolling(window=20).mean()
+        df['20dSTD'] = df['close'].rolling(window=20).std() 
+
+        df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
+        df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
+
+        df = df.tail(60)
+
+        h_lines = fibs(df)
+
+        apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
+                mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
+            mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
+
+        kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
+        mpf.plot(df,**kwargs,style='nightclouds')
+        mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
+        s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
+        mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + '-mplfiance.png', hlines=h_lines)
+        await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + '-mplfiance.png'))
+    except Exception as e:
+        logging.error("ERROR Making chart:" + str(e))
+        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+
+
+
+def fibs(df):
+
+    fib = df['close'].head(7)
+
+    price_min = fib.min() #df.Close.min()
+    price_max = fib.max() #df.Close.max()
+    difference = abs(price_max - price_min)
+    h_lines = []
+    print(difference/price_min)
+    if difference/price_min > 0.005:
+        thickness_top_line = (0.236 * (price_max - price_min))
+        bottom_top_line = price_max - thickness_top_line
+        center_of_top_line = price_max - thickness_top_line/2
+        print(bottom_top_line)
+        print(center_of_top_line)
+        print(thickness_top_line)
+
+        level2 = (0.382 * (price_max - price_min))
+        bottom_second_line = price_max - level2
+        thickness_second_line = abs(bottom_second_line - bottom_top_line)
+        center_of_second_line = bottom_top_line - thickness_second_line/2
+
+        level3 = (0.618 * (price_max - price_min))
+        bottom_third_line = price_max - level3
+        thickness_third_line = abs(bottom_third_line - bottom_second_line)
+        center_of_third_line = bottom_second_line - thickness_third_line/2
+
+        thickness_forth_line = abs(bottom_third_line - price_min)
+        center_of_forth_line = bottom_third_line - thickness_forth_line/2
+        
+        h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
+                        colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
+                        linewidths=[thickness_top_line/5, thickness_second_line/5, thickness_third_line/5, thickness_forth_line/5],
+                        alpha=0.4)
+    return h_lines
