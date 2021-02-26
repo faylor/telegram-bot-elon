@@ -51,15 +51,16 @@ async def candle(message: types.Message, regexp_command):
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
 
-        mpf.plot(df, type='candle', style='charles',
+        mpf.plot(df, type='candle', style='yahoo',
             title=coin.upper() + " vs USDT",
             ylabel='Price ($)',
             ylabel_lower='Vol',
             volume=True, 
-            mav=(3,6,9), 
-            savefig='test-mplfiance.png')
+            mav=(3,6,9),
+            figscale=3.0,
+            savefig=coin + '-mplfiance.png')
         
-        await bot.send_photo(chat_id=chat_id, photo=InputFile('test-mplfiance.png'))
+        await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + '-mplfiance.png'))
     except Exception as e:
         logging.error("ERROR Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
