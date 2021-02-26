@@ -45,10 +45,9 @@ async def chart(message: types.Message):
 async def candle(message: types.Message):
     chat_id = message.chat.id
     try:
-        # trades = get_ohcl_trades('btc')
-        arr = [[1614232980,41547.93,41572.28,41516.31,41532.75,1.062377,44130.68208997],[1614233040,41530.75,41532.75,41471.28,41474.81,0.74467,30908.75414289],[1614233100,41477.08,41537.03,41475.2,41500.39,0.864615,35878.76945827]]
-        arr = np.array(arr)
-        df = pd.DataFrame(arr, columns='time open high low close volume amount'.split())
+        trades = get_ohcl_trades('btc')
+        
+        df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
 
