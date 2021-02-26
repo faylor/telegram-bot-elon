@@ -203,7 +203,7 @@ async def send_price_of(message: types.Message, regexp_command):
                 saved_btc = 0
             changes = round(100 * (p - saved) / saved, 2)
             await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
-        candle(message, regexp_command)
+        await candle(message, regexp_command)
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
