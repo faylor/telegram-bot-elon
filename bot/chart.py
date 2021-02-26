@@ -57,7 +57,7 @@ async def candle(message: types.Message, regexp_command):
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
 
-        df = df.tail(35)
+        df = df.tail(25)
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
@@ -66,9 +66,9 @@ async def candle(message: types.Message, regexp_command):
         kwargs = dict(type='candle',
             title=coin.upper() + " vs USDT",
             ylabel='Price ($)',
-            ylabel_lower='Vol',volume=True,figratio=(3,2),figscale=2.1,addplot=apd)
+            ylabel_lower='Vol',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
         mpf.plot(df,**kwargs,style='nightclouds')
-        mc = mpf.make_marketcolors(up='#00E676',down='#FF3D00',inherit=True)
+        mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
         s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
         mpf.plot(df,**kwargs, style=s, savefig=coin + '-mplfiance.png')
         
