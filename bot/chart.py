@@ -113,7 +113,7 @@ async def fibs_chart(message: types.Message, regexp_command):
 
 def fibs(df):
 
-    fib = df['close'].head(7)
+    fib = df['close']
 
     price_min = fib.min() #df.Close.min()
     price_max = fib.max() #df.Close.max()
