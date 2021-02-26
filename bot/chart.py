@@ -21,7 +21,7 @@ from .prices import get_last_trades, get_ohcl_trades
 import pygal
 from pygal.style import DarkStyle, DefaultStyle
 
-@dp.message_handler(commands=['chart'])
+@dp.message_handler(commands=['line'])
 async def chart(message: types.Message):
     chat_id = message.chat.id
     try:
@@ -40,21 +40,21 @@ async def chart(message: types.Message):
         logging.error("ERROR Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
-
-@dp.message_handler(commands=['candle'])
-async def candle(message: types.Message):
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['chart ([a-zA-Z]*)']))
+async def candle(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
-        trades = get_ohcl_trades('btc')
+        coin = regexp_command.group(1)
+        trades = get_ohcl_trades(coin)
         
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
 
         mpf.plot(df, type='candle', style='charles',
-            title='S&P 500, Nov 2019',
+            title=coin.upper() + " vs USDT",
             ylabel='Price ($)',
-            ylabel_lower='Shares \nTraded',
+            ylabel_lower='Vol',
             volume=True, 
             mav=(3,6,9), 
             savefig='test-mplfiance.png')
