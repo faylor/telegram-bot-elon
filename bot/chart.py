@@ -5,7 +5,6 @@ import redis
 import asyncio
 import pandas as pd
 import mplfinance as mpf
-import numpy as np
 from aiogram import Bot, types
 from aiogram.types.input_file import InputFile
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -51,8 +50,8 @@ async def candle(message: types.Message):
         arr = np.array(arr)
         df = pd.DataFrame(arr, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
+        df.set_index('time', inplace=True)
 
-        logging.error("HERE")
         mpf.plot(df, type='candle', style='charles',
             title='S&P 500, Nov 2019',
             ylabel='Price ($)',
