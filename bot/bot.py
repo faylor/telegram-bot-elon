@@ -212,11 +212,15 @@ async def send_rapids(message: types.Message):
     try:
         array_rapids = get_rapids()
         out = ""
+        i = 0
         for rap in array_rapids:
-            out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"])
+            if i < 10:
+                out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"])
+                i = i + 1
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
+                
     except Exception as e:
-        logging.warn("Could convert saved point:" + str(e))
+        logging.warn("Could not load rapids:" + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['news ([a-zA-Z]*)']))
 async def find_news(message: types.Message, regexp_command):
