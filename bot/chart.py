@@ -93,13 +93,17 @@ async def fibs_chart(message: types.Message, regexp_command):
 
         df = df.tail(60)
 
-        h_lines = fibs(df)
+        h_lines, y_min, y_max = fibs(df)
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
             mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
 
-        kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
+        if y_min is None:
+            kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
+        else:
+            kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
+        
         mpf.plot(df,**kwargs,style='nightclouds')
         mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
         s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
@@ -136,10 +140,18 @@ def fibs(df):
     thickness_forth_line = abs(bottom_third_line - price_min)
     center_of_forth_line = bottom_third_line - thickness_forth_line/2
     
-    fix = 4.7
+    ydelta = 0.1 * (price_max-price_min)
+    if price_min > 0.0:
+        # don't let it go negative:
+        setminy = max(0.9*price_min,price_min-ydelta)
+    else:
+        setminy = price_min-ydelta
+    ymin = setminy
+    ymax= price_max+ydelta
+    fix = 26
     h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
                     colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
-                    linewidths=[thickness_top_line/fix, thickness_second_line/fix, thickness_third_line/fix, thickness_forth_line/fix],
-                    alpha=0.4)
+                    linewidths=[fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta],
+                    alpha=0.15)
 
-    return h_lines
+    return h_lines, ymin, ymax
