@@ -153,6 +153,7 @@ def format_price_extended(data_cr, data_cmc):
     try:
         coin_result = {}
         change_usd_hr = 0
+        ath = 0
         if data_cr is not None:
             price = to_zero_2(data_cr, "price", "USD")
             change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
@@ -175,7 +176,7 @@ def format_price_extended(data_cr, data_cmc):
         if coin_result["change_usd_24hr"] == 0 and change_usd_hr != 0:
             coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
         
-        if ath > price:
+        if ath > price and ath != 0:
             coin_result["down_from_alt"] = -100 * (price - ath) / ath
         else: 
             coin_result["down_from_alt"] = 0
