@@ -135,13 +135,18 @@ def get_ath_ranks(labels):
         for l in labels:
             tmp_cr = None
             tmp_cmc = None
+            logging.error("1")
             if l in data_cr:
+                logging.error("2")
                 tmp_cr = data_cr[l]
             if l in data_cmc:
+                logging.error("3")
                 tmp_cmc = data_cmc[l]
             if tmp_cr is None and tmp_cmc is None:
+                logging.error("4")
                 results[l] = {}
             else:
+                logging.error("5")
                 results[l] = format_price_extended(tmp_cr, tmp_cmc)
         return results
     except Exception as e:
@@ -175,11 +180,11 @@ def format_price_extended(data_cr, data_cmc):
             coin_result["down_from_alt"] = -100 * (price - ath) / ath
         else: 
             coin_result["down_from_alt"] = 0
-        logging.error(coin_result)
+        
         return coin_result
     except Exception as e:
-        logging.error(e)
-    return {}
+        logging.error("FORMAT ERROR: " + str(e))
+        return {}
     
 def get_price_extended(label):
     http.headers.clear()
