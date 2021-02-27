@@ -129,7 +129,7 @@ def format_price_extended(data):
         coin_result["days_since_ath"] = days_since.days
         ath = to_zero_2(data, "athPrice", "USD")
         
-        if ath < price:
+        if ath > price:
             coin_result["down_from_alt"] = 100* (price - ath) / ath
         else: 
             coin_result["down_from_alt"] = 0
