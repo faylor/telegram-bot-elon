@@ -7,7 +7,6 @@ import os
 from aiogram import types
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-import hashlib
 import redis
 
 retry_strategy = Retry(
@@ -102,7 +101,7 @@ def search_data(dic, symbols):
 
 def get_filtered_cr_data(labels):
     try:
-        lab_hash = hashlib.md5(str(labels))
+        lab_hash = hash(str(labels))
         data = r.get("ATH_cr_" + str(lab_hash))
         if data is not None:
             logging.info("USING ATH CR FILTERED CACHE")
@@ -221,7 +220,7 @@ def get_price(label):
 
 def coin_price(labels):
     try:
-        lab_hash = hashlib.md5(str(labels))
+        lab_hash = hash(str(labels))
         data = r.get("QUOTES_cmc_" + str(lab_hash))
         if data is not None:
             logging.info("USING ATH CACHE")
