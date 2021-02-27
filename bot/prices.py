@@ -106,7 +106,7 @@ def get_filtered_cr_data(labels):
         data = r.get("ATH_cr_" + str(lab_hash))
         if data is not None:
             logging.info("USING ATH CR FILTERED CACHE")
-            return data
+            return json.loads(data)
 
         logging.info("GETTING NEW CR FILTERED DATA")
         data = load_ath_data()
@@ -115,7 +115,7 @@ def get_filtered_cr_data(labels):
             results = {}
             for f in filtered_data:
                 results[f["symbol"]] = f
-            r.set("ATH_cr_" + str(lab_hash), results, ex=60)
+            r.set("ATH_cr_" + str(lab_hash), json.dumps(results), ex=60)
             return results
         else:
             logging.error("Filtered Failed... No Data")
