@@ -110,7 +110,7 @@ def get_ath_ranks(labels):
 
 def format_price_extended(data):
     try:
-        coin_result = {} = {}
+        coin_result = {}
         coin_result["change_usd_24hr"] = to_zero(data, "histPrices", "24H", "USD")
         coin_result["change_btc_24hr"] = to_zero(data, "histPrices", "24H", "BTC")
         date_of_string = data["athPrice"]["date"]
