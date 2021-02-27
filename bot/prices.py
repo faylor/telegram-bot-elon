@@ -4,6 +4,7 @@ from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from datetime import datetime
 import os
+import json
 from aiogram import types
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
@@ -77,7 +78,7 @@ def load_ath_data():
         data = r.get("ATH_cryptorank")
         if data is not None:
             logging.info("USING ATH CACHE")
-            return data
+            return json.loads(data)
         logging.info("GETTING NEW ATH DATA")
         url = "https://api.cryptorank.io/v0/coins?locale=en"
         http.headers.clear()
@@ -85,7 +86,7 @@ def load_ath_data():
         if resp.status_code == 200:
             js = resp.json()
             data = js["data"]
-            r.set("ATH_cryptorank", data, ex=60)
+            r.set("ATH_cryptorank", json.dumps(data), ex=60)
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
@@ -224,7 +225,7 @@ def coin_price(labels):
         data = r.get("QUOTES_cmc_" + str(lab_hash))
         if data is not None:
             logging.info("USING ATH CACHE")
-            return data
+            return json.loads(data)
         logging.info("GETTING NEW ATH DATA")
         http.headers.clear()
         http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
@@ -238,11 +239,9 @@ def coin_price(labels):
         if response.status_code == 429:
             logging.error("HIT LIMIT")
         else:
-            logging.error("HIT LIMIT")
             data = response.json()
-            print(data)
             data_arr = data["data"]
-            r.set("QUOTES_cmc_" + str(lab_hash), data_arr, ex=60)
+            r.set("QUOTES_cmc_" + str(lab_hash), json.dumps(data_arr), ex=60)
             return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("COIN_PRICE Error: " + str(e))
