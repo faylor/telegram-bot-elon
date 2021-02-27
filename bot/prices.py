@@ -128,6 +128,10 @@ def get_ath_ranks(labels):
     try:
         data_cr = get_filtered_cr_data(labels)
         data_cmc = coin_price(labels)
+        logging.error("GOT HERE")
+        logging.error(data_cr["BAND"])
+        logging.error("GOT HERE 2")
+        logging.error(data_cmc["BAND"])
         results = {}
         if data_cr is None and data_cmc is None:
             logging.error("ATH Ranks: No data from cr or cmc")
