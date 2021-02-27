@@ -214,9 +214,11 @@ async def send_rapids(message: types.Message):
         out = ""
         i = 0
         for rap in array_rapids:
-            if i < 10:
-                out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"])
+            if i < 15:
+                out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"]) + "\n"
                 i = i + 1
+            else:
+                break
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
                 
     except Exception as e:
