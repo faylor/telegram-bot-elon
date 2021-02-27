@@ -16,7 +16,7 @@ from .bot import dp, bot, r
 from .prices import get_price, coin_price, get_ath_ranks, get_change_label, get_price_extended
 from .user import get_user_price_config
 
-@dp.message_handler(commands=['alts'])
+@dp.message_handler(commands=['ath'])
 async def prices_alts(message: types.Message):
     chat_id = message.chat.id
     mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO", "AAVE", "DOGE", "ZIL"]
@@ -58,7 +58,7 @@ async def prices_alts(message: types.Message):
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
 
-@dp.message_handler(commands=['ath'])
+@dp.message_handler(commands=['alts'])
 async def prices_alts(message: types.Message):
     chat_id = message.chat.id
     mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
@@ -71,7 +71,7 @@ async def prices_alts(message: types.Message):
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
 
-    out = [f"<pre>{in_prices}  1hr  24hr  ATH-days   ATH%"]
+    out = [f"<pre>{in_prices}    1hr   24hr  ATH-days   ATH%"]
     change_list = [""]
 
     data = get_ath_ranks(mains)
@@ -87,7 +87,7 @@ async def prices_alts(message: types.Message):
             c_value = 0
             c_1 = ""
             c_24 = ""
-            days_since = 0
+            days_since = "??".ljust(5, ' ')
             ath_down = 0
             if in_prices == "USD":
                 if "change_usd_1hr" in d:
