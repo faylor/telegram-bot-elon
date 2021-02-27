@@ -156,6 +156,8 @@ def format_price_extended(data_cr, data_cmc):
             price = to_zero_2(data_cr, "price", "USD")
             change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
             change_btc_hr = to_zero(data_cr, "histPrices", "24H", "BTC")
+            coin_result["change_usd_1hr"] = 0
+            coin_result["change_btc_1hr"] = 0
             coin_result["change_btc_24hr"] = 100*(price - change_btc_hr)/change_btc_hr
             date_of_string = data_cr["athPrice"]["date"]
             date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
