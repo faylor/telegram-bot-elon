@@ -152,6 +152,7 @@ def get_ath_ranks(labels):
 def format_price_extended(data_cr, data_cmc):
     try:
         coin_result = {}
+        change_usd_hr = 0
         if data_cr is not None:
             price = to_zero_2(data_cr, "price", "USD")
             change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
@@ -171,7 +172,7 @@ def format_price_extended(data_cr, data_cmc):
             coin_result["change_btc_1hr"] = coin_result["change_usd_1hr"] 
             coin_result["change_usd_24hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_24h")
         
-        if coin_result["change_usd_24hr"] == 0:
+        if coin_result["change_usd_24hr"] == 0 and change_usd_hr != 0:
             coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
         
         if ath > price:
