@@ -97,9 +97,7 @@ def get_ath_ranks(labels):
         results = []
         if data is not None:
             for f in data:
-                coin_result = {}
-                coin_result[f["symbol"]] = format_price_extended(f)
-                results.append(coin_result)
+                results[f["symbol"]] = format_price_extended(f)
             return results
         else:
             logging.error("Ranks Failed... No Data")
