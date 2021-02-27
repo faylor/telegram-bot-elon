@@ -126,7 +126,7 @@ def format_price_extended(data):
         date_of_string = data["athPrice"]["date"]
         date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
         days_since = datetime.utcnow().date() - date_object
-        coin_result["days_since_ath"] = str(days_since)
+        coin_result["days_since_ath"] = days_since.days
         ath = to_zero_2(data, "athPrice", "USD")
         
         if ath < price:
