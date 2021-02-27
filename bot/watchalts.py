@@ -71,7 +71,7 @@ async def prices_alts(message: types.Message):
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
 
-    out = [f"<pre>{in_prices}   24hr  ATH-days   ATH%"]
+    out = [f"<pre>{in_prices}  1hr  24hr  ATH-days   ATH%"]
     change_list = [""]
 
     data = get_ath_ranks(mains)
@@ -86,14 +86,16 @@ async def prices_alts(message: types.Message):
             l = l.ljust(5, ' ')
             
             if in_prices == "USD":
-                c_value = d["change_usd_24hr"]
-                change = get_change_label(d["change_usd_24hr"], 4)
+                c_value = d["change_usd_1hr"]
+                c_1 = get_change_label(c_value, 4)
+                c_24 = get_change_label(d["change_usd_24hr"], 4)
             else:
-                c_value = d["change_btc_24hr"]
-                change = get_change_label(c_value, 4)
+                c_value = d["change_btc_1hr"]
+                c_1 = get_change_label(c_value, 4)
+                c_24 = get_change_label(d["change_usd_24hr"], 4)
             days_since = str(d["days_since_ath"]).ljust(5, ' ')
             ath_down = d["down_from_alt"]
-            s = f"{l} {change}  {days_since} {round(ath_down,1)}%"
+            s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
             if len(change_list) >= 2:
                 i = 1
                 while i < len(change_list) and c_value < change_list[i]:

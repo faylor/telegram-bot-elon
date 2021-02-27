@@ -7,6 +7,7 @@ import os
 from aiogram import types
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import redis
 
 retry_strategy = Retry(
     total=1,
@@ -18,6 +19,8 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 http = Session()
 http.mount("https://", adapter)
 http.mount("http://", adapter)
+
+from .bot import r
 
 def to_zero(js, key1, key2, key3):
     try:
@@ -67,14 +70,21 @@ def get_rapids():
         return 0,0,0,0,0,0
     return None
 
+
 def load_ath_data():
-    url = "https://api.cryptorank.io/v0/coins?locale=en"
-    http.headers.clear()
     try:
+        data = r.get("ATH_cryptorank")
+        if data is not None:
+            logging.info("USING ATH CACHE")
+            return data
+        logging.info("GETTING NEW ATH DATA")
+        url = "https://api.cryptorank.io/v0/coins?locale=en"
+        http.headers.clear()
         resp = http.get(url)
         if resp.status_code == 200:
             js = resp.json()
             data = js["data"]
+            r.set("ATH_cryptorank", data, ex=60)
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
@@ -88,11 +98,22 @@ def search_data(dic, symbols):
     ''' Define your own condition here'''
     return dic['symbol'].lower() in symbols
 
-def get_filtered_data(labels):
+def get_filtered_cr_data(labels):
     try:
+        data = r.get("ATH_cr_" + labels)
+        if data is not None:
+            logging.info("USING ATH CR FILTERED CACHE")
+            return data
+
+        logging.info("GETTING NEW CR FILTERED DATA")
         data = load_ath_data()
         if data is not None:
-            return [d for d in data if search_data(d, labels)]
+            filtered_data = [d for d in data if search_data(d, labels)]
+            results = {}
+            for f in filtered_data:
+                results[f["symbol"]] = f
+            r.set("ATH_cr_" + labels, results, ex=60)
+            return results
         else:
             logging.error("Filtered Failed... No Data")
             return None
@@ -102,32 +123,37 @@ def get_filtered_data(labels):
 
 def get_ath_ranks(labels):
     try:
-        data = get_filtered_data(labels)
+        data_cr = get_filtered_cr_data(labels)
+        data_cmc = coin_price(labels)
         results = {}
-        if data is not None:
-            for f in data:
-                results[f["symbol"]] = format_price_extended(f)
-            return results
-        else:
-            logging.error("Ranks Failed... No Data")
+        if data_cr is None and data_cmc is None:
+            logging.error("ATH Ranks: No data from cr or cmc")
             return None
+        for l in labels:
+            results[l] = format_price_extended(data_cr[l], data_cmc[l])
+        return results
     except Exception as e:
         logging.error(e)
         return None
 
-def format_price_extended(data):
+def format_price_extended(data_cr, data_cmc):
     try:
         coin_result = {}
-        price = to_zero_2(data, "price", "USD")
-        change_usd_hr = to_zero(data, "histPrices", "24H", "USD")
-        coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
-        change_btc_hr = to_zero(data, "histPrices", "24H", "BTC")
+        price = to_zero_2(data_cr, "price", "USD")
+        coin_result["change_usd_1hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_1h")
+        # TODO no data for btc 1hr
+        coin_result["change_btc_1hr"] = coin_result["change_usd_1hr"] 
+        change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
+        coin_result["change_usd_24hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_24h")
+        if coin_result["change_usd_24hr"] == 0:
+            coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
+        change_btc_hr = to_zero(data_cr, "histPrices", "24H", "BTC")
         coin_result["change_btc_24hr"] = 100*(price - change_btc_hr)/change_btc_hr
-        date_of_string = data["athPrice"]["date"]
+        date_of_string = data_cr["athPrice"]["date"]
         date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
         days_since = datetime.utcnow().date() - date_object
         coin_result["days_since_ath"] = days_since.days
-        ath = to_zero_2(data, "athPrice", "USD")
+        ath = to_zero_2(data_cr, "athPrice", "USD")
         
         if ath > price:
             coin_result["down_from_alt"] = -100 * (price - ath) / ath
@@ -191,39 +217,31 @@ def get_price(label):
     return price, change_1hr, change_24hr, price_btc
 
 def coin_price(labels):
-    http.headers.clear()
-    http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
-    s = ",".join(labels)
-    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
-    parameters = {
-        'symbol':s,
-        'skip_invalid': True
-    }
-
     try:
+        data = r.get("QUOTES_cmc_" + labels)
+        if data is not None:
+            logging.info("USING ATH CACHE")
+            return data
+        logging.info("GETTING NEW ATH DATA")
+        http.headers.clear()
+        http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
+        s = ",".join(labels)
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+        parameters = {
+            'symbol':s,
+            'skip_invalid': True
+        }
         response = http.get(url, params=parameters)
         if response.status_code == 429:
-            # use mess
             logging.error("HIT LIMIT")
         else:
             coins = {}
             data = response.json()
             data_arr = data["data"]
+            r.set("QUOTES_cmc_" + labels, data_arr, ex=60)
             return data_arr
-
-#         "USD": {
-#             "price": 6602.60701122,
-#             "volume_24h": 4314444687.5194,
-#             "percent_change_1h": 0.988615,
-#             "percent_change_24h": 4.37185,
-#             "percent_change_7d": -12.1352,
-#             "percent_change_30d": -12.1352,
-#             "market_cap": 113563929433.21645,
-#             "last_updated": "2018-08-09T21:56:28.000Z"
-
-        
     except (ConnectionError, Timeout, TooManyRedirects) as e:
-        print(e)
+        logging.error("COIN_PRICE Error: " + str(e))
 
 def get_last_trades(x):
     http.headers.clear()
