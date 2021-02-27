@@ -168,6 +168,7 @@ def format_price_extended(data_cr, data_cmc):
             ath = to_zero_2(data_cr, "athPrice", "USD")
         if data_cmc is not None:
             price = to_zero(data_cmc, "quote", "usd", "price")
+            print(data_cmc)
             coin_result["change_usd_1hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_1h")
             # TODO no data for btc 1hr
             coin_result["change_btc_1hr"] = coin_result["change_usd_1hr"] 
