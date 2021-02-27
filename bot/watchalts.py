@@ -87,6 +87,8 @@ async def prices_alts(message: types.Message):
             c_value = 0
             c_1 = ""
             c_24 = ""
+            days_since = 0
+            ath_down = 0
             if in_prices == "USD":
                 if "change_usd_1hr" in d:
                     c_value = d["change_usd_1hr"]
@@ -99,8 +101,10 @@ async def prices_alts(message: types.Message):
                     c_1 = get_change_label(c_value, 4)
                 if "change_usd_24hr" in d:
                     c_24 = get_change_label(d["change_usd_24hr"], 4)
-            days_since = str(d["days_since_ath"]).ljust(5, ' ')
-            ath_down = d["down_from_alt"]
+            if "days_since_ath" in d:
+                days_since = str(d["days_since_ath"]).ljust(5, ' ')
+            if "down_from_alt" in d:
+                ath_down = d["down_from_alt"]
             s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
             if len(change_list) >= 2:
                 i = 1
