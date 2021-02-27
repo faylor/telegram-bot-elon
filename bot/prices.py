@@ -118,14 +118,17 @@ def get_ath_ranks(labels):
 def format_price_extended(data):
     try:
         coin_result = {}
-        coin_result["change_usd_24hr"] = to_zero(data, "histPrices", "24H", "USD")
-        coin_result["change_btc_24hr"] = to_zero(data, "histPrices", "24H", "BTC")
+        price = to_zero_2(data, "price", "USD")
+        change_usd_hr = to_zero(data, "histPrices", "24H", "USD")
+        coin_result["change_usd_24hr"] = (price - change_usd_hr)/change_usd_hr
+        change_btc_hr = to_zero(data, "histPrices", "24H", "BTC")
+        coin_result["change_btc_24hr"] = (price - change_btc_hr)/change_btc_hr
         date_of_string = data["athPrice"]["date"]
-        date_object = datetime.strptime(date_of_string, "%Y-%m-%d")
+        date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
         days_since = datetime.utcnow() - date_object
         coin_result["days_since_ath"] = days_since
         ath = to_zero_2(data, "athPrice", "USD")
-        price = to_zero_2(data, "price", "USD")
+        
         if ath < price:
             coin_result["down_from_alt"] = (price - ath) / ath
         else: 
