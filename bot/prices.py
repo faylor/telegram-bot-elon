@@ -128,16 +128,21 @@ def get_ath_ranks(labels):
     try:
         data_cr = get_filtered_cr_data(labels)
         data_cmc = coin_price(labels)
-        logging.error("GOT HERE")
-        logging.error(data_cr["BAND"])
-        logging.error("GOT HERE 2")
-        logging.error(data_cmc["BAND"])
         results = {}
         if data_cr is None and data_cmc is None:
             logging.error("ATH Ranks: No data from cr or cmc")
             return None
         for l in labels:
-            results[l] = format_price_extended(data_cr[l], data_cmc[l])
+            tmp_cr = None
+            tmp_cmc = None
+            if l in data_cr:
+                tmp_cr = data_cr[l]
+            if l in data_cmc:
+                tmp_cmc = data_cmc[l]
+            if tmp_cr is None and tmp_cmc is None:
+                results[l] = {}
+            else:
+                results[l] = format_price_extended(tmp_cr, tmp_cmc)
         return results
     except Exception as e:
         logging.error(e)
@@ -146,21 +151,25 @@ def get_ath_ranks(labels):
 def format_price_extended(data_cr, data_cmc):
     try:
         coin_result = {}
-        price = to_zero_2(data_cr, "price", "USD")
-        coin_result["change_usd_1hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_1h")
-        # TODO no data for btc 1hr
-        coin_result["change_btc_1hr"] = coin_result["change_usd_1hr"] 
-        change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
-        coin_result["change_usd_24hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_24h")
+        if data_cr is not None:
+            price = to_zero_2(data_cr, "price", "USD")
+            change_usd_hr = to_zero(data_cr, "histPrices", "24H", "USD")
+            change_btc_hr = to_zero(data_cr, "histPrices", "24H", "BTC")
+            coin_result["change_btc_24hr"] = 100*(price - change_btc_hr)/change_btc_hr
+            date_of_string = data_cr["athPrice"]["date"]
+            date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
+            days_since = datetime.utcnow().date() - date_object
+            coin_result["days_since_ath"] = days_since.days
+            ath = to_zero_2(data_cr, "athPrice", "USD")
+        if data_cmc is not None:
+            price = to_zero(data_cmc, "quote", "usd", "price")
+            coin_result["change_usd_1hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_1h")
+            # TODO no data for btc 1hr
+            coin_result["change_btc_1hr"] = coin_result["change_usd_1hr"] 
+            coin_result["change_usd_24hr"] = to_zero(data_cmc, "quote", "usd", "percent_change_24h")
+        
         if coin_result["change_usd_24hr"] == 0:
             coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
-        change_btc_hr = to_zero(data_cr, "histPrices", "24H", "BTC")
-        coin_result["change_btc_24hr"] = 100*(price - change_btc_hr)/change_btc_hr
-        date_of_string = data_cr["athPrice"]["date"]
-        date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
-        days_since = datetime.utcnow().date() - date_object
-        coin_result["days_since_ath"] = days_since.days
-        ath = to_zero_2(data_cr, "athPrice", "USD")
         
         if ath > price:
             coin_result["down_from_alt"] = -100 * (price - ath) / ath
