@@ -28,7 +28,7 @@ def to_zero(js, key1, key2, key3):
     except Exception as e:
         return 0
 
-def to_zero(js, key1, key2):
+def to_zero_2(js, key1, key2):
     try:
         r = js[key1][key2]
         if r is None:
@@ -124,8 +124,8 @@ def format_price_extended(data):
         date_object = datetime.strptime(date_of_string, "%Y-%m-%d")
         days_since = datetime.utcnow() - date_object
         coin_result["days_since_ath"] = days_since
-        ath = to_zero(data, "athPrice", "USD")
-        price = to_zero(data, "price", "USD")
+        ath = to_zero_2(data, "athPrice", "USD")
+        price = to_zero_2(data, "price", "USD")
         if ath < price:
             coin_result["down_from_alt"] = (price - ath) / ath
         else: 
