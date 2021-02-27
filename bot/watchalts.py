@@ -79,7 +79,7 @@ async def prices_alts(message: types.Message):
         return await bot.send_message(chat_id=chat_id, text="Empty Data", parse_mode="HTML")
 
     for l in mains:
-        if l.upper() in data:
+        if l.upper() not in data:
             out.append(l.upper() + " Missing Data")
         else:
             d = data[l.upper()]
