@@ -28,6 +28,15 @@ def to_zero(js, key1, key2, key3):
     except Exception as e:
         return 0
 
+def to_zero(js, key1, key2):
+    try:
+        r = js[key1][key2]
+        if r is None:
+            r = 0
+        return r
+    except Exception as e:
+        return 0
+
 def get_rapids():
     http.headers.clear()
     try:
