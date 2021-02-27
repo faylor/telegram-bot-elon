@@ -211,7 +211,7 @@ async def send_price_of(message: types.Message, regexp_command):
 async def send_rapids(message: types.Message):
     try:
         array_rapids = get_rapids()
-        out = "Most Recent Moveer Greater than 3%:\n<pre>"
+        out = "Most Recent Mover +/- more than 3%:\n<pre>"
         i = 0
         for rap in array_rapids:
             if i > 15:

@@ -2,7 +2,7 @@ import logging
 import requests
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-
+from datetime import datetime
 import os
 from aiogram import types
 from requests.adapters import HTTPAdapter
@@ -58,7 +58,76 @@ def get_rapids():
         return 0,0,0,0,0,0
     return None
 
+def load_ath_data():
+    url = "https://api.cryptorank.io/v0/coins?locale=en"
+    http.headers.clear()
+    try:
+        resp = http.get(url)
+        if resp.status_code == 200:
+            js = resp.json()
+            data = js["data"]
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            data = []
+        return data
+    except Exception as e:
+        logging.error(e)
+        return []
 
+def search_data(dic, symbols):
+    ''' Define your own condition here'''
+    return dic['symbol'].lower() in symbols
+
+def get_filtered_data(labels):
+    try:
+        data = load_ath_data()
+        if data is not None:
+            return [d for d in data if search_data(d, labels)]
+        else:
+            logging.error("Filtered Failed... No Data")
+            return None
+    except Exception as e:
+        logging.error(e)
+        return None
+
+def get_ath_ranks(labels):
+    try:
+        data = get_filtered_data(labels)
+        results = []
+        if data is not None:
+            for f in data:
+                coin_result = {}
+                coin_result[f["symbol"]] = format_price_extended(f)
+                results.append(coin_result)
+            return results
+        else:
+            logging.error("Ranks Failed... No Data")
+            return None
+    except Exception as e:
+        logging.error(e)
+        return None
+
+def format_price_extended(data):
+    try:
+        coin_result = {} = {}
+        coin_result["change_usd_24hr"] = to_zero(data, "histPrices", "24H", "USD")
+        coin_result["change_btc_24hr"] = to_zero(data, "histPrices", "24H", "BTC")
+        date_of_string = data["athPrice"]["date"]
+        date_object = datetime.strptime(date_of_string, "%Y-%M-%D")
+        days_since = datetime.utcnow() - date_object
+        coin_result["days_since_ath"] = days_since
+        ath = to_zero(data, "athPrice", "USD")
+        price = to_zero(data, "price", "USD")
+        if ath < price:
+            coin_result["down_from_alt"] = (price - ath) / ath
+        else: 
+            coin_result["down_from_alt"] = 0
+        return coin_result
+    except Exception as e:
+        logging.error(e)
+    return {}
+    
 def get_price_extended(label):
     http.headers.clear()
     http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})

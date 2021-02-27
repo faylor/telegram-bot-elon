@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, bot, r
-from .prices import get_price, coin_price, get_change_label, get_price_extended
+from .prices import get_price, coin_price, get_ath_ranks, get_change_label, get_price_extended
 from .user import get_user_price_config
 
 @dp.message_handler(commands=['alts'])
@@ -45,6 +45,50 @@ async def prices_alts(message: types.Message):
             change24 = get_change_label(c_btc_24, 4)
         days_since = str(days_since).ljust(5, ' ')
         s = f"{l} {change} {change24}  {days_since} {round(ath_down,1)}%"
+        if len(change_list) >= 2:
+            i = 1
+            while i < len(change_list) and c_value < change_list[i]:
+                i = i + 1
+            out.insert(i, s)
+            change_list.insert(i,c_value)
+        else:
+            out.append(s)
+            change_list.append(c_value)
+
+    await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
+
+
+@dp.message_handler(commands=['ath'])
+async def prices_alts(message: types.Message):
+    chat_id = message.chat.id
+    mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
+    try:
+        config = json.loads(r.get(message.chat.id))
+        logging.info(json.dumps(config))
+        if "watch_list_alts" in config:
+            mains = config["watch_list_alts"]
+    except Exception as ex:
+        logging.info("no config found, ignore")
+    in_prices = get_user_price_config(message.from_user.mention).upper()
+
+    out = [f"<pre>{in_prices}   24hr  ATH-days   ATH%"]
+    change_list = [""]
+
+    data = get_ath_ranks(mains)
+
+    for l in mains:
+        d = data[l.upper()]
+        l = l.ljust(5, ' ')
+        
+        if in_prices == "USD":
+            c_value = data["change_usd_24hr"]
+            change = get_change_label(data["change_usd_24hr"], 4)
+        else:
+            c_value = data["change_btc_24hr"]
+            change = get_change_label(c_value, 4)
+        days_since = str(data["days_since_ath"]).ljust(5, ' ')
+        ath_down = data["down_from_alt"]
+        s = f"{l} {change}  {days_since} {round(ath_down,1)}%"
         if len(change_list) >= 2:
             i = 1
             while i < len(change_list) and c_value < change_list[i]:
