@@ -103,7 +103,7 @@ def get_filtered_data(labels):
 def get_ath_ranks(labels):
     try:
         data = get_filtered_data(labels)
-        results = []
+        results = {}
         if data is not None:
             for f in data:
                 results[f["symbol"]] = format_price_extended(f)
