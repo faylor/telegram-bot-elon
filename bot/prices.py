@@ -20,7 +20,8 @@ http = Session()
 http.mount("https://", adapter)
 http.mount("http://", adapter)
 
-from .bot import r
+from .settings import (REDIS_URL)
+r = redis.from_url(REDIS_URL)
 
 def to_zero(js, key1, key2, key3):
     try:
