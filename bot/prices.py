@@ -28,6 +28,37 @@ def to_zero(js, key1, key2, key3):
     except Exception as e:
         return 0
 
+def get_rapids():
+    http.headers.clear()
+    try:
+        url = "https://api.cryptometer.io/rapid-movements"
+        parameters = {
+            'api_key': os.environ["METER_IO_API"]
+        }
+        response = http.get(url, params=parameters)
+        if response.status_code == 429:
+            # use mess
+            logging.error("HIT LIMIT")
+        else:
+            coins = {}
+            data = response.json()
+            data_arr = data["data"]
+            #  "data":[
+            #     {
+            #        "pair":"WLO-USD",
+            #        "exchange":"bitfinex",
+            #        "change_detected":5.17,
+            #        "side":"PUMP",
+            #        "timestamp":"2019-12-11T11:18:15.000Z"
+            #     }
+            #  ]
+            return data_arr
+    except Exception as e:
+        logging.error(e)
+        return 0,0,0,0,0,0
+    return None
+
+
 def get_price_extended(label):
     http.headers.clear()
     http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})

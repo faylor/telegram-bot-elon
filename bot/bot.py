@@ -17,7 +17,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl, get_a_fox, search_pix
-from .prices import get_price, round_sense, get_news
+from .prices import get_price, round_sense, get_news, get_rapids
 
 r = redis.from_url(REDIS_URL)
 
@@ -204,6 +204,17 @@ async def send_price_of(message: types.Message, regexp_command):
             changes = round(100 * (p - saved) / saved, 2)
             await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
         await candle(message, regexp_command)
+    except Exception as e:
+        logging.warn("Could convert saved point:" + str(e))
+
+@dp.message_handler(commands=['pump', 'rapid'])
+async def send_rapids(message: types.Message):
+    try:
+        array_rapids = get_rapids()
+        out = ""
+        for rap in array_rapids:
+            out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"])
+        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
 
