@@ -79,6 +79,8 @@ async def prices_alts(message: types.Message):
         return await bot.send_message(chat_id=chat_id, text="Empty Data", parse_mode="HTML")
 
     for l in mains:
+        print(l.upper())
+        print(data)
         d = data[l.upper()]
         l = l.ljust(5, ' ')
         
