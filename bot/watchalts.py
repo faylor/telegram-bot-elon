@@ -84,15 +84,21 @@ async def prices_alts(message: types.Message):
         else:
             d = data[l.upper()]
             l = l.ljust(5, ' ')
-            
+            c_value = 0
+            c_1 = ""
+            c_24 = ""
             if in_prices == "USD":
-                c_value = d["change_usd_1hr"]
-                c_1 = get_change_label(c_value, 4)
-                c_24 = get_change_label(d["change_usd_24hr"], 4)
+                if "change_usd_1hr" in d:
+                    c_value = d["change_usd_1hr"]
+                    c_1 = get_change_label(c_value, 4)
+                if "change_usd_24hr" in d:
+                    c_24 = get_change_label(d["change_usd_24hr"], 4)
             else:
-                c_value = d["change_btc_1hr"]
-                c_1 = get_change_label(c_value, 4)
-                c_24 = get_change_label(d["change_usd_24hr"], 4)
+                if "change_btc_1hr" in d:
+                    c_value = d["change_btc_1hr"]
+                    c_1 = get_change_label(c_value, 4)
+                if "change_usd_24hr" in d:
+                    c_24 = get_change_label(d["change_usd_24hr"], 4)
             days_since = str(d["days_since_ath"]).ljust(5, ' ')
             ath_down = d["down_from_alt"]
             s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
