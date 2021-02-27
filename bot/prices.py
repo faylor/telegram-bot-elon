@@ -101,7 +101,7 @@ def search_data(dic, symbols):
 
 def get_filtered_cr_data(labels):
     try:
-        data = r.get("ATH_cr_" + labels)
+        data = r.get("ATH_cr_" + str(labels))
         if data is not None:
             logging.info("USING ATH CR FILTERED CACHE")
             return data
@@ -113,7 +113,7 @@ def get_filtered_cr_data(labels):
             results = {}
             for f in filtered_data:
                 results[f["symbol"]] = f
-            r.set("ATH_cr_" + labels, results, ex=60)
+            r.set("ATH_cr_" + str(labels), results, ex=60)
             return results
         else:
             logging.error("Filtered Failed... No Data")
@@ -219,7 +219,7 @@ def get_price(label):
 
 def coin_price(labels):
     try:
-        data = r.get("QUOTES_cmc_" + labels)
+        data = r.get("QUOTES_cmc_" + str(labels))
         if data is not None:
             logging.info("USING ATH CACHE")
             return data
@@ -239,7 +239,7 @@ def coin_price(labels):
             coins = {}
             data = response.json()
             data_arr = data["data"]
-            r.set("QUOTES_cmc_" + labels, data_arr, ex=60)
+            r.set("QUOTES_cmc_" + str(labels), data_arr, ex=60)
             return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("COIN_PRICE Error: " + str(e))
