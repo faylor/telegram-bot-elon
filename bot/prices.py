@@ -175,6 +175,7 @@ def format_price_extended(data_cr, data_cmc):
             coin_result["down_from_alt"] = -100 * (price - ath) / ath
         else: 
             coin_result["down_from_alt"] = 0
+        logging.error(coin_result)
         return coin_result
     except Exception as e:
         logging.error(e)
