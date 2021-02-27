@@ -211,14 +211,17 @@ async def send_price_of(message: types.Message, regexp_command):
 async def send_rapids(message: types.Message):
     try:
         array_rapids = get_rapids()
-        out = ""
+        out = "Most Recent Moveer Greater than 3%:\n<pre>"
         i = 0
         for rap in array_rapids:
-            if i < 15:
-                out = out + rap["pair"] + ": " + str(rap["side"]) + " " + str(rap["change_detected"]) + "% @" + str(rap["timestamp"]) + "\n"
+            if i > 15:
+                break
+            if abs(rap["change_detected"]) > 3:  
+                out = out + rap["pair"] + ": " + str(rap["change_detected"]) + "%\n"
                 i = i + 1
             else:
                 break
+        out = out + "</pre>"
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
                 
     except Exception as e:
