@@ -120,9 +120,9 @@ def format_price_extended(data):
         coin_result = {}
         price = to_zero_2(data, "price", "USD")
         change_usd_hr = to_zero(data, "histPrices", "24H", "USD")
-        coin_result["change_usd_24hr"] = (price - change_usd_hr)/change_usd_hr
+        coin_result["change_usd_24hr"] = 100*(price - change_usd_hr)/change_usd_hr
         change_btc_hr = to_zero(data, "histPrices", "24H", "BTC")
-        coin_result["change_btc_24hr"] = (price - change_btc_hr)/change_btc_hr
+        coin_result["change_btc_24hr"] = 100*(price - change_btc_hr)/change_btc_hr
         date_of_string = data["athPrice"]["date"]
         date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
         days_since = datetime.utcnow().date() - date_object
@@ -130,7 +130,7 @@ def format_price_extended(data):
         ath = to_zero_2(data, "athPrice", "USD")
         
         if ath < price:
-            coin_result["down_from_alt"] = (price - ath) / ath
+            coin_result["down_from_alt"] = 100* (price - ath) / ath
         else: 
             coin_result["down_from_alt"] = 0
         return coin_result
