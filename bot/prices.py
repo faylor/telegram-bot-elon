@@ -114,7 +114,7 @@ def format_price_extended(data):
         coin_result["change_usd_24hr"] = to_zero(data, "histPrices", "24H", "USD")
         coin_result["change_btc_24hr"] = to_zero(data, "histPrices", "24H", "BTC")
         date_of_string = data["athPrice"]["date"]
-        date_object = datetime.strptime(date_of_string, "%Y-%M-%D")
+        date_object = datetime.strptime(date_of_string, "%Y-%m-%d")
         days_since = datetime.utcnow() - date_object
         coin_result["days_since_ath"] = days_since
         ath = to_zero(data, "athPrice", "USD")

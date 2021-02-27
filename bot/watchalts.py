@@ -75,6 +75,8 @@ async def prices_alts(message: types.Message):
     change_list = [""]
 
     data = get_ath_ranks(mains)
+    if data is None:
+        return await bot.send_message(chat_id=chat_id, text="Empty Data", parse_mode="HTML")
 
     for l in mains:
         d = data[l.upper()]
