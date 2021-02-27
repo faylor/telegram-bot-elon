@@ -125,7 +125,7 @@ def format_price_extended(data):
         coin_result["change_btc_24hr"] = (price - change_btc_hr)/change_btc_hr
         date_of_string = data["athPrice"]["date"]
         date_object = datetime.strptime(date_of_string, "%Y-%m-%d").date()
-        days_since = datetime.utcnow() - date_object
+        days_since = datetime.utcnow().date() - date_object
         coin_result["days_since_ath"] = days_since
         ath = to_zero_2(data, "athPrice", "USD")
         
