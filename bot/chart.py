@@ -80,7 +80,7 @@ async def fibs_chart(message: types.Message, regexp_command):
     try:
         coin = regexp_command.group(1)
         trades = get_ohcl_trades(coin)
-        trades = trades[-60:]
+        trades = trades[-120:]
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
@@ -119,32 +119,27 @@ def fibs(df):
     price_max = fib.max() #df.Close.max()
     difference = abs(price_max - price_min)
     h_lines = []
-    print(difference/price_min)
-    if difference/price_min > 0.005:
-        thickness_top_line = (0.236 * (price_max - price_min))
-        bottom_top_line = price_max - thickness_top_line
-        center_of_top_line = price_max - thickness_top_line/2
-        print(bottom_top_line)
-        print(center_of_top_line)
-        print(thickness_top_line)
+    thickness_top_line = (0.236 * (price_max - price_min))
+    bottom_top_line = price_max - thickness_top_line
+    center_of_top_line = price_max - thickness_top_line/2
 
-        level2 = (0.382 * (price_max - price_min))
-        bottom_second_line = price_max - level2
-        thickness_second_line = abs(bottom_second_line - bottom_top_line)
-        center_of_second_line = bottom_top_line - thickness_second_line/2
+    level2 = (0.382 * (price_max - price_min))
+    bottom_second_line = price_max - level2
+    thickness_second_line = abs(bottom_second_line - bottom_top_line)
+    center_of_second_line = bottom_top_line - thickness_second_line/2
 
-        level3 = (0.618 * (price_max - price_min))
-        bottom_third_line = price_max - level3
-        thickness_third_line = abs(bottom_third_line - bottom_second_line)
-        center_of_third_line = bottom_second_line - thickness_third_line/2
+    level3 = (0.618 * (price_max - price_min))
+    bottom_third_line = price_max - level3
+    thickness_third_line = abs(bottom_third_line - bottom_second_line)
+    center_of_third_line = bottom_second_line - thickness_third_line/2
 
-        thickness_forth_line = abs(bottom_third_line - price_min)
-        center_of_forth_line = bottom_third_line - thickness_forth_line/2
-        
-        fix = 4.7
-        h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
-                        colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
-                        linewidths=[thickness_top_line/fix, thickness_second_line/fix, thickness_third_line/fix, thickness_forth_line/fix],
-                        alpha=0.4)
+    thickness_forth_line = abs(bottom_third_line - price_min)
+    center_of_forth_line = bottom_third_line - thickness_forth_line/2
+    
+    fix = 4.7
+    h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
+                    colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
+                    linewidths=[thickness_top_line/fix, thickness_second_line/fix, thickness_third_line/fix, thickness_forth_line/fix],
+                    alpha=0.4)
 
     return h_lines
