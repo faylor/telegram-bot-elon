@@ -133,20 +133,16 @@ def get_ath_ranks(labels):
             logging.error("ATH Ranks: No data from cr or cmc")
             return None
         for l in labels:
+            l = l.upper()
             tmp_cr = None
             tmp_cmc = None
-            logging.error("1")
             if l in data_cr:
-                logging.error("2")
                 tmp_cr = data_cr[l]
             if l in data_cmc:
-                logging.error("3")
                 tmp_cmc = data_cmc[l]
             if tmp_cr is None and tmp_cmc is None:
-                logging.error("4")
                 results[l] = {}
             else:
-                logging.error("5")
                 results[l] = format_price_extended(tmp_cr, tmp_cmc)
         return results
     except Exception as e:
