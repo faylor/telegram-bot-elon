@@ -83,7 +83,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         coin = splits[0]
         period_seconds = 60
         period_counts = -120
-        if len(splits) == 2:
+        if len(splits) >= 2:
             period_seconds = splits[1]
             if not period_seconds.isdigit():
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not a number, try 60, 180, 108000 etc")
