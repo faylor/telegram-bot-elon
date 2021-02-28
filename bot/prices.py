@@ -298,7 +298,7 @@ def get_ohcl_trades(coin, period_seconds):
         else:
             coins = {}
             data = response.json()
-            data_arr = data["result"]["60"]
+            data_arr = data["result"][str(period_seconds)]
             return data_arr
     
     except (ConnectionError, Timeout, TooManyRedirects) as e:

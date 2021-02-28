@@ -82,7 +82,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         splits = inputs.split()
         coin = splits[0]
         period_seconds = 60
-        period_counts = -120
+        period_counts = 60
         if len(splits) >= 2:
             period_seconds = splits[1]
             if not period_seconds.isnumeric():
