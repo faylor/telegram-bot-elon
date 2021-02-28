@@ -74,7 +74,7 @@ async def candle(message: types.Message, regexp_command):
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibs ([\sa-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibs ([\s0-9.a-zA-Z]*)']))
 async def fibs_chart(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
@@ -92,9 +92,6 @@ async def fibs_chart(message: types.Message, regexp_command):
             period_counts = splits[2]
             if not period_counts.isnumeric():
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
-        
-        await bot.send_message(chat_id=chat_id, text="Running reporting for " + str(inputs) + " - " + str(splits) + " ... " + str(period_seconds) + "seconds, number of times:" + str(period_counts), parse_mode="HTML")
-       
         trades = get_ohcl_trades(coin, period_seconds)
         trades = trades[-2 * period_counts:]
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
