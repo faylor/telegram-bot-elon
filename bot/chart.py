@@ -79,7 +79,7 @@ async def fibs_chart(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
         inputs = regexp_command.group(1)
-        splits = inputs.split(" ")
+        splits = inputs.split()
         coin = splits[0]
         period_seconds = 60
         period_counts = -120
