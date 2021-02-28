@@ -86,16 +86,36 @@ async def fibs_chart(message: types.Message, regexp_command):
 
         if len(splits) > 1:
             period_seconds = splits[1]
-            if period_seconds.lower() == "1m":
+            if period_seconds.lower() == "m" or period_seconds.lower() == "1m":
                 period_seconds = 60
             elif period_seconds.lower() == "3m":
                 period_seconds = 180
-            elif period_seconds.lower() == "1d":
-                period_seconds = 108000
+            elif period_seconds.lower() == "5m":
+                period_seconds = 300
+            elif period_seconds.lower() == "15m":
+                period_seconds = 900
+            elif period_seconds.lower() == "30m":
+                period_seconds = 1800
+            elif period_seconds.lower() == "60m" or period_seconds.lower() == "h" or period_seconds.lower() == "1h":
+                period_seconds = 3600
+            elif period_seconds.lower() == "2h":
+                period_seconds = 7200
+            elif period_seconds.lower() == "4h":
+                period_seconds = 14400
+            elif period_seconds.lower() == "6h":
+                period_seconds = 21600
+            elif period_seconds.lower() == "12h":
+                period_seconds = 43200
+            elif period_seconds.lower() == "24h" or period_seconds.lower() == "d" or period_seconds.lower() == "1d":
+                period_seconds = 86400
+            elif period_seconds.lower() == "3d":
+                period_seconds = 259200
+            elif period_seconds.lower() == "7d" or period_seconds.lower() == "w" or period_seconds.lower() == "1w":
+                period_seconds = 604800
             elif period_seconds.isnumeric():
                 period_seconds = int(period_seconds)
             else:
-                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not 1M, 3M, 1D of a number in seconds like 60, 180, 108000 etc")
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not 1M, 3M, 5M, 15M, 30M, 1H, 2H, 4H, 6H, 12H, 1D, 3D, 1W of a number in seconds like 60, 180, 108000 etc")
         if len(splits) == 3:
             period_counts = splits[2]
             if period_counts.isnumeric():
