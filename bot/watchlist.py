@@ -75,7 +75,13 @@ async def add_to_prices(message: types.Message, regexp_command):
         else:
             config = json.loads(config)
         logging.info(json.dumps(config))
-        a, _, _, _ = get_price(new_coin)
+        
+        coins = coin_price(new_coin)
+        if coins is None or new_coin.upper() not in coins:
+            a, _, _, _ = get_price(new_coin)
+        else:
+            a = coins[new_coin.upper()]["quote"]["USD"]["price"]
+            
         if "watch_list" not in config:
             config["watch_list"] = []
         if a == 0:
