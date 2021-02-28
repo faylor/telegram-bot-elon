@@ -109,7 +109,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
         logging.error("5")
-        df = df.tail(period_counts)
+        df = df.tail(int(period_counts))
         logging.error("6")
         h_lines, y_min, y_max = fibs(df)
 
