@@ -86,19 +86,23 @@ async def fibs_chart(message: types.Message, regexp_command):
 
         if len(splits) > 1:
             period_seconds = splits[1]
-            if not period_seconds.isnumeric():
-                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not a number, try 60, 180, 108000 etc")
+            if period_seconds.lower() == "1m":
+                period_seconds = 60
+            elif period_seconds.lower() == "3m":
+                period_seconds = 180
+            elif period_seconds.lower() == "1d":
+                period_seconds = 108000
+            elif period_seconds.isnumeric():
+                period_seconds = int(period_seconds)
+            else:
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not 1M, 3M, 1D of a number in seconds like 60, 180, 108000 etc")
         if len(splits) == 3:
             period_counts = splits[2]
             if not period_counts.isnumeric():
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
-        logging.error("1")
         trades = get_ohcl_trades(coin, period_seconds)
-        logging.error("2")
-        ranger = -2 * int(period_counts)
-        logging.error("3")
+        ranger = -2 * period_counts
         trades = trades[ranger:]
-        logging.error("4")
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
@@ -108,9 +112,7 @@ async def fibs_chart(message: types.Message, regexp_command):
 
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
-        logging.error("5")
         df = df.tail(int(period_counts))
-        logging.error("6")
         h_lines, y_min, y_max = fibs(df)
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
