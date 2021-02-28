@@ -98,8 +98,11 @@ async def fibs_chart(message: types.Message, regexp_command):
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not 1M, 3M, 1D of a number in seconds like 60, 180, 108000 etc")
         if len(splits) == 3:
             period_counts = splits[2]
-            if not period_counts.isnumeric():
+            if period_counts.isnumeric():
+                period_counts = int(period_counts)
+            else:
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
+            
         trades = get_ohcl_trades(coin, period_seconds)
         ranger = -2 * period_counts
         trades = trades[ranger:]
