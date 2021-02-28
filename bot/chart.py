@@ -74,13 +74,25 @@ async def candle(message: types.Message, regexp_command):
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibs ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibs ([\sa-zA-Z]*)']))
 async def fibs_chart(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
-        coin = regexp_command.group(1)
-        trades = get_ohcl_trades(coin)
-        trades = trades[-120:]
+        inputs = regexp_command.group(1)
+        splits = inputs.split(" ")
+        coin = splits[0]
+        period_seconds = 60
+        period_counts = -120
+        if len(splits) == 2:
+            period_seconds = splits[1]
+            if not period_seconds.isdigit():
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not a number, try 60, 180, 108000 etc")
+        if len(splits) == 3:
+            period_counts = splits[2]
+            if not period_counts.isdigit():
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
+        trades = get_ohcl_trades(coin, period_seconds)
+        trades = trades[-2 * period_counts:]
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
@@ -91,7 +103,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
 
-        df = df.tail(60)
+        df = df.tail(period_counts)
 
         h_lines, y_min, y_max = fibs(df)
 
