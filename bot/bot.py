@@ -47,7 +47,14 @@ SETTINGS:
 
 COIN INFORMATION:
   Get Price: /$btc /$aave ..etc
-  News Summary: /news btc 
+  News Summary: /news btc
+  Rapid changers: /rapid  or  /pump
+  Chart: /chart <coin>  eg: /chart btc
+  Fib Chart: /fibs <coin> <optional time period> <optional number of bars>
+            eg: /fibs btc    (will default to 1m and 60 intervals)
+            or  /fibs btc 3m  (will default to 60 intervals)
+            or /fibs btc 15m 100 (will show 15min periods 100 times)
+            Time Periods: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d, 3d, 7d  
 
 WATCH COINS (PER CHAT):
   Watch table: /$ /lambo /prices 

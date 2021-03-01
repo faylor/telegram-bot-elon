@@ -87,7 +87,7 @@ async def prices_alts(message: types.Message):
             c_value = 0
             c_1 = ""
             c_24 = ""
-            days_since = "??".ljust(5, ' ')
+            days_since = "0".ljust(5, ' ')
             ath_down = 0
             if in_prices == "USD":
                 if "change_usd_1hr" in d:
