@@ -45,7 +45,7 @@ async def candle(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
         coin = regexp_command.group(1)
-        trades = get_ohcl_trades(coin)
+        trades = get_ohcl_trades(coin, 180)
         trades = trades[-60:]
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
