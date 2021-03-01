@@ -213,6 +213,8 @@ def get_price_extended(label):
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
+        http.headers.clear()
+        http.headers.update({"x-messari-api-key": os.environ["MESSARI_API_KEY"]})
         url = "https://data.messari.io/api/v1/assets/" + label + "/metrics"
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
