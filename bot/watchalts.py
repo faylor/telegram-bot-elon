@@ -16,7 +16,7 @@ from .bot import dp, bot, r
 from .prices import get_price, coin_price, get_ath_ranks, get_change_label, get_price_extended
 from .user import get_user_price_config
 
-@dp.message_handler(commands=['ath'])
+@dp.message_handler(commands=['altsold'])
 async def prices_alts(message: types.Message):
     chat_id = message.chat.id
     mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO", "AAVE", "DOGE", "ZIL"]
@@ -58,7 +58,7 @@ async def prices_alts(message: types.Message):
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
 
-@dp.message_handler(commands=['alts'])
+@dp.message_handler(commands=['alts', 'ath', 'aths'])
 async def prices_alts(message: types.Message):
     chat_id = message.chat.id
     mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
