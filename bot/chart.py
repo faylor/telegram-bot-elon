@@ -59,10 +59,14 @@ async def candle(message: types.Message, regexp_command):
 
         df = df.tail(30)
 
+        
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
             mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
 
+        rsi_df = get_rsi_df(df)
+        if rsi_df is not None:
+            apd.append(mpf.make_addplot(rsi_df, color='r', panel=1))
         kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
         mpf.plot(df,**kwargs,style='nightclouds')
         mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
@@ -199,37 +203,18 @@ def fibs(df):
 
     return h_lines, ymin, ymax
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['rsi ([\s0-9.a-zA-Z]*)']))
-async def rsi_chart(message: types.Message, regexp_command):
+def get_rsi_df(ticker):
     try:
-        chat_id = message.chat.id
-    
-        coin = regexp_command.group(1)
-        trades = get_ohcl_trades(coin, 180)
-        trades = trades[-60:]
-        ticker = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
-        ticker['time'] = pd.DatetimeIndex(ticker['time']*10**9)
-        ticker.set_index('time', inplace=True)
-
         delta = ticker['close'].diff()
         up = delta.clip(lower=0)
         down = -1*delta.clip(upper=0)
         ema_up = up.ewm(com=13, adjust=False).mean()
         ema_down = down.ewm(com=13, adjust=False).mean()
         rs = ema_up/ema_down
-
         ticker['RSI'] = 100 - (100/(1 + rs))
-
         ticker = ticker.iloc[14:]
-
-        kwargs = dict(type='line',ylabel=coin.upper() + ' RSI',figratio=(3,2),figscale=1.5,ylim=[0,100])
-        
-        mpf.plot(ticker['RSI'],**kwargs,style='nightclouds')
-        mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
-        s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
-        mpf.plot(ticker['RSI'], **kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + '-rsi.png', hlines=[30, 70])
-        await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + '-rsi.png'))
-
+        return ticker["RSI"]    
     except Exception as e:
         logging.error("RSI failed:" + str(e))
+        return None
 
