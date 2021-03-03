@@ -57,14 +57,13 @@ async def candle(message: types.Message, regexp_command):
         df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
         df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
 
+        rsi_df = get_rsi_df(df)
         df = df.tail(30)
 
-        
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
             mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
 
-        rsi_df = get_rsi_df(df)
         if rsi_df is not None:
             apd.append(mpf.make_addplot(rsi_df, color='r', panel=1))
         kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
@@ -212,7 +211,7 @@ def get_rsi_df(ticker):
         ema_down = down.ewm(com=13, adjust=False).mean()
         rs = ema_up/ema_down
         ticker['RSI'] = 100 - (100/(1 + rs))
-        ticker = ticker.iloc[14:]
+        ticker = ticker.tail(30)
         return ticker["RSI"]    
     except Exception as e:
         logging.error("RSI failed:" + str(e))
