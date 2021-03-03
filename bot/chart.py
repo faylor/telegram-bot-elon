@@ -290,14 +290,16 @@ def fibs(df, extend=False):
         setminy = price_min-ydelta
     ymin = setminy
     ymax= price_max+ydelta
-    fix = 26
+    
     if extend:
         thickness = thickness_top_line + thickness_second_line
         ymax=ymax+thickness
         center_of_extend = price_max + thickness/2
+        fix = 20
         h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
         line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
     else:
+        fix = 26
         h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
         line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
                     
