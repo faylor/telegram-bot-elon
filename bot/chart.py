@@ -167,8 +167,97 @@ async def fibs_chart(message: types.Message, regexp_command):
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibex ([\s0-9.a-zA-Z]*)']))
+async def fibs_chart(message: types.Message, regexp_command):
+    chat_id = message.chat.id
+    try:
+        inputs = regexp_command.group(1)
+        splits = inputs.split()
+        coin = splits[0]
+        period_seconds = 60
+        period_counts = 60
 
-def fibs(df):
+        if len(splits) > 1:
+            period_seconds = splits[1]
+            if period_seconds.lower() == "m" or period_seconds.lower() == "1m":
+                period_seconds = 60
+            elif period_seconds.lower() == "3m":
+                period_seconds = 180
+            elif period_seconds.lower() == "5m":
+                period_seconds = 300
+            elif period_seconds.lower() == "15m":
+                period_seconds = 900
+            elif period_seconds.lower() == "30m":
+                period_seconds = 1800
+            elif period_seconds.lower() == "60m" or period_seconds.lower() == "h" or period_seconds.lower() == "1h":
+                period_seconds = 3600
+            elif period_seconds.lower() == "2h":
+                period_seconds = 7200
+            elif period_seconds.lower() == "4h":
+                period_seconds = 14400
+            elif period_seconds.lower() == "6h":
+                period_seconds = 21600
+            elif period_seconds.lower() == "12h":
+                period_seconds = 43200
+            elif period_seconds.lower() == "24h" or period_seconds.lower() == "d" or period_seconds.lower() == "1d":
+                period_seconds = 86400
+            elif period_seconds.lower() == "3d":
+                period_seconds = 259200
+            elif period_seconds.lower() == "7d" or period_seconds.lower() == "w" or period_seconds.lower() == "1w":
+                period_seconds = 604800
+            elif period_seconds.isnumeric():
+                period_seconds = int(period_seconds)
+            else:
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your period in seconds is not 1M, 3M, 5M, 15M, 30M, 1H, 2H, 4H, 6H, 12H, 1D, 3D, 1W of a number in seconds like 60, 180, 108000 etc")
+        if len(splits) == 3:
+            period_counts = splits[2]
+            if period_counts.isnumeric():
+                period_counts = int(period_counts)
+            else:
+                return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
+            
+        trades = get_ohcl_trades(coin, period_seconds)
+        ranger = -2 * period_counts
+        trades = trades[ranger:]
+        df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
+        df['time'] = pd.DatetimeIndex(df['time']*10**9)
+        df.set_index('time', inplace=True)
+
+        df['MA20'] = df['close'].rolling(window=20).mean()
+        df['20dSTD'] = df['close'].rolling(window=20).std() 
+
+        df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
+        df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
+        
+        rsi_df = get_rsi_df(df)
+        rsi_df = rsi_df.tail(int(period_counts))
+        df = df.tail(int(period_counts))
+        h_lines, y_min, y_max = fibs(df, extend=true)
+
+        apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
+                mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
+            mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
+        
+        if rsi_df is not None:
+            apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, ylabel='RSI', ylim=[0,100]))
+
+        if y_min is None:
+            kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
+        else:
+            kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
+        
+        mpf.plot(df,**kwargs,style='nightclouds')
+        mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
+        s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
+        mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + '-mplfiance.png', hlines=h_lines)
+        await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + '-mplfiance.png'))
+    except Exception as e:
+        logging.error("ERROR Making chart:" + str(e))
+        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+
+
+
+def fibs(df, extend=False):
 
     fib = df['close']
 
@@ -202,9 +291,19 @@ def fibs(df):
     ymin = setminy
     ymax= price_max+ydelta
     fix = 26
-    h_lines = dict(hlines=[center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line],
-                    colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350'],
-                    linewidths=[fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta],
+    if extend:
+        thickness = thickness_top_line + thickness_second_line
+        ymax=ymax+thickness
+        center_of_extend = price_max + thickness/2
+        h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
+        line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+    else:
+        h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
+        line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+                    
+    h_lines = dict(hlines=h_normal,
+                    colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350', '#FEFEFE'],
+                    linewidths=line_widths,
                     alpha=0.15)
 
     return h_lines, ymin, ymax
