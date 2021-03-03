@@ -286,11 +286,13 @@ def fibs(df, extend=False):
     if extend:
         thickness = thickness_top_line + thickness_second_line
         ydelta = 0.1 * (price_max+thickness-price_min)
+        ymax= price_max+thickness+ydelta
         center_of_extend = price_max + thickness/2
         h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
         line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
     else:
         ydelta = 0.1 * (price_max-price_min)
+        ymax= price_max+ydelta
         h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
         line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
     if price_min > 0.0:
@@ -298,7 +300,6 @@ def fibs(df, extend=False):
     else:
         setminy = price_min-ydelta
     ymin = setminy
-    ymax= price_max+ydelta             
     h_lines = dict(hlines=h_normal,
                     colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350', '#FEFEFE'],
                     linewidths=line_widths,
