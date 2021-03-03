@@ -65,7 +65,7 @@ async def candle(message: types.Message, regexp_command):
             mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
 
         if rsi_df is not None:
-            apd.append(mpf.make_addplot(rsi_df, color='r', panel=1))
+            apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, ylim=[0,100]))
         kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
         mpf.plot(df,**kwargs,style='nightclouds')
         mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
