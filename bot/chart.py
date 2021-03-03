@@ -282,27 +282,23 @@ def fibs(df, extend=False):
     thickness_forth_line = abs(bottom_third_line - price_min)
     center_of_forth_line = bottom_third_line - thickness_forth_line/2
     
-    ydelta = 0.1 * (price_max-price_min)
+    fix = 26
+    if extend:
+        thickness = thickness_top_line + thickness_second_line
+        ydelta = 0.1 * (price_max+thickness-price_min)
+        center_of_extend = price_max + thickness/2
+        h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
+        line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+    else:
+        ydelta = 0.1 * (price_max-price_min)
+        h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
+        line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
     if price_min > 0.0:
-        # don't let it go negative:
         setminy = max(0.9*price_min,price_min-ydelta)
     else:
         setminy = price_min-ydelta
     ymin = setminy
-    ymax= price_max+ydelta
-    
-    if extend:
-        thickness = thickness_top_line + thickness_second_line
-        ymax=ymax+thickness
-        center_of_extend = price_max + thickness/2
-        fix = 20
-        h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
-        line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
-    else:
-        fix = 26
-        h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
-        line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
-                    
+    ymax= price_max+ydelta             
     h_lines = dict(hlines=h_normal,
                     colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350', '#FEFEFE'],
                     linewidths=line_widths,
