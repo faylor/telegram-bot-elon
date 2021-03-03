@@ -301,7 +301,7 @@ def fibs(df, extend=False):
         setminy = price_min-ydelta
     ymin = setminy
     h_lines = dict(hlines=h_normal,
-                    colors=['#26C6DA', '#66BB6A','#FFA726', '#EF5350', '#FEFEFE'],
+                    colors=['#26C6DA', '#FEFEFE','#FFA726', '#EF5350', '#66BB6A'],
                     linewidths=line_widths,
                     alpha=0.15)
 
