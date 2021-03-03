@@ -288,9 +288,9 @@ def get_last_trades(x):
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
 
-def get_ohcl_trades(coin, period_seconds):
+def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     http.headers.clear()
-    url = 'https://api.cryptowat.ch/markets/binance/' + coin + 'usdt/ohlc?periods=' + str(period_seconds)
+    url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
     try:
         response = http.get(url)
@@ -299,6 +299,8 @@ def get_ohcl_trades(coin, period_seconds):
             logging.error("HIT LIMIT")
         else:
             data = response.json()
+            if "error" in data and exchange=='binance':
+                 return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
             data_arr = data["result"][str(period_seconds)]
             return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
