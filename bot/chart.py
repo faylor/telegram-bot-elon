@@ -232,7 +232,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         rsi_df = get_rsi_df(df)
         rsi_df = rsi_df.tail(int(period_counts))
         df = df.tail(int(period_counts))
-        h_lines, y_min, y_max = fibs(df, extend=true)
+        h_lines, y_min, y_max = fibs(df, extend=True)
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
