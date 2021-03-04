@@ -168,14 +168,14 @@ async def fibs_chart(message: types.Message, regexp_command):
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fibex ([\s0-9.a-zA-Z]*)']))
-async def fibs_chart(message: types.Message, regexp_command):
+async def fibs_chart_extended(message: types.Message, regexp_command):
     chat_id = message.chat.id
     try:
         inputs = regexp_command.group(1)
         splits = inputs.split()
         coin = splits[0]
         period_seconds = 60
-        period_counts = 60
+        period_counts = 100
 
         if len(splits) > 1:
             period_seconds = splits[1]
@@ -263,6 +263,12 @@ def fibs(df, extend=False):
 
     price_min = fib.min() #df.Close.min()
     price_max = fib.max() #df.Close.max()
+    max_index = fib.idxmax()
+    min_index = fib.idxmin()
+    if max_index > min_index:
+        logging.error("TRENDING UP")
+    else:
+        logging.error("TRENDING DOWN")
     difference = abs(price_max - price_min)
     h_lines = []
     thickness_top_line = (0.236 * (price_max - price_min))
