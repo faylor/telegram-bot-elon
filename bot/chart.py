@@ -86,7 +86,7 @@ async def fibs_chart(message: types.Message, regexp_command):
         splits = inputs.split()
         coin = splits[0]
         period_seconds = 60
-        period_counts = 60
+        period_counts = 80
 
         if len(splits) > 1:
             period_seconds = splits[1]
@@ -175,7 +175,7 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
         splits = inputs.split()
         coin = splits[0]
         period_seconds = 60
-        period_counts = 100
+        period_counts = 80
 
         if len(splits) > 1:
             period_seconds = splits[1]
@@ -266,9 +266,12 @@ def fibs(df, extend=False):
     max_index = fib.idxmax()
     min_index = fib.idxmin()
     if max_index > min_index:
-        logging.error("TRENDING UP")
+        logging.info("TRENDING UP")
+        trend_direction = "UP"
     else:
-        logging.error("TRENDING DOWN")
+        logging.info("TRENDING DOWN")
+        trend_direction = "DOWN"
+
     difference = abs(price_max - price_min)
     h_lines = []
     thickness_top_line = (0.236 * (price_max - price_min))
@@ -290,17 +293,28 @@ def fibs(df, extend=False):
     
     fix = 26
     if extend:
-        thickness = thickness_top_line + thickness_second_line
-        ydelta = 0.1 * (price_max+thickness-price_min)
-        ymax= price_max+thickness+ydelta
-        center_of_extend = price_max + thickness/2
-        h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
-        line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+        if trend_direction == "UP":
+            thickness = thickness_top_line + thickness_second_line
+            ydelta = 0.1 * (price_max+thickness-price_min)
+            ymax= price_max + thickness + ydelta
+            center_of_extend = price_max + thickness/2
+            h_normal = [center_of_extend, center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
+            line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+ 
+        else:
+            thickness = thickness_forth_line + thickness_third_line
+            ydelta = 0.1 * (price_max + thickness - price_min)
+            center_of_extend = price_min - thickness/2
+            price_min= price_min - thickness
+            h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line, center_of_extend]
+            line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta, fix * thickness/ydelta]
+ 
     else:
         ydelta = 0.1 * (price_max-price_min)
         ymax= price_max+ydelta
         h_normal = [center_of_top_line, center_of_second_line, center_of_third_line, center_of_forth_line]
         line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
+    
     if price_min > 0.0:
         setminy = max(0.9*price_min,price_min-ydelta)
     else:
