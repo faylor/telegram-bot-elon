@@ -1,17 +1,8 @@
 import logging
 import json
-import requests
-import redis
-import asyncio
-from aiogram import Bot, types
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher import Dispatcher, filters
-from aiogram.utils.executor import start_webhook
-from aiogram.dispatcher.webhook import SendMessage
-from aiogram.utils.markdown import escape_md
-from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
-                          WEBHOOK_URL, WEBHOOK_PATH,
-                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+from aiogram import types
+from aiogram.dispatcher import filters
+
 from .bot import dp, r, bot
 
 @dp.message_handler(commands=['pickup'])
@@ -36,7 +27,7 @@ async def pickup_list(message: types.Message):
     out = out + "</pre>"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['+([\s0-9,.a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\+([\s0-9,.a-zA-Z]*)']))
 async def add_to_shop(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1).strip()
@@ -64,7 +55,7 @@ async def add_to_shop(message: types.Message, regexp_command):
 
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['-([\s0-9,.a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\-([\s0-9,.a-zA-Z]*)']))
 async def remove_from_shop(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1).strip().lower()
