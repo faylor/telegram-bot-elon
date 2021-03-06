@@ -293,9 +293,9 @@ def fibs(df, extend=False):
     center_of_forth_line = bottom_third_line - thickness_forth_line/2
     
     fix = 26
-    if extend:
+    if extend == True:
         if trend_direction == "UP":
-            logging.error("111bbbb")
+            logging.error("-----------111bbbb")
             thickness = thickness_top_line + thickness_second_line
             ydelta = 0.1 * (price_max+thickness-price_min)
             ymax= price_max + thickness + ydelta
@@ -304,7 +304,7 @@ def fibs(df, extend=False):
             line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
  
         else:
-            logging.error("11aa1")
+            logging.error("---------------11aa1")
             thickness = thickness_forth_line + thickness_third_line
             ydelta = 0.1 * (price_max + thickness - price_min)
             center_of_extend = price_min - thickness/2
