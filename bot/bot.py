@@ -34,6 +34,7 @@ from .virtualwallet import *
 from .bets import *
 from .user import *
 from .chart import *
+from .shoppinglist import *
 
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me', 'start'])
@@ -114,6 +115,11 @@ Fun:
   /fox  or /foxy
   /pix <anything>
   /remind
+
+RANDOM:
+  /pickup   (shopping list)
+  /+<anything> (add to list)
+  /-<anything> (remove from list)
 
 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
     """
