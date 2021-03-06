@@ -67,7 +67,7 @@ async def remove_from_shop(message: types.Message, regexp_command):
                 if new_coin in config["shop_list"]:
                     config["shop_list"].remove(new_coin)
                     
-                r.delete(message.chat.id, json.dumps(config))
+                r.set(message.chat.id, json.dumps(config))
                 await message.reply(f'{message.from_user.first_name}, done. You bought ' + str(new_coin))
                 return
                 
