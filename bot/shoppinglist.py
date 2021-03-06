@@ -13,8 +13,6 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_price, coin_price, round_sense, get_change_label
-from .user import get_user_price_config
 
 @dp.message_handler(commands=['pickup'])
 async def pickup_list(message: types.Message):
