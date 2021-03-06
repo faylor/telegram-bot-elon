@@ -241,7 +241,7 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
         if rsi_df is not None:
             apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI', ylim=[0,100]))
 
-        kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
+        kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=2, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
         
         mpf.plot(df,**kwargs,style='nightclouds')
         mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
