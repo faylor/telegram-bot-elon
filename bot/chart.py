@@ -239,7 +239,7 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
                 mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
         
         if rsi_df is not None:
-            apd.extend(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, ylabel='RSI', ylim=[0,100]))
+            apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI', ylim=[0,100]))
 
         if y_min is None:
             kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
@@ -294,7 +294,6 @@ def fibs(df, extend=False):
     fix = 26
     if extend == True:
         if trend_direction == "UP":
-            logging.error("-----------111bbbb")
             thickness = thickness_top_line + thickness_second_line
             ydelta = 0.1 * (price_max+thickness-price_min)
             ymax= price_max + thickness + ydelta
@@ -303,7 +302,6 @@ def fibs(df, extend=False):
             line_widths = [fix * thickness/ydelta, fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
  
         else:
-            logging.error("---------------11aa1")
             thickness = thickness_forth_line + thickness_third_line
             ydelta = 0.1 * (price_max + thickness - price_min)
             center_of_extend = price_min - thickness/2
@@ -319,10 +317,8 @@ def fibs(df, extend=False):
         line_widths = [fix * thickness_top_line/ydelta, fix * thickness_second_line/ydelta, fix * thickness_third_line/ydelta, fix * thickness_forth_line/ydelta]
     
     if price_min > 0.0:
-        logging.error("111")
         setminy = max(0.9*price_min,price_min-ydelta)
     else:
-        logging.error("222")
         setminy = price_min-ydelta
     ymin = setminy
     h_lines = dict(hlines=h_normal,
