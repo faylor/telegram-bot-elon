@@ -236,12 +236,13 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
 
         apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
                 mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
-            mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
+                mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
         
         if rsi_df is not None:
-            apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel='lower', ylabel='RSI', ylim=[0,100]))
+            apd.extend(mpf.make_addplot(rsi_df, color='#FFFFFF', panel='lower', ylabel='RSI', ylim=[0,100]))
 
         if y_min is None:
+            logging.error("HEREEJKSHFKJSHF")
             kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd)
         else:
             kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True,figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
