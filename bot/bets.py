@@ -191,16 +191,21 @@ async def clear_weekly_totals(message: types.Message):
 async def set_user_totes(message: types.Message):
     try:
         chat_id = message.chat.id
-        for key in r.scan_iter(f"{chat_id}_BTC_*"):
-            user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
-            if not user_id.isdigit():
-                logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
-            else:
-                member = await bot.get_chat_member(message.chat.id, user_id)
-                mention_name = member.user.mention    
-                logging.error(mention_name + " = " + user_id)
+        # for key in r.scan_iter(f"{chat_id}_BTC_*"):
+        #     user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
+        #     if not user_id.isdigit():
+        #         logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
+        #     else:
+        #         member = await bot.get_chat_member(message.chat.id, user_id)
+        #         mention_name = member.user.mention    
+        #         logging.error(mention_name + " = " + user_id)
                 
-            # set_user_total(message.chat.id, user, int(amount))
+        set_user_total(chat_id, 1442973965, int(2))
+        set_user_total(chat_id, 1038547988, int(2))
+        set_user_total(chat_id, 1402645782, int(6))
+        set_user_total(chat_id, 1597217560, int(2))
+        set_user_total(chat_id, 1573604904, int(5))
+
         await message.reply(f"Set User")
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
