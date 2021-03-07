@@ -187,13 +187,10 @@ async def clear_weekly_totals(message: types.Message):
             r.set(bets_chat_key, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['setupagain']))
-async def set_user_totes(message: types.Message, regexp_command):
+@dp.message_handler(commands=['setupagain'])
+async def set_user_totes(message: types.Message):
     try:
         chat_id = message.chat.id
-        user = regexp_command.group(1)
-        amount = regexp_command.group(2)
-        logging.error("USER:" + user)
         for key in r.scan_iter(f"{chat_id}_BTC_*"):
             user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
             if not user_id.isdigit():
