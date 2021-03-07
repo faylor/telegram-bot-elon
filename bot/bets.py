@@ -213,11 +213,20 @@ async def set_user_totes(message: types.Message):
 
 def set_user_total(chat_id, user_id, total):
     try:
+        logging.error("Current config set user total: " )
+        
         bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
+
+        logging.error("Current config set user total: " + bets_chat_key)
+        
         config = r.get(bets_chat_key)
         if config is None:
+            logging.error("Current config set user total: 000 " + bets_chat_key)
+        
             config = {}
         else:
+            logging.error("Current config set user total: " + str(config))
+        
             config = json.loads(config)
         logging.error("Current config set user total: " + json.dumps(config))
         if "winners_list" not in config:
