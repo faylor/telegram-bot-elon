@@ -187,53 +187,53 @@ async def clear_weekly_totals(message: types.Message):
             r.set(bets_chat_key, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
-@dp.message_handler(commands=['setupagain'])
-async def set_user_totes(message: types.Message):
-    try:
-        chat_id = message.chat.id
-        # for key in r.scan_iter(f"{chat_id}_BTC_*"):
-        #     user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
-        #     if not user_id.isdigit():
-        #         logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
-        #     else:
-        #         member = await bot.get_chat_member(message.chat.id, user_id)
-        #         mention_name = member.user.mention    
-        #         logging.error(mention_name + " = " + user_id)
+# @dp.message_handler(commands=['setupagain'])
+# async def set_user_totes(message: types.Message):
+#     try:
+#         chat_id = message.chat.id
+#         # for key in r.scan_iter(f"{chat_id}_BTC_*"):
+#         #     user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
+#         #     if not user_id.isdigit():
+#         #         logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
+#         #     else:
+#         #         member = await bot.get_chat_member(message.chat.id, user_id)
+#         #         mention_name = member.user.mention    
+#         #         logging.error(mention_name + " = " + user_id)
                 
-        set_user_total(chat_id, 1442973965, int(2))
-        set_user_total(chat_id, 1038547988, int(2))
-        set_user_total(chat_id, 1402645782, int(6))
-        set_user_total(chat_id, 1597217560, int(2))
-        set_user_total(chat_id, 1573604904, int(5))
+#         set_user_total(chat_id, 1442973965, int(2))
+#         set_user_total(chat_id, 1038547988, int(2))
+#         set_user_total(chat_id, 1402645782, int(6))
+#         set_user_total(chat_id, 1597217560, int(2))
+#         set_user_total(chat_id, 1573604904, int(5))
 
-        await message.reply(f"Set User")
-    except Exception as e:
-        logging.error("Cannot bet: " + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+#         await message.reply(f"Set User")
+#     except Exception as e:
+#         logging.error("Cannot bet: " + str(e))
+#         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-def set_user_total(chat_id, user_id, total):
-    try:
-        logging.error("Current config set user total: " )
+# def set_user_total(chat_id, user_id, total):
+#     try:
+#         logging.error("Current config set user total: " )
         
-        bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
+#         bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
 
-        logging.error("Current config set user total: " + bets_chat_key)
+#         logging.error("Current config set user total: " + bets_chat_key)
         
-        config = r.get(bets_chat_key)
-        if config is None:
-            logging.error("Current config set user total: 000 " + bets_chat_key)
+#         config = r.get(bets_chat_key)
+#         if config is None:
+#             logging.error("Current config set user total: 000 " + bets_chat_key)
         
-            config = {"winners_list": {}}
-        else:
-            logging.error("Current config set user total: " + str(config))
+#             config = {"winners_list": {}}
+#         else:
+#             logging.error("Current config set user total: " + str(config))
         
-            config = json.loads(config)
-        logging.error("Current config set user total: " + json.dumps(config))
-        config["winners_list"][str(user_id)] = total
-        r.set(bets_chat_key, json.dumps(config))
-    except Exception as e:
-        logging.error("Cannot set user total: " + str(e))
-        raise e
+#             config = json.loads(config)
+#         logging.error("Current config set user total: " + json.dumps(config))
+#         config["winners_list"][str(user_id)] = total
+#         r.set(bets_chat_key, json.dumps(config))
+#     except Exception as e:
+#         logging.error("Cannot set user total: " + str(e))
+#         raise e
  
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
@@ -244,7 +244,7 @@ async def add_user(message: types.Message):
     else:
         config = json.loads(config)
     if "winners_list" not in config:
-        config["winners_list"] = []
+        config["winners_list"] = {}
     if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 1
     else:
@@ -261,7 +261,7 @@ async def add_user(message: types.Message):
     else:
         config = json.loads(config)
     if "winners_list" not in config:
-        config["winners_list"] = []
+        config["winners_list"] = {}
     if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 2
     else:
@@ -278,7 +278,7 @@ async def add_user(message: types.Message):
     else:
         config = json.loads(config)
     if "winners_list" not in config:
-        config["winners_list"] = []
+        config["winners_list"] = {}
     if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 3
     else:
@@ -295,7 +295,7 @@ async def add_user(message: types.Message):
     else:
         config = json.loads(config)
     if "winners_list" not in config:
-        config["winners_list"] = []
+        config["winners_list"] = {}
     if str(message.from_user.id) not in config["winners_list"]:
         config["winners_list"][str(message.from_user.id)] = 4
     else:
