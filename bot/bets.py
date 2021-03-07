@@ -12,12 +12,14 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
 from .bot import dp, bot, r
 from .user import add_win_for_user
 from .prices import get_abs_difference, get_price
 
 BETS_KEY = "{chat_id}_bets"
-
+  
 async def weekly_tally(message: types.Message, r):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
@@ -185,14 +187,24 @@ async def clear_weekly_totals(message: types.Message):
             r.set(bets_chat_key, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['set ([0-9.,a-zA-Z]*) add([\s0-9]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['setupagain']))
 async def set_user_totes(message: types.Message, regexp_command):
     try:
+        chat_id = message.chat.id
         user = regexp_command.group(1)
         amount = regexp_command.group(2)
         logging.error("USER:" + user)
-        set_user_total(message.chat.id, user, int(amount))
-        await message.reply(f'Set user {user} to {amount}')
+        for key in r.scan_iter(f"{chat_id}_BTC_*"):
+            user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
+            if not user_id.isdigit():
+                logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
+            else:
+                member = await bot.get_chat_member(message.chat.id, user_id)
+                mention_name = member.user.mention    
+                logging.error(mention_name + " = " + user_id)
+                
+            # set_user_total(message.chat.id, user, int(amount))
+        await message.reply(f"Set User")
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
