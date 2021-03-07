@@ -16,11 +16,13 @@ from .bot import dp, bot, r
 from .user import add_win_for_user
 from .prices import get_abs_difference, get_price
 
+BETS_KEY = "{chat_id}_bets"
 
 async def weekly_tally(message: types.Message, r):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
+    out = out + "<pre>Who             Bet      Diff\n"
     winning = ""
     winning_name = ""
     winning_eth_name = ""
@@ -44,9 +46,10 @@ async def weekly_tally(message: types.Message, r):
                     winning = user_id
                     winning_name = mention_name
                     winning_diff = d
-            out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING BTC == " + winning_name + "\n"
+            out = out + mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)) + "\n"
+    out = out + "</pre>\nWINNING BTC: " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
+    out = out + "<pre>Who             Bet      Diff\n"
     winning_eth = ""
     winning_diff = 99999
     for key in r.scan_iter(f"{cid}_ETH_*"):
@@ -67,8 +70,8 @@ async def weekly_tally(message: types.Message, r):
                     winning_eth = user_id
                     winning_eth_name = mention_name
                     winning_diff = d
-            out = out + mention_name + " => " + a + "  -- DIFF = " + str(round(d,1)) + "\n"
-    out = out + "\n LOOK WHO IS WINNING ETH == " + winning_eth_name + "\n"
+            out = out + mention_name.ljust(15, ' ')  + " " + a.ljust(7, ' ') + " " + str(round(d,1)) + "\n"
+    out = out + "</pre>\nWINNING ETH: " + winning_eth_name + "\n"
     return out, winning, winning_eth, winning_name, winning_eth_name
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
@@ -88,6 +91,7 @@ async def get_weekly(message: types.Message):
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
+    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out)
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
@@ -112,13 +116,14 @@ async def finish_weekly(message: types.Message):
         add_win_for_user(config, winning_eth)
     
     logging.info(json.dumps(config))
-    r.set(message.chat.id, json.dumps(config))
+    r.set(bets_chat_key, json.dumps(config))
     await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
     await total_weekly(message)
 
 @dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
 async def total_weekly(message: types.Message):
-    config = r.get(message.chat.id)
+    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
+    config = r.get(bets_chat_key)
     if config is None:
         config = {"winners_list":[]}
     else:
@@ -171,45 +176,45 @@ async def set_weekly(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['clearbetstotals'])
 async def clear_weekly_totals(message: types.Message):
-    config = r.get(message.chat.id)
+    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
+    config = r.get(bets_chat_key)
     if config is not None:
         config = json.loads(config)
         if "winners_list" in config:
             config["winners_list"] = {}
-            r.set(message.chat.id, json.dumps(config))
+            r.set(bets_chat_key, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['set ([0-9.,a-zA-Z]*) add([\s0-9]*)']))
 async def set_user_totes(message: types.Message, regexp_command):
     try:
-        amount = regexp_command.group(1)
-        amount_eth = regexp_command.group(2)
-        cid = str(message.chat.id)
-        r.set(f"{cid}_BTC_" + str(message.from_user.id), amount)
-        r.set(f"{cid}_ETH_" + str(message.from_user.id), amount_eth)
-        await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
+        user = regexp_command.group(1)
+        amount = regexp_command.group(2)
+        logging.error("USER:" + user)
+        set_user_total(message.chat.id, user, int(amount))
+        await message.reply(f'Set user {user} to {amount}')
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-    
-    logging.warn('user:' + str(message.from_user.id))
-    config = r.get(message.chat.id)
-    if config is None:
-        config = {}
-    else:
-        config = json.loads(config)
-    if "winners_list" not in config:
-        config["winners_list"] = []
-    if str(message.from_user.id) not in config["winners_list"]:
-        config["winners_list"][str(message.from_user.id)] = 1
-    else:
-        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 1
-    logging.info(json.dumps(config))
-    r.set(message.chat.id, json.dumps(config))
-    await message.reply('user:' + message.from_user.mention)
-
-
+def set_user_total(chat_id, user_id, total):
+    try:
+        bets_chat_key = BETS_KEY.format(chat_id=chat_id)
+        config = r.get(bets_chat_key)
+        if config is None:
+            config = {}
+        else:
+            config = json.loads(config)
+        if "winners_list" not in config:
+            config["winners_list"] = []
+        if str(user_id) not in config["winners_list"]:
+            config["winners_list"][str(user_id)] = 1
+        else:
+            config["winners_list"][str(user_id)] = int(config["winners_list"][str(user_id)]) + 1
+    except Exception as e:
+        logging.error("Cannot set user total: " + str(e))
+        raise e
+ 
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
     logging.warn('user:' + str(message.from_user.id))
