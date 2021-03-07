@@ -223,13 +223,14 @@ def set_user_total(chat_id, user_id, total):
         if config is None:
             logging.error("Current config set user total: 000 " + bets_chat_key)
         
-            config = {"winners_list": []}
+            config = {"winners_list": {}}
         else:
             logging.error("Current config set user total: " + str(config))
         
             config = json.loads(config)
         logging.error("Current config set user total: " + json.dumps(config))
         config["winners_list"][str(user_id)] = total
+        r.set(bets_chat_key, json.dumps(config))
     except Exception as e:
         logging.error("Cannot set user total: " + str(e))
         raise e
