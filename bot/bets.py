@@ -88,14 +88,14 @@ async def start_weekly(message: types.Message):
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
     out, _, _, _, _ = await weekly_tally(message, r)
-    await bot.send_message(chat_id=message.chat.id, text=out)
+    await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
-    await bot.send_message(chat_id=message.chat.id, text=out)
+    await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
     config = r.get(message.chat.id)
     if config is None:
@@ -157,11 +157,6 @@ async def total_weekly(message: types.Message):
         await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
     else:
         await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
-
-@dp.message_handler(commands=['bet'])
-async def set_maintenance(message: types.Message):
-    await message.reply('Bets being rewritten. Down for maintenance.')
-
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
