@@ -151,6 +151,11 @@ async def total_weekly(message: types.Message):
     else:
         await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
 
+@dp.message_handler(commands=['bet'])
+async def set_maintenance(message: types.Message):
+    await message.reply('Bets being rewritten. Down for maintenance.')
+
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
     try:
@@ -173,6 +178,37 @@ async def clear_weekly_totals(message: types.Message):
             config["winners_list"] = {}
             r.set(message.chat.id, json.dumps(config))
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['set ([0-9.,a-zA-Z]*) add([\s0-9]*)']))
+async def set_user_totes(message: types.Message, regexp_command):
+    try:
+        amount = regexp_command.group(1)
+        amount_eth = regexp_command.group(2)
+        cid = str(message.chat.id)
+        r.set(f"{cid}_BTC_" + str(message.from_user.id), amount)
+        r.set(f"{cid}_ETH_" + str(message.from_user.id), amount_eth)
+        await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
+    except Exception as e:
+        logging.error("Cannot bet: " + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+
+    
+    logging.warn('user:' + str(message.from_user.id))
+    config = r.get(message.chat.id)
+    if config is None:
+        config = {}
+    else:
+        config = json.loads(config)
+    if "winners_list" not in config:
+        config["winners_list"] = []
+    if str(message.from_user.id) not in config["winners_list"]:
+        config["winners_list"][str(message.from_user.id)] = 1
+    else:
+        config["winners_list"][str(message.from_user.id)] = int(config["winners_list"][str(message.from_user.id)]) + 1
+    logging.info(json.dumps(config))
+    r.set(message.chat.id, json.dumps(config))
+    await message.reply('user:' + message.from_user.mention)
+
 
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
