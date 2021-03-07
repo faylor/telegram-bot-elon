@@ -207,10 +207,7 @@ def set_user_total(chat_id, user_id, total):
             config = json.loads(config)
         if "winners_list" not in config:
             config["winners_list"] = []
-        if str(user_id) not in config["winners_list"]:
-            config["winners_list"][str(user_id)] = 1
-        else:
-            config["winners_list"][str(user_id)] = int(config["winners_list"][str(user_id)]) + 1
+        config["winners_list"][str(user_id)] = total
     except Exception as e:
         logging.error("Cannot set user total: " + str(e))
         raise e
