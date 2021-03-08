@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, bot, r
-from .prices import get_price, coin_price, get_ath_ranks, get_change_label, get_price_extended
+from .prices import get_price, coin_price, get_ohcl_trades, get_ath_ranks, get_change_label, get_price_extended
 from .user import get_user_price_config
 
 @dp.message_handler(commands=['altsold'])
@@ -118,7 +118,7 @@ async def prices_alts(message: types.Message):
 
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watchalt ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
 async def add_to_prices_alts(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
@@ -133,7 +133,9 @@ async def add_to_prices_alts(message: types.Message, regexp_command):
         if "watch_list_alts" not in config:
             config["watch_list_alts"] = []
         if a == 0:
-            await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watchalt aave')
+            arr = get_ohcl_trades(new_coin, 60)
+            if arr is None:
+                await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Code Not Found. Try /watchalt aave')
         else:
             new_coin = new_coin.lower()
             if new_coin in config["watch_list_alts"]:
@@ -146,7 +148,7 @@ async def add_to_prices_alts(message: types.Message, regexp_command):
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['removealt ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['remove ([a-zA-Z]*)']))
 async def remove_from_prices_alts(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
