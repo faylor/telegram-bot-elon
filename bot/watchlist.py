@@ -23,8 +23,8 @@ async def prices(message: types.Message):
     try:
         config = json.loads(r.get(message.chat.id))
         logging.info(json.dumps(config))
-        if "watch_list" in config:
-            mains = config["watch_list"]
+        if "watch_list_alts" in config:
+            mains = config["watch_list_alts"]
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
@@ -64,7 +64,7 @@ async def prices(message: types.Message):
         out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watchdeprecated ([a-zA-Z]*)']))
 async def add_to_prices(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
@@ -100,7 +100,7 @@ async def add_to_prices(message: types.Message, regexp_command):
 
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['remove ([a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['removedeprecated ([a-zA-Z]*)']))
 async def remove_from_prices(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)

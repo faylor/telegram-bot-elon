@@ -61,10 +61,7 @@ WATCH COINS (PER CHAT):
   Watch table: /$ /lambo /prices 
   Add To watch: /watch <coin> (eg: /watch eth)
   Remove from watch: /remove <coin> (eg: /remove aave)
-
-  Watch ATH on Alts: /alts
-  Add To Alts: /watchalt <coin> (eg: /watchalt zil)
-  Remove from watchalt: /removealt <coin> (eg: /removealt aave)
+  View ATH on watch list: /alts
 
 BAGS WALLET (Advanced - Per Chat):
   Buy: /grab btc

@@ -305,6 +305,8 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
+    finally:
+        return None
 
 def get_news(label):
     try:
