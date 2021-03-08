@@ -292,6 +292,7 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     http.headers.clear()
     url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
+    data_arr = None
     try:
         response = http.get(url)
         if response.status_code == 429:
@@ -302,11 +303,10 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             if "error" in data and exchange=='binance':
                  return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
             data_arr = data["result"][str(period_seconds)]
-            return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
     finally:
-        return None
+        return data_arr
 
 def get_news(label):
     try:
