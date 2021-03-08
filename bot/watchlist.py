@@ -91,6 +91,7 @@ async def sorted_prices(message: types.Message, regexp_command):
     except:
         logging.error("FAILED TO GET COIN PRICES")
 
+    logging.error("HEUH:" + order_by)
     if "1" in order_by:
         order_by = "percent_change_1h"
     elif "24" in order_by:
