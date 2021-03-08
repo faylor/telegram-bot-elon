@@ -67,7 +67,7 @@ from .user import get_user_price_config
 #     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([\s0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['order([\s0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
     order_by = regexp_command.group(1)
     order_by = order_by.lower().strip()
