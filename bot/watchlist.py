@@ -98,7 +98,7 @@ async def sorted_prices(message: types.Message, regexp_command):
     else:
          order_by = "price"
     
-    coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by]))
+    ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by]))
 
     for l in mains:
         if coins is None or l.upper() not in coins:
@@ -106,7 +106,7 @@ async def sorted_prices(message: types.Message, regexp_command):
             tmp = {l.upper(): {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}}
 
 
-    for l, coin in coins.items():
+    for l, coin in ordered_coins.items():
         p = coin["quote"]["USD"]["price"]
         c = coin["quote"]["USD"]["percent_change_1h"]
         c24 = coin["quote"]["USD"]["percent_change_24h"]
