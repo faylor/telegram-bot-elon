@@ -59,6 +59,7 @@ COIN INFORMATION:
 
 WATCH COINS (PER CHAT):
   Watch table: /$ /lambo /prices 
+  Order table: /$ 1h /$ 24h /$ price 
   Add To watch: /watch <coin> (eg: /watch eth)
   Remove from watch: /remove <coin> (eg: /remove aave)
   View ATH on watch list: /alts
