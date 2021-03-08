@@ -16,58 +16,58 @@ from .bot import dp, r, bot
 from .prices import get_price, coin_price, round_sense, get_change_label
 from .user import get_user_price_config
 
-@dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
-async def prices(message: types.Message):
-    chat_id = message.chat.id
-    mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
-    try:
-        config = json.loads(r.get(message.chat.id))
-        logging.info(json.dumps(config))
-        if "watch_list_alts" in config:
-            mains = config["watch_list_alts"]
-    except Exception as ex:
-        logging.info("no config found, ignore")
-    in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = f"<pre>       {in_prices}    | 1hr      24hr\n"
-    totes = 0
+# @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
+# async def prices(message: types.Message):
+#     chat_id = message.chat.id
+#     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
+#     try:
+#         config = json.loads(r.get(message.chat.id))
+#         logging.info(json.dumps(config))
+#         if "watch_list_alts" in config:
+#             mains = config["watch_list_alts"]
+#     except Exception as ex:
+#         logging.info("no config found, ignore")
+#     in_prices = get_user_price_config(message.from_user.mention).upper()
+#     out = f"<pre>       {in_prices}    | 1hr      24hr\n"
+#     totes = 0
 
-    try:
-        coins = None
-        coins = coin_price(mains)
-    except:
-        logging.error("FAILED TO GET COIN PRICES")
+#     try:
+#         coins = None
+#         coins = coin_price(mains)
+#     except:
+#         logging.error("FAILED TO GET COIN PRICES")
 
-    sorted_dict = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD']['price']))
+#     sorted_dict = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD']['price']))
 
-    for l in mains:
-        if coins is None or l.upper() not in coins:
-            p, c, c24, btc_price = get_price(l)
-        else:
-            p = coins[l.upper()]["quote"]["USD"]["price"]
-            c = coins[l.upper()]["quote"]["USD"]["percent_change_1h"]
-            c24 = coins[l.upper()]["quote"]["USD"]["percent_change_24h"]
-            btc_price = 1
-        totes = totes + c
-        l = l.ljust(5, ' ')
+#     for l in mains:
+#         if coins is None or l.upper() not in coins:
+#             p, c, c24, btc_price = get_price(l)
+#         else:
+#             p = coins[l.upper()]["quote"]["USD"]["price"]
+#             c = coins[l.upper()]["quote"]["USD"]["percent_change_1h"]
+#             c24 = coins[l.upper()]["quote"]["USD"]["percent_change_24h"]
+#             btc_price = 1
+#         totes = totes + c
+#         l = l.ljust(5, ' ')
         
-        if in_prices == "USD":
-            prices = str(round_sense(p))
-        else:
-            prices = str(round(btc_price,8))
-        prices = prices.ljust(7, ' ')
-        change = get_change_label(c)
-        change24 = get_change_label(c24)
-        out = out + f"{l} {prices} |{change}    {change24}\n"
-    if totes < 0:
-        out = out + "</pre>\n\n ☠️☠️☠️☠️☠️☠️" 
-    elif totes > 6:
-        out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
-    else:
-        out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
-    await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
+#         if in_prices == "USD":
+#             prices = str(round_sense(p))
+#         else:
+#             prices = str(round(btc_price,8))
+#         prices = prices.ljust(7, ' ')
+#         change = get_change_label(c)
+#         change24 = get_change_label(c24)
+#         out = out + f"{l} {prices} |{change}    {change24}\n"
+#     if totes < 0:
+#         out = out + "</pre>\n\n ☠️☠️☠️☠️☠️☠️" 
+#     elif totes > 6:
+#         out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
+#     else:
+#         out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
+#     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['order([\s0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['$([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
     order_by = regexp_command.group(1) or ""
     order_by = order_by.lower().strip()
@@ -98,7 +98,7 @@ async def sorted_prices(message: types.Message, regexp_command):
     else:
          order_by = "price"
     
-    ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by]))
+    ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by], reverse=True))
 
     for l in mains:
         if coins is None or l.upper() not in coins:
