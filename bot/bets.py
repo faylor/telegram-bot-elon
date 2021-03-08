@@ -51,7 +51,7 @@ async def weekly_tally(message: types.Message, r):
             out = out + mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)) + "\n"
     out = out + "</pre>\nWINNING BTC: " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
-    out = out + "<pre>Who             Bet      Diff\n"
+    out = out + "<pre>Who             Bet     Diff\n"
     winning_eth = ""
     winning_diff = 99999
     for key in r.scan_iter(f"{cid}_ETH_*"):
@@ -133,7 +133,7 @@ async def total_weekly(message: types.Message):
     
     if "winners_list" in config:
         scores = [0]
-        out = ["<pre>Who?            Wins\n"]
+        out = ["<pre>Who?            Wins"]
         for k, v in config["winners_list"].items():
             key = str(k)
             if key.isdigit():
