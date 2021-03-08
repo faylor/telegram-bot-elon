@@ -215,14 +215,18 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
                 period_counts = int(period_counts)
             else:
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
-            
+        logging.error("HERE1")
         trades = get_ohcl_trades(coin, period_seconds)
+        logging.error("HERE2")
+        
         ranger = -2 * period_counts
         trades = trades[ranger:]
         df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
         df['time'] = pd.DatetimeIndex(df['time']*10**9)
         df.set_index('time', inplace=True)
 
+        logging.error("HERE3")
+        
         df['MA20'] = df['close'].rolling(window=20).mean()
         df['20dSTD'] = df['close'].rolling(window=20).std() 
 
