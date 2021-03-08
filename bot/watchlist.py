@@ -67,7 +67,7 @@ async def prices(message: types.Message):
     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['order([\n0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['order([\s0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
     order_by = regexp_command.group(1) or ""
     order_by = order_by.lower().strip()
@@ -104,7 +104,7 @@ async def sorted_prices(message: types.Message, regexp_command):
         if coins is None or l.upper() not in coins:
             p, c, c24, btc_price = get_price(l)
             tmp = {l.upper(): {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}}
-
+            ordered_coins.extend(tmp)
 
     for l, coin in ordered_coins.items():
         p = coin["quote"]["USD"]["price"]
