@@ -12,7 +12,7 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
-from .bot import dp, r, bot
+from .bot import dp, r, bot, send_price_of
 from .prices import get_price, coin_price, round_sense, get_change_label
 from .user import get_user_price_config
 
@@ -67,14 +67,21 @@ from .user import get_user_price_config
 #     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$', 'whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$ ([0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$([\s0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
     try:
         order_by = regexp_command.group(1)
         order_by = order_by.lower().strip()
     except:
         order_by = "price"
-
+    
+    if "1" in order_by:
+        order_by = "percent_change_1h"
+    elif "24" in order_by:
+        order_by = "percent_change_24h"
+    else:
+        return send_price_of(message, regexp_command)
+        
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
     try:
@@ -94,13 +101,7 @@ async def sorted_prices(message: types.Message, regexp_command):
     except:
         logging.error("FAILED TO GET COIN PRICES")
 
-    logging.error("HEUH:" + order_by)
-    if "1" in order_by:
-        order_by = "percent_change_1h"
-    elif "24" in order_by:
-        order_by = "percent_change_24h"
-    else:
-         order_by = "price"
+    
     
     ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by], reverse=True))
 

@@ -195,11 +195,9 @@ async def send_reminder(message: types.Message):
 #     await prices_alts(message)
 #     await send_balance(message, None)
 
-
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$([a-zA-Z]*)']))
 async def send_price_of(message: types.Message, regexp_command):
     try:
-        symbol = regexp_command.group(1)
+        symbol = regexp_command.group(1).strip()
         p, c, c24, btc_price = get_price(symbol)
         await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
