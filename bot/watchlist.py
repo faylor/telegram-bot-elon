@@ -69,9 +69,12 @@ from .user import get_user_price_config
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\$', 'whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$ ([0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
-    order_by = regexp_command.group(1)
-    order_by = order_by.lower().strip()
-    
+    try:
+        order_by = regexp_command.group(1)
+        order_by = order_by.lower().strip()
+    except:
+        order_by = "price"
+
     chat_id = message.chat.id
     mains = ["BTC", "ETH", "GRT", "LTC", "ADA", "AAVE", "DOGE", "ZIL"]
     try:
