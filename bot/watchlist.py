@@ -44,6 +44,8 @@ async def sorted_prices(message: types.Message, regexp_command):
     try:
         order_by = regexp_command.group(1)
         order_by = order_by.lower().strip()
+        if order_by is None or order_by == "":
+            order_by = "price"
     except:
         order_by = "price"
     
@@ -51,7 +53,7 @@ async def sorted_prices(message: types.Message, regexp_command):
         order_by = "percent_change_1h"
     elif "24" in order_by:
         order_by = "percent_change_24h"
-    else:
+    elif "price" not in order_by:
         return await send_price_of(message, regexp_command)
         
     chat_id = message.chat.id
