@@ -12,9 +12,10 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
-from .bot import dp, r, bot, send_price_of
+from .bot import dp, r, bot
 from .prices import get_price, coin_price, round_sense, get_change_label
 from .user import get_user_price_config
+from .chart import fibs_chart_extended
 
 # @dp.message_handler(commands=['prices', 'watching', 'btc', 'lambo', 'whenlambo', 'lambos', 'whenlambos', 'price', '$', '£', '€'])
 # async def prices(message: types.Message):
@@ -65,6 +66,26 @@ from .user import get_user_price_config
 #     else:
 #         out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
 #     await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
+async def send_price_of(message: types.Message, regexp_command):
+    try:
+        symbol = regexp_command.group(1).strip()
+        p, c, c24, btc_price = get_price(symbol)
+        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
+        saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
+        if saved is not None:
+            saved = saved.decode('utf-8')
+            if "{" in saved:
+                js = json.loads(saved)
+                saved = float(js["usd"])
+                saved_btc = float(js["btc"])
+            else:
+                saved = float(saved)
+                saved_btc = 0
+            changes = round(100 * (p - saved) / saved, 2)
+            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
+        await fibs_chart_extended(message, regexp_command)
+    except Exception as e:
+        logging.warn("Could convert saved point:" + str(e))
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$([\s0-9a-zA-Z]*)']))
