@@ -195,12 +195,12 @@ async def setup_totes_manually(message: types.Message):
         #         logging.error(mention_name + " = " + user_id)
                 
         set_user_total(chat_id, 1442973965, int(2))
-        set_user_total(chat_id, 1038547988, int(2))
-        set_user_total(chat_id, 1402645782, int(7))
+        set_user_total(chat_id, 1038547988, int(3))
+        set_user_total(chat_id, 1402645782, int(6))
         set_user_total(chat_id, 1597217560, int(3))
         set_user_total(chat_id, 1573604904, int(5))
 
-        await message.reply(f"Set User")
+        await total_weekly(message)
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
