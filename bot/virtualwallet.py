@@ -529,14 +529,14 @@ async def set_panic_point(message: types.Message, regexp_command):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd
-            # new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
-            new_balance = 99
-            # r.delete(key)
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            
+            r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
             if profit_or_loss > 0:
-                profit_or_loss_md = md.text('Profit USD:', '🚀', md.bold(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
             else:
-                profit_or_loss_md = md.text('Loss USD:', '🔻', md.bold(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -671,9 +671,9 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             
             profit_or_loss = (data["sale_price_usd"] * coins) - (data["price_usd"] * coins)
             if profit_or_loss > 0:
-                profit_or_loss_md = md.text('Profit USD:', '🚀', md.bold(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
             else:
-                profit_or_loss_md = md.text('Loss USD:', '🔻', md.bold(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
             # And send message
             await bot.send_message(
                 message.chat.id,
