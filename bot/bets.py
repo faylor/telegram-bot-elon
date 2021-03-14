@@ -122,6 +122,7 @@ def get_bets_totes(chat_id):
         config = {"winners_list":[]}
     else:
         config = json.loads(config)
+    return config
 
 def set_bets_totes(chat_id, config):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
@@ -208,13 +209,10 @@ def set_user_total(chat_id, user_id, total):
     try:
         logging.error("Current config set user total: " )
         
-        bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
-
-        logging.error("Current config set user total: " + bets_chat_key)
-        
         config = get_bets_totes(chat_id)
         logging.error("Current config set user total: " + json.dumps(config))
         config["winners_list"][str(user_id)] = total
+        
         set_user_totes(chat_id, config)
     except Exception as e:
         logging.error("Cannot set user total: " + str(e))
