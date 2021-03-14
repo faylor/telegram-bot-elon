@@ -617,19 +617,21 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 else:
                     return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
             
+            profit_or_loss = (data["sale_price_usd"] * coins) - (data["price_usd"] * coins)
             # And send message
             await bot.send_message(
                 message.chat.id,
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
-                    md.text('Buy Price USD:', md.text(data['price_usd'])),
-                    md.text('Buy Price BTC:', md.text(data['price_btc'])),
-                    md.text('Sale Price USD:', md.text(data['sale_price_usd'])),
-                    md.text('Sale Price BTC:', md.text(data['sale_price_btc'])),
+                    md.text('Buy Price USD:', md.text(round_sense(data['price_usd']))),
+                    md.text('Buy Price BTC:', md.text(round_sense(data['price_btc']))),
+                    md.text('Sale Price USD:', md.text(round_sense(data['sale_price_usd']))),
+                    md.text('Sale Price BTC:', md.text(round_sense(data['sale_price_btc']))),
                     md.text('Total Coins Sold:', md.text(str(coins))),
                     md.text('Remaining Coins:', md.text(str(remaining_balance))),
                     md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    md.text('Profit or Loss:', md.text(str(round(profit_or_loss, 2)))),
                     md.text('New Bag Balance USD:', md.text(str(new_balance))),
                     sep='\n',
                 ),

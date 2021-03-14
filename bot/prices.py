@@ -210,6 +210,61 @@ def get_price_extended(label):
         return 0,0,0,0,0,0
     return change_1hr, change_24hr, change_btc_1hr, change_btc_24hr, days_since_alt, down_from_alt
 
+def get_gecko_list():
+    data = r.get("GECKO_list")
+    if data is not None:
+            logging.info("USING CACHE FOR GECKO LIST")
+            return json.loads(data)
+    
+    http.headers.clear()
+    url = "https://api.coingecko.com/api/v3/coins/list"
+    resp = http.get(url, timeout=(1, 1))
+    if resp.status_code == 200:
+        results = resp.json()
+        r.set("GECKO_list", json.dumps(results), ex=3600)
+        return results
+    return None
+
+def get_gecko_id(symbol):
+    data = get_gecko_list()
+    for d in data:
+        if d["symbol"].lower() == symbol.lower():
+            return d["id"]
+    return None
+
+def get_price_gecko(label):
+    price, change_1hr, change_24hr = 0, 0, 0
+    try:
+        id = get_gecko_id(label)
+        if id is None: 
+            return 0, 0, 0, 0
+        
+        http.headers.clear()
+        url = f"https://api.coingecko.com/api/v3/coins/{id}/tickers"
+        resp = http.get(url, timeout=(1, 1))
+        if resp.status_code == 200:
+            js = resp.json()
+            price = js["data"]["market_data"]["price_usd"]
+            price_btc = js["data"]["market_data"]["price_btc"]
+            change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
+            change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return 0,0,0,0
+    except Exception as e:
+        logging.error(e)
+        return 0, 0, 0, 0
+    if price is None:
+        price = 0
+    if change_1hr is None:
+        change_1hr = 0
+    if change_24hr is None:
+        change_24hr = 0
+    if price_btc is None:
+        price_btc = 0
+    return price, change_1hr, change_24hr, price_btc
+
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
     try:
@@ -338,7 +393,11 @@ def round_sense(price):
         return round(price, 1)
     if price > 1:
         return round(price, 2)
-    return round(price, 4)
+    if price > 0.01:
+        return round(price, 4)
+    if price > 0.001:
+        return round(price, 5)
+    return round(price, 8)
 
 
 def get_change_label(c, lpad=None):

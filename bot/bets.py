@@ -93,17 +93,10 @@ async def get_weekly(message: types.Message):
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
-    config = r.get(message.chat.id)
-    if config is None:
-        config = {}
-    else:
-        config = json.loads(config)
-    if "winners_list" not in config:
-        config["winners_list"] = {}
+    config = get_bets_totes(message.chat.id)
     if "," in winning_btc:
         winners = winning_btc.split(",")
         for winner in winners:
@@ -118,19 +111,25 @@ async def finish_weekly(message: types.Message):
         add_win_for_user(config, winning_eth)
     
     logging.info(json.dumps(config))
-    r.set(bets_chat_key, json.dumps(config))
+    set_bets_totes(message.chat.id, config)
     await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
     await total_weekly(message)
 
-@dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
-async def total_weekly(message: types.Message):
-    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
+def get_bets_totes(chat_id):
+    bets_chat_key = BETS_KEY.format(chat_id=chat_id)
     config = r.get(bets_chat_key)
     if config is None:
         config = {"winners_list":[]}
     else:
         config = json.loads(config)
-    
+
+def set_bets_totes(chat_id, config):
+    bets_chat_key = BETS_KEY.format(chat_id=chat_id)
+    r.set(bets_chat_key, json.dumps(config))
+
+@dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
+async def total_weekly(message: types.Message):
+    config = get_bets_totes(message.chat.id)
     if "winners_list" in config:
         scores = [0]
         out = ["<pre>Who?            Wins"]
@@ -173,62 +172,53 @@ async def set_weekly(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['clearbetstotals'])
 async def clear_weekly_totals(message: types.Message):
-    bets_chat_key = BETS_KEY.format(chat_id=message.chat.id)
-    config = r.get(bets_chat_key)
+    config = get_bets_totes(message.chat.id)
     if config is not None:
         config = json.loads(config)
         if "winners_list" in config:
             config["winners_list"] = {}
-            r.set(bets_chat_key, json.dumps(config))
+            set_bets_totes(message.chat.id, config)
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
-# @dp.message_handler(commands=['setupagain'])
-# async def set_user_totes(message: types.Message):
-#     try:
-#         chat_id = message.chat.id
-#         # for key in r.scan_iter(f"{chat_id}_BTC_*"):
-#         #     user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
-#         #     if not user_id.isdigit():
-#         #         logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
-#         #     else:
-#         #         member = await bot.get_chat_member(message.chat.id, user_id)
-#         #         mention_name = member.user.mention    
-#         #         logging.error(mention_name + " = " + user_id)
+@dp.message_handler(commands=['setupagain'])
+async def set_user_totes(message: types.Message):
+    try:
+        chat_id = message.chat.id
+        # for key in r.scan_iter(f"{chat_id}_BTC_*"):
+        #     user_id = str(key.decode('utf-8')).replace(f"{chat_id}_BTC_","")
+        #     if not user_id.isdigit():
+        #         logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
+        #     else:
+        #         member = await bot.get_chat_member(message.chat.id, user_id)
+        #         mention_name = member.user.mention    
+        #         logging.error(mention_name + " = " + user_id)
                 
-#         set_user_total(chat_id, 1442973965, int(2))
-#         set_user_total(chat_id, 1038547988, int(2))
-#         set_user_total(chat_id, 1402645782, int(6))
-#         set_user_total(chat_id, 1597217560, int(2))
-#         set_user_total(chat_id, 1573604904, int(5))
+        set_user_total(chat_id, 1442973965, int(2))
+        set_user_total(chat_id, 1038547988, int(2))
+        set_user_total(chat_id, 1402645782, int(7))
+        set_user_total(chat_id, 1597217560, int(3))
+        set_user_total(chat_id, 1573604904, int(5))
 
-#         await message.reply(f"Set User")
-#     except Exception as e:
-#         logging.error("Cannot bet: " + str(e))
-#         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
+        await message.reply(f"Set User")
+    except Exception as e:
+        logging.error("Cannot bet: " + str(e))
+        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
 
-# def set_user_total(chat_id, user_id, total):
-#     try:
-#         logging.error("Current config set user total: " )
+def set_user_total(chat_id, user_id, total):
+    try:
+        logging.error("Current config set user total: " )
         
-#         bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
+        bets_chat_key = BETS_KEY.format(chat_id=str(chat_id))
 
-#         logging.error("Current config set user total: " + bets_chat_key)
+        logging.error("Current config set user total: " + bets_chat_key)
         
-#         config = r.get(bets_chat_key)
-#         if config is None:
-#             logging.error("Current config set user total: 000 " + bets_chat_key)
-        
-#             config = {"winners_list": {}}
-#         else:
-#             logging.error("Current config set user total: " + str(config))
-        
-#             config = json.loads(config)
-#         logging.error("Current config set user total: " + json.dumps(config))
-#         config["winners_list"][str(user_id)] = total
-#         r.set(bets_chat_key, json.dumps(config))
-#     except Exception as e:
-#         logging.error("Cannot set user total: " + str(e))
-#         raise e
+        config = get_bets_totes(chat_id)
+        logging.error("Current config set user total: " + json.dumps(config))
+        config["winners_list"][str(user_id)] = total
+        set_user_totes(chat_id, config)
+    except Exception as e:
+        logging.error("Cannot set user total: " + str(e))
+        raise e
  
 @dp.message_handler(commands=['add1'])
 async def add_user(message: types.Message):
