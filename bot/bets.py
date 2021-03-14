@@ -182,7 +182,7 @@ async def clear_weekly_totals(message: types.Message):
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
 
 @dp.message_handler(commands=['setupagain'])
-async def set_user_totes(message: types.Message):
+async def setup_totes_manually(message: types.Message):
     try:
         chat_id = message.chat.id
         # for key in r.scan_iter(f"{chat_id}_BTC_*"):
@@ -213,7 +213,7 @@ def set_user_total(chat_id, user_id, total):
         logging.error("Current config set user total: " + json.dumps(config))
         config["winners_list"][str(user_id)] = total
         
-        set_user_totes(chat_id, config)
+        set_bets_totes(chat_id, config)
     except Exception as e:
         logging.error("Cannot set user total: " + str(e))
         raise e

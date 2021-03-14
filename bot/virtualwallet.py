@@ -631,7 +631,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     md.text('Total Coins Sold:', md.text(str(coins))),
                     md.text('Remaining Coins:', md.text(str(remaining_balance))),
                     md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
-                    md.text('Profit or Loss:', md.text(str(round(profit_or_loss, 2)))),
+                    md.text('Profit or Loss USD:', md.text(str(round(profit_or_loss, 2)))),
                     md.text('New Bag Balance USD:', md.text(str(new_balance))),
                     sep='\n',
                 ),
