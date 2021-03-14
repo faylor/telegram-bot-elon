@@ -489,11 +489,11 @@ async def process_spend(message: types.Message, state: FSMContext):
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
-                    md.text('Price USD:', md.text(data['price_usd'])),
-                    md.text('Price BTC:', md.text(data['price_btc'])),
-                    md.text('Total Spent USD:', md.text(message.text)),
-                    md.text('Total Coins:', md.text(str(coins))),
-                    md.text('Remaining Balance USD:', md.text(str(remaining_balance))),
+                    md.text('Price USD:', md.text(round_sense(data['price_usd']))),
+                    md.text('Price BTC:', md.text(round(data['price_btc'], 6))),
+                    md.text('Total Spent USD:', md.text(round_sense(message.text))),
+                    md.text('Total Coins:', md.text(str(round(coins,4)))),
+                    md.text('Remaining Balance USD:', md.text(str(round(remaining_balance, 2)))),
                     sep='\n',
                 ),
                 reply_markup=markup,
@@ -506,6 +506,58 @@ async def process_spend(message: types.Message, state: FSMContext):
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
 
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic ([\s0-9.,a-zA-Z]*)']))
+async def set_panic_point(message: types.Message, regexp_command):
+    try:
+        to_symbol = regexp_command.group(1)
+        user_id = str(message.from_user.id)
+        chat_id = str(message.chat.id)
+        
+        keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
+        for key in keys:
+            js = r.get(key).decode('utf-8')
+            symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
+            logging.error("COIN: " + symbol)
+            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            if js is not None:
+                js = json.loads(js)
+                price_usd = js["usd"]
+                price_btc = js["btc"]
+                available_coins = js["coins"]
+            else:
+                return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
+
+            sale_usd = available_coins * sale_price_usd
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            
+            r.delete(key)
+            profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
+            if profit_or_loss > 0:
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.bold(str(round(profit_or_loss, 2))))
+            else:
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.bold(str(round(profit_or_loss, 2))))
+            # And send message
+            await bot.send_message(
+                message.chat.id,
+                md.text(
+                    md.text('User:', md.code(message.from_user.mention)),
+                    md.text('Coin:', md.code(symbol.upper())),
+                    md.text('Buy Price USD:', md.text(round_sense(price_usd))),
+                    md.text('Buy Price BTC:', md.text(round(price_btc, 6))),
+                    md.text('Sale Price USD:', md.text(round_sense(sale_price_usd))),
+                    md.text('Sale Price BTC:', md.text(round(sale_price_btc, 6))),
+                    md.text('Total Coins Sold:', md.text(str(available_coins))),
+                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    profit_or_loss_md,
+                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    sep='\n',
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
+        await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
+    except Exception as e:
+        logging.error("Panic error: " + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
@@ -618,6 +670,10 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
             
             profit_or_loss = (data["sale_price_usd"] * coins) - (data["price_usd"] * coins)
+            if profit_or_loss > 0:
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.bold(str(round(profit_or_loss, 2))))
+            else:
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.bold(str(round(profit_or_loss, 2))))
             # And send message
             await bot.send_message(
                 message.chat.id,
@@ -625,13 +681,13 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
                     md.text('Buy Price USD:', md.text(round_sense(data['price_usd']))),
-                    md.text('Buy Price BTC:', md.text(round_sense(data['price_btc']))),
+                    md.text('Buy Price BTC:', md.text(round(data['price_btc'], 6))),
                     md.text('Sale Price USD:', md.text(round_sense(data['sale_price_usd']))),
-                    md.text('Sale Price BTC:', md.text(round_sense(data['sale_price_btc']))),
+                    md.text('Sale Price BTC:', md.text(round(data['sale_price_btc'], 6))),
                     md.text('Total Coins Sold:', md.text(str(coins))),
-                    md.text('Remaining Coins:', md.text(str(remaining_balance))),
+                    md.text('Remaining Coins:', md.text(str(round(remaining_balance, 4)))),
                     md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
-                    md.text('Profit or Loss USD:', md.text(str(round(profit_or_loss, 2)))),
+                    profit_or_loss_md,
                     md.text('New Bag Balance USD:', md.text(str(new_balance))),
                     sep='\n',
                 ),

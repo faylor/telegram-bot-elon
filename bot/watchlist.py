@@ -39,7 +39,7 @@ async def send_price_of(message: types.Message, regexp_command):
         logging.warn("Could convert saved point:" + str(e))
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$([\s0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['whenlambo([\s0-9a-zA-Z]*)', 'lambo([\s0-9a-zA-Z]*)', 'prices([\s0-9a-zA-Z]*)', '\$([\s0-9a-zA-Z]*)', '\£([\s0-9a-zA-Z]*)', '\€([\s0-9a-zA-Z]*)']))
 async def sorted_prices(message: types.Message, regexp_command):
     try:
         order_by = regexp_command.group(1)
@@ -75,8 +75,6 @@ async def sorted_prices(message: types.Message, regexp_command):
     except:
         logging.error("FAILED TO GET COIN PRICES")
 
-    
-    
     ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by], reverse=True))
 
     for l in mains:
