@@ -511,6 +511,12 @@ async def process_spend(message: types.Message, state: FSMContext):
 async def set_panic_point(message: types.Message, regexp_command):
     try:
         to_symbol = regexp_command.group(1)
+    except:
+        to_symbol = "usd"
+    try:
+        if 'btc' in to_symbol.lower():
+            return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
+
         user_id = str(message.from_user.id)
         chat_id = str(message.chat.id)
         
