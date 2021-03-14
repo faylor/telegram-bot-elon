@@ -507,7 +507,7 @@ async def process_spend(message: types.Message, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
     try:
         to_symbol = regexp_command.group(1)
