@@ -358,9 +358,12 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             if "error" in data and exchange=='binance':
                  return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
             if "error" in data and exchange=='kraken':
-                 return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usd')
+                 return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
             if "error" in data and exchange=='bittrex':
-                 return get_ohcl_trades(coin, period_seconds, 'upbit', 'usd')
+                 return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
+            if "error" in data and exchange=='upbit':
+                 return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')     
+                 
             
      
             data_arr = data["result"][str(period_seconds)]
