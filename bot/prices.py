@@ -355,21 +355,21 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             logging.error("HIT LIMIT")
         else:
             data = response.json()
-            if "error" in data and exchange=='binance':
-                logging.error("NOT FOUND IN BINANCE")
-                return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
-            if "error" in data and exchange=='kraken':
-                logging.error("NOT FOUND IN KRAKEN")
-                return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
-            if "error" in data and exchange=='bittrex':
-                logging.error("NOT FOUND IN BITREX")
-                return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
-            if "error" in data and exchange=='upbit':
-                logging.error("NOT FOUND IN UPBIT")
-                return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')
-     
-            data_arr = data["result"][str(period_seconds)]
-            return data_arr
+            if "error" in data:
+                if exchange=='binance':
+                    logging.error("NOT FOUND IN BINANCE")
+                    return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
+                elif exchange=='kraken':
+                    logging.error("NOT FOUND IN KRAKEN")
+                    return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
+                elif exchange=='bittrex':
+                    logging.error("NOT FOUND IN BITREX")
+                    return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
+                elif exchange=='upbit':
+                    logging.error("NOT FOUND IN UPBIT")
+                    return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')
+            else:
+                return data["result"][str(period_seconds)]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
 
