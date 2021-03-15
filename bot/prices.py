@@ -368,6 +368,7 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
                 elif exchange=='upbit':
                     logging.error("NOT FOUND IN UPBIT")
                     return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')
+                logging.error("ERROR WITH RESP:" + json.dumps(data))
             else:
                 return data["result"][str(period_seconds)]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
