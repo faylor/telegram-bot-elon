@@ -356,13 +356,17 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
         else:
             data = response.json()
             if "error" in data and exchange=='binance':
-                 return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
+                logging.error("NOT FOUND IN BINANCE")
+                return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
             if "error" in data and exchange=='kraken':
-                 return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
+                logging.error("NOT FOUND IN KRAKEN")
+                return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
             if "error" in data and exchange=='bittrex':
-                 return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
+                logging.error("NOT FOUND IN BITREX")
+                return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
             if "error" in data and exchange=='upbit':
-                 return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')     
+                logging.error("NOT FOUND IN OKEX")
+                return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')     
                  
             
      
