@@ -357,6 +357,12 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             data = response.json()
             if "error" in data and exchange=='binance':
                  return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
+            if "error" in data and exchange=='kraken':
+                 return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usd')
+            if "error" in data and exchange=='bittrex':
+                 return get_ohcl_trades(coin, period_seconds, 'upbit', 'usd')
+            
+     
             data_arr = data["result"][str(period_seconds)]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
