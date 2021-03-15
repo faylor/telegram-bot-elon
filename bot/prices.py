@@ -365,7 +365,7 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
                 logging.error("NOT FOUND IN BITREX")
                 return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
             if "error" in data and exchange=='upbit':
-                logging.error("NOT FOUND IN OKEX")
+                logging.error("NOT FOUND IN UPBIT")
                 return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')     
                  
             
