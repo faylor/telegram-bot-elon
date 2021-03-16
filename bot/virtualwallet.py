@@ -351,7 +351,6 @@ async def totals_user_scores2(message: types.Message):
         chat_id = str(message.chat.id)
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-        out = "League Season Standings:\n\n"
         out = ["<pre>Who?          Live Value  | USD\n"]
         scores = [0]
         for key in saves:
@@ -380,6 +379,9 @@ async def totals_user_scores2(message: types.Message):
                     score_live = str(round(score_live,2)).ljust(10, ' ')
                     out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
+        if len(out) > 3:
+            out[1] = '👑' + out[1]
+            out[len(out)-2] = '🥄' + out[len(out)-2]
         s = "\n".join(out)
         await bot.send_message(chat_id=chat_id, text=s, parse_mode='HTML')
     except Exception as e:
