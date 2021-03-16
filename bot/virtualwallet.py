@@ -351,7 +351,7 @@ async def totals_user_scores2(message: types.Message):
         chat_id = str(message.chat.id)
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-        out = ["<pre>Who?            Live Value  | USD"]
+        out = ["<pre>Who?              Live Val    USD"]
         scores = [0]
         for key in saves:
             key = key.decode('utf-8')
