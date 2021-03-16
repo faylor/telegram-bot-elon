@@ -372,7 +372,7 @@ async def totals_user_scores2(message: types.Message):
                     while i < len(scores) and score_total < scores[i]:
                         i = i + 1
                     score_live = str(round(score_live,2)).ljust(10, ' ')
-                    out.insert(i, f"{user} {score_live} {score_usd}")
+                    out.insert(i, f"🔸 {user} {score_live} {score_usd}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
@@ -380,8 +380,8 @@ async def totals_user_scores2(message: types.Message):
                     out.append(f"{user} {score_live} {score_usd}")
         out.append("</pre>")
         if len(out) > 3:
-            out[1] = '👑' + out[1]
-            out[len(out)-2] = '🥄' + out[len(out)-2]
+            out[1] =  out[1].replace('🔸', '👑')
+            out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
         s = "\n".join(out)
         await bot.send_message(chat_id=chat_id, text=s, parse_mode='HTML')
     except Exception as e:
