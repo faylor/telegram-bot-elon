@@ -377,7 +377,7 @@ async def totals_user_scores2(message: types.Message):
                 else:
                     scores.append(score_total)
                     score_live = str(round(score_live,2)).ljust(10, ' ')
-                    out.append(f"{user} {score_live} {score_usd}")
+                    out.append(f"🔸 {user} {score_live} {score_usd}")
         out.append("</pre>")
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
