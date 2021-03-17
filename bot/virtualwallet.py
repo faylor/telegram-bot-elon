@@ -101,10 +101,20 @@ async def get_log(message: types.Message):
             current_log = []
         else:
             current_log = json.loads(current_log.decode("utf-8"))
-        out = ["Log:"]
+        out = ["Log (use clearlog to empty):"]
         for l in current_log:
             out.append(l["time"] + ": " + str(l["coin"]) + " sold for USD " + str(l["change"]))
         await message.reply('\n'.join(out))
+    except Exception as e:
+        logging.error("Log failed:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Failed to get log. Contact... meh')
+
+@dp.message_handler(commands=['clearlog'])
+async def get_log(message: types.Message):
+    try:
+        log_key =  SCORE_LOG_KEY.format(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+        r.delete(log_key)
+        await message.reply('CLEARED LOG.')
     except Exception as e:
         logging.error("Log failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to get log. Contact... meh')
@@ -125,7 +135,7 @@ def get_user_bag_score(chat_id, user_id):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
-def user_spent_usd(chat_id, user_id, usd, coin=""):
+def user_spent_usd(chat_id, user_id, usd, coin):
     try:
         _, account_usd = get_user_bag_score(chat_id, user_id)
         if account_usd is None:
@@ -496,7 +506,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             if spend <= 0 or price == 0:
                 return await message.reply("Total Spend or price has gotta be a more than 0.\nHow old are you? (digits only)")
 
-            remaining_balance = user_spent_usd(chat_id, user_id, spend)
+            remaining_balance = user_spent_usd(chat_id, user_id, spend, data['coin'])
             if remaining_balance is None:
                 return await message.reply("Total Spend is more than Account Balance\nHow old are you? (digits only)")
 
@@ -566,7 +576,7 @@ async def set_panic_point(message: types.Message, regexp_command):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
             
             r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
@@ -692,7 +702,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
             sale_usd = coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd)
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
             remaining_balance = available_coins - coins
             if remaining_balance == 0:
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
