@@ -100,7 +100,7 @@ async def get_log(message: types.Message):
         if current_log is None:
             current_log = []
         else:
-            current_log = current_log.decode("utf-8")
+            current_log = json.loads(current_log.decode("utf-8"))
         out = ["Log:"]
         for l in current_log:
             out.append(l["time"] + ": " + l["coin"] + " sold for " + l["usd"])
@@ -142,7 +142,7 @@ def user_spent_usd(chat_id, user_id, usd, coin=""):
         if current_log is None:
             current_log = []
         else:
-            current_log = current_log.decode("utf-8")
+            current_log = json.loads(current_log.decode("utf-8"))
         current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, "usd": new_account_usd}})
         r.set(log_key, json.dumps(current_log))
         return new_account_usd
