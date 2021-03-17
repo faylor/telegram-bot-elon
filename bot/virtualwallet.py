@@ -103,7 +103,7 @@ async def get_log(message: types.Message):
             current_log = json.loads(current_log.decode("utf-8"))
         out = ["Log:"]
         for l in current_log:
-            out.append(l["time"] + ": " + l["coin"] + " sold for " + l["usd"])
+            out.append(l["time"] + ": " + l["coin"] + " sold for USD " + l["change"])
         await message.reply('\n'.join(out))
     except Exception as e:
         logging.error("Log failed:" + str(e))
