@@ -1,3 +1,4 @@
+import datetime
 import logging
 import json
 import requests
@@ -22,6 +23,7 @@ from .prices import get_price, coin_price, round_sense
 from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
+SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
 
 # States
 class Form(StatesGroup):
@@ -90,6 +92,22 @@ async def add_bag_usd(message: types.Message, regexp_command):
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
+@dp.message_handler(commands=['log'])
+async def get_log(message: types.Message):
+    try:
+        log_key =  SCORE_LOG_KEY.format(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+        current_log = r.get(log_key)
+        if current_log is None:
+            current_log = []
+        out = ["Log:"]
+        for l in current_log:
+            out.append(l["time"] + ": " + l["coin"] + " sold for " + l["usd"])
+        await message.reply('\n'.join(out))
+    except Exception as e:
+        logging.error("Log failed:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Failed to get log. Contact... meh')
+
+
 def get_user_bag_score(chat_id, user_id):
     try:
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
@@ -105,7 +123,7 @@ def get_user_bag_score(chat_id, user_id):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
-def user_spent_usd(chat_id, user_id, usd):
+def user_spent_usd(chat_id, user_id, usd, coin=""):
     try:
         _, account_usd = get_user_bag_score(chat_id, user_id)
         if account_usd is None:
@@ -117,6 +135,12 @@ def user_spent_usd(chat_id, user_id, usd):
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = {"live": 0, "usd": new_account_usd}
         r.set(key, json.dumps(js))
+        log_key =  SCORE_LOG_KEY.format(chat_id=str(chat_id), user_id=user_id)
+        current_log = r.get(log_key)
+        if current_log is None:
+            current_log = []
+        current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, "usd": new_account_usd}})
+        r.set(log_key, json.dumps(current_log))
         return new_account_usd
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
@@ -299,7 +323,8 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-       
+        if message.from_user.id == 1597217560:
+            out = '👑 Reigning Champ\n' + out
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
