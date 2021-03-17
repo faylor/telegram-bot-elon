@@ -87,7 +87,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
             key = key.decode('utf-8')
             js = {"live": 0, "usd": amount}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO JELLYS CANDLE CLUB \n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
