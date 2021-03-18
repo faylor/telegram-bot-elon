@@ -1,6 +1,12 @@
 import cryptowatch as cw
 from google.protobuf.json_format import MessageToJson
 import os
+import asyncio
+
+import requests
+from bot.settings import (TELEGRAM_BOT)
+
+
 
 class Crytream():
 
@@ -12,7 +18,8 @@ class Crytream():
         self.bot = None
 
     
-    async def handle_intervals_update(self, interval_update):
+
+    def handle_intervals_update(self, interval_update):
         # market_msg = ">>> Market#{} Exchange#{} Pair#{}: {} New Trades".format(
         #     trade_update.marketUpdate.market.marketId,
         #     trade_update.marketUpdate.market.exchangeId,
@@ -20,12 +27,14 @@ class Crytream():
         #     len(trade_update.marketUpdate.tradesUpdate.trades),
         # )
         # print(market_msg)
-        rs = MessageToJson(interval_update)
+        text = MessageToJson(interval_update)
         # for interval in interval_update.marketUpdate.intervalsUpdate.intervals:
         #     if interval.periodName == "60":
-        if self.bot is not None:
-            await self.bot.send_message(chat_id=self.chat_id[0], text=rs)
-
+        bot_key = TELEGRAM_BOT
+        chat_id = self.chat_id[0]
+        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+        resp = requests.post(send_message_url)
+    
     
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
@@ -38,7 +47,7 @@ class Crytream():
     async def start(self, bot):
         self.bot = bot
 
-        cw.stream.on_intervals_update = await self.handle_intervals_update
+        cw.stream.on_intervals_update = self.handle_intervals_update
         cw.stream.connect()
 
     def stop(self):
