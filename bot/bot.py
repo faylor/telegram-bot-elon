@@ -125,7 +125,7 @@ RANDOM:
     """
     await bot.send_message(chat_id=message.chat.id, text=out)
 
-@dp.message_handler(commands=['startpricewatch'])
+@dp.message_handler(commands=['smiles'])
 async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to start...")
@@ -136,7 +136,7 @@ async def startPriceWatch(message: types.Message):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(commands=['stoppricewatch'])
+@dp.message_handler(commands=['cries'])
 async def stopPriceWatch(message: types.Message):
     try:
         logging.warn("____CHAT IT_____ " + str(message.chat.id))
