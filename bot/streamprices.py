@@ -44,7 +44,7 @@ class Crytream():
         if chat_id in self.chat_ids:
             self.chat_ids.remove(chat_id)
 
-    async def start(self, bot):
+    def start(self, bot):
         self.bot = bot
 
         cw.stream.on_intervals_update = self.handle_intervals_update
