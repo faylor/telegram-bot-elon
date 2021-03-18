@@ -10,20 +10,20 @@ class Crytream():
         cw.stream.on_trades_update = self.handle_trades_update
     
     def handle_trades_update(self, trade_update):
-        market_msg = ">>> Market#{} Exchange#{} Pair#{}: {} New Trades".format(
-            trade_update.marketUpdate.market.marketId,
-            trade_update.marketUpdate.market.exchangeId,
-            trade_update.marketUpdate.market.currencyPairId,
-            len(trade_update.marketUpdate.tradesUpdate.trades),
-        )
-        print(market_msg)
-        for trade in trade_update.marketUpdate.intervalsUpdate.intervals:
-            if trade.period == 60:
+        # market_msg = ">>> Market#{} Exchange#{} Pair#{}: {} New Trades".format(
+        #     trade_update.marketUpdate.market.marketId,
+        #     trade_update.marketUpdate.market.exchangeId,
+        #     trade_update.marketUpdate.market.currencyPairId,
+        #     len(trade_update.marketUpdate.tradesUpdate.trades),
+        # )
+        # print(market_msg)
+        for interval in trade_update.marketUpdate.intervalsUpdate.intervals:
+            if interval.period == 60:
                 trade_msg = "\tOpen:{} High:{} Low:{} Close:{}".format(
-                    trade.ohlc.openStr,
-                    trade.ohlc.highStr,
-                    trade.ohlc.lowStr,
-                    trade.ohlc.closeStr
+                    interval.ohlc.openStr,
+                    interval.ohlc.highStr,
+                    interval.ohlc.lowStr,
+                    interval.ohlc.closeStr
                 )
                 print(trade_msg)
     
