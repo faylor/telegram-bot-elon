@@ -130,7 +130,7 @@ async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to start...")
         crytream.add_chat_id(message.chat.id)
-        crytream.start()
+        crytream.start(bot)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
