@@ -19,11 +19,11 @@ class Crytream():
         #     trade_update.marketUpdate.market.currencyPairId,
         #     len(trade_update.marketUpdate.tradesUpdate.trades),
         # )
-        # print(market_msg)
-        for interval in intervals_update.marketUpdate.intervalsUpdate.intervals:
-            if self.bot is not None:
-                await self.bot.send_message(chat_id=self.chat_id[0], text=str(interval))
-            # if interval.period == 60:
+        print(intervals_update)
+        # for interval in intervals_update.marketUpdate.intervalsUpdate.intervals:
+        # if self.bot is not None:
+        #     await self.bot.send_message(chat_id=self.chat_id[0], text=str(interval))
+        #     # if interval.period == 60:
                 # trade_msg = "Base:{} Quote:{}".format(
                 #     interval.volumeBaseStr,
                 #     interval.volumeQuoteStr
