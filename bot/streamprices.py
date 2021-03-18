@@ -22,10 +22,10 @@ class Crytream():
         # )
         # print(market_msg)
         rs = MessageToJson(interval_update)
-        for interval in interval_update.marketUpdate.intervalsUpdate.intervals:
-            if interval.periodName.d == "60":
-                if self.bot is not None:
-                    await self.bot.send_message(chat_id=self.chat_id[0], text=rs)
+        # for interval in interval_update.marketUpdate.intervalsUpdate.intervals:
+        #     if interval.periodName == "60":
+        if self.bot is not None:
+            await self.bot.send_message(chat_id=self.chat_id[0], text=rs)
 
     
     def add_chat_id(self, chat_id):
