@@ -1,4 +1,5 @@
 import cryptowatch as cw
+from google.protobuf.json_format import MessageToJson
 import os
 
 class Crytream():
@@ -12,7 +13,7 @@ class Crytream():
         self.bot = None
 
     
-    async def handle_intervals_update(self, intervals_update):
+    async def handle_intervals_update(self, interval_update):
         # market_msg = ">>> Market#{} Exchange#{} Pair#{}: {} New Trades".format(
         #     trade_update.marketUpdate.market.marketId,
         #     trade_update.marketUpdate.market.exchangeId,
@@ -20,15 +21,12 @@ class Crytream():
         #     len(trade_update.marketUpdate.tradesUpdate.trades),
         # )
         # print(market_msg)
-        for interval in intervals_update.marketUpdate.intervalsUpdate.intervals:
-            if interval.periodName == "60":
-                trade_msg = "\tBase:{} Quote:{}".format(
-                    interval.volumeBaseStr,
-                    interval.volumeQuoteStr
-                )
+        rs = MessageToJson(interval_update)
+        for interval in interval_update.marketUpdate.intervalsUpdate.intervals:
+            if interval.periodName.d == "60":
                 if self.bot is not None:
-                    await self.bot.send_message(chat_id=self.chat_id[0], text=trade_msg)
-                print(trade_msg)
+                    await self.bot.send_message(chat_id=self.chat_id[0], text=rs)
+
     
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
