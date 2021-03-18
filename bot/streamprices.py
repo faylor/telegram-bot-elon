@@ -6,7 +6,7 @@ class Crytream():
     def __init__(self) -> None:
         self.chat_ids = []
         cw.api_key = os.environ["CRYPTOWATCH_API"]
-        cw.stream.subscriptions = ["markets:*:trades"]
+        cw.stream.subscriptions = ["assets:60:ohlc"]
         cw.stream.on_trades_update = self.handle_trades_update
     
     def handle_trades_update(self, trade_update):
@@ -17,15 +17,15 @@ class Crytream():
             len(trade_update.marketUpdate.tradesUpdate.trades),
         )
         print(market_msg)
-        for trade in trade_update.marketUpdate.tradesUpdate.trades:
-            trade_msg = "\tID:{} TIMESTAMP:{} TIMESTAMPNANO:{} PRICE:{} AMOUNT:{}".format(
-                trade.externalId,
-                trade.timestamp,
-                trade.timestampNano,
-                trade.priceStr,
-                trade.amountStr,
-            )
-            print(trade_msg)
+        for trade in trade_update.marketUpdate.intervalsUpdate.intervals:
+            if trade.period == 60:
+                trade_msg = "\tOpen:{} High:{} Low:{} Close:{}".format(
+                    trade.ohlc.openStr,
+                    trade.ohlc.highStr,
+                    trade.ohlc.lowStr,
+                    trade.ohlc.closeStr
+                )
+                print(trade_msg)
     
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
