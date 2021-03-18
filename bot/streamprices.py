@@ -21,13 +21,14 @@ class Crytream():
         # )
         # print(market_msg)
         for interval in intervals_update.marketUpdate.intervalsUpdate.intervals:
-            if interval.period == 60:
-                # trade_msg = "\tBase:{} Quote:{}".format(
+            if self.bot is not None:
+                await self.bot.send_message(chat_id=self.chat_id[0], text=str(interval))
+            # if interval.period == 60:
+                # trade_msg = "Base:{} Quote:{}".format(
                 #     interval.volumeBaseStr,
                 #     interval.volumeQuoteStr
                 # )
-                if self.bot is not None:
-                    await self.bot.send_message(chat_id=self.chat_id[0], text=str(interval))
+            
                 # print(trade_msg)
     
     def add_chat_id(self, chat_id):
