@@ -20,12 +20,12 @@ class Crytream():
         # )
         # print(market_msg)
         for interval in intervals_update.marketUpdate.intervalsUpdate.intervals:
+            print("HERE")
             if interval.period == 60:
-                trade_msg = "\tOpen:{} High:{} Low:{} Close:{}".format(
-                    interval.ohlc.openStr,
-                    interval.ohlc.highStr,
-                    interval.ohlc.lowStr,
-                    interval.ohlc.closeStr
+                print("HERE2")
+                trade_msg = "\tBase:{} Quote:{}".format(
+                    interval.volumeBaseStr,
+                    interval.volumeQuoteStr
                 )
                 print(trade_msg)
     
