@@ -70,7 +70,7 @@ class Crytream():
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.buy_updates = self.buy_updates + 1
-            if self.updates > 10:
+            if self.buy_updates + self.sell_updates > 4:
                 self.stop()
                 text = "Stopped after 10 switches"
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
