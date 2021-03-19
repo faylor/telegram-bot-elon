@@ -52,11 +52,18 @@ class Crytream():
         asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
 
         buy_pressure = len(bids) / len(asks)
-        bot_key = TELEGRAM_BOT
-        chat_id = self.chat_ids[0]
-        text = "BUY PRESSURE:\nLATEST:" + str(float(buy_pressure))
-        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-        resp = requests.post(send_message_url)
+        if buy_pressure < 0.2:
+            bot_key = TELEGRAM_BOT
+            chat_id = self.chat_ids[0]
+            text = "HIGH SELL PRESSURE: " + str(float(buy_pressure))
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
+        if buy_pressure > 2:
+            bot_key = TELEGRAM_BOT
+            chat_id = self.chat_ids[0]
+            text = "HIGH BUY PRESSURE: " + str(float(buy_pressure))
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
 
 
     def handle_intervals_update(self, interval_update):
