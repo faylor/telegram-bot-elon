@@ -48,24 +48,26 @@ class Crytream():
         #       ]
         #     }
         last_message = json.loads(MessageToJson(orderbook_snapshot_update))
-        bids = last_message["marketUpdate"]["orderBookUpdate"]["bids"]
-        asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
+        order_book = last_message["marketUpdate"]["orderBookUpdate"]
+        if "bids" in order_book and "asks" in order_book:
+            bids = ["bids"]
+            asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
 
-        buy_pressure = len(bids) / len(asks)
-        if buy_pressure < 0.1:
-            bot_key = TELEGRAM_BOT
-            chat_id = self.chat_ids[0]
-            text = "HIGH SELL PRESSURE: " + str(float(buy_pressure))
-            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-            resp = requests.post(send_message_url)
-            self.stop()
-        if buy_pressure > 10:
-            bot_key = TELEGRAM_BOT
-            chat_id = self.chat_ids[0]
-            text = "HIGH BUY PRESSURE: " + str(float(buy_pressure))
-            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-            resp = requests.post(send_message_url)
-            self.stop()
+            buy_pressure = len(bids) / len(asks)
+            if buy_pressure < 0.1:
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "HIGH SELL PRESSURE: " + str(float(buy_pressure))
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
+                self.stop()
+            if buy_pressure > 10:
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "HIGH BUY PRESSURE: " + str(float(buy_pressure))
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
+                self.stop()
 
 
     def handle_intervals_update(self, interval_update):
