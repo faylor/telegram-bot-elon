@@ -20,6 +20,8 @@ class Crytream():
         self.volumes = []
         self.last_average = 0
         self.volume_count = 0
+        self.sell_updates = 0
+        self.buy_updates = 0
     
     def handle_orderbook_snapshot_updates(self, orderbook_snapshot_update):
         # "orderBookUpdate": {
@@ -54,20 +56,25 @@ class Crytream():
             asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
 
             buy_pressure = len(bids) / len(asks)
-            if buy_pressure < 0.1:
+            if buy_pressure < 0.001 and self.sell_updates == 0:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "HIGH SELL PRESSURE: " + str(float(buy_pressure))
+                text = "SELL PRESSURE: " + str(float(buy_pressure))
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                self.stop()
-            if buy_pressure > 10:
+                self.sell_updates = self.updates + 1
+            if buy_pressure > 10 and self.buy_updates == 0:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "HIGH BUY PRESSURE: " + str(float(buy_pressure))
+                text = "BUY PRESSURE: " + str(float(buy_pressure))
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
+                self.buy_updates = self.updates + 1
+            if self.updates > 10:
                 self.stop()
+                text = "Stopped after 10 switches"
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
 
 
     def handle_intervals_update(self, interval_update):
