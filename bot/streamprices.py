@@ -1,6 +1,7 @@
 import cryptowatch as cw
 from google.protobuf.json_format import MessageToJson
 import os
+import json
 import asyncio
 
 import requests
@@ -53,7 +54,7 @@ class Crytream():
         #     }
         #   }
         # }
-        last_message = MessageToJson(interval_update)
+        last_message = json.loads(MessageToJson(interval_update))
         intervals = last_message["marketUpdate"]["intervalsUpdate"]["intervals"]
         if len(self.volumes) > 5:
             last_average = sum(self.volumes)/len(self.volumes)
