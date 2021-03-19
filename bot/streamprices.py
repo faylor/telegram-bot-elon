@@ -62,7 +62,7 @@ class Crytream():
             if interval["periodName"] == "60":
                 last_volume = float(interval["volumeQuoteStr"])
 
-        if self.last_average > 0 and self.volume_count > 5:
+        if self.last_average > 0 and self.volume_count > 50:
             if (self.last_average * 3) < last_volume:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
