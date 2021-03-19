@@ -181,9 +181,17 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
 
         symbols = []
         keys = []
+        chat_ids = []
         for key in saves:
-            symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
-            keys.append(key.decode('utf-8'))
+            key_split = key.split("_")
+            if "At_" + this_chat_id in key or len(key_split) < 4:
+                # not this chats
+                logging.info("Not a chat_id key:" + str(key))  
+            else:
+                chat_id = key_split[1]
+                chat_ids.append(chat_id)
+                symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
+                keys.append(key.decode('utf-8'))
 
         try:
             coin_prices = None
@@ -201,57 +209,51 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             else:
                 p, c, c24, btc_price = get_price(symbol)  
 
-            key_split = key.split("_")
-            if "At_" + this_chat_id in key or len(key_split) < 4:
-                # not this chats
-                logging.info("Not a chat_id key:" + str(key))  
+            chat_id = chat_ids[i]
+            if float(p) > 0:
+                value = r.get(key)
+                if value is not None:
+                    value = value.decode('utf-8')
+                    if "{" in value:
+                        js = json.loads(value)
+                        usd_price = float(js["usd"])
+                        buy_btc_price = float(js["btc"])
+                        coins = float(js["coins"])
+                    else:
+                        usd_price = float(value)
+                        buy_btc_price = "UNKNOWN"
+                        coins = "UNKNOWN"
+                    
+                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
+                        price = str(round(btc_price,8))
+                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
+                            buy_price = buy_btc_price.ljust(8,' ')
+                            change = 0
+                        else:
+                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
+                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
+                    else:
+                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
+                        price = str(round_sense(p))
+                        if usd_price == 0:
+                            change = 0
+                        else:
+                            change = round(100 * (p - usd_price) / usd_price, 2)
+                    total_change = total_change + change
+                    counter = counter + 1
+                    change = get_change_label(change).ljust(5,' ')
+                    symbol = symbol.upper()
+                    usd_value = coins * p
+                    total_value = total_value + usd_value
+                    coins = str(round_sense(coins)).ljust(6,' ')
+                    the_chat = await bot.get_chat(chat_id)
+                    the_chat_title = the_chat.title
+                    if last_the_chat_title != the_chat_title:
+                        out = out + f"{the_chat_title}\n"
+                        last_the_chat_title = the_chat_title
+                    out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
             else:
-                chat_id = key_split[1]
-                logging.info("PRICE FOR KEY::" + str(p)) 
-                if float(p) > 0:
-                    value = r.get(key)
-                    if value is not None:
-                        value = value.decode('utf-8')
-                        if "{" in value:
-                            js = json.loads(value)
-                            usd_price = float(js["usd"])
-                            buy_btc_price = float(js["btc"])
-                            coins = float(js["coins"])
-                        else:
-                            usd_price = float(value)
-                            buy_btc_price = "UNKNOWN"
-                            coins = "UNKNOWN"
-                        
-                        if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                            price = str(round(btc_price,8))
-                            if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                                buy_price = buy_btc_price.ljust(8,' ')
-                                change = 0
-                            else:
-                                buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
-                                change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
-                        else:
-                            buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                            price = str(round_sense(p))
-                            if usd_price == 0:
-                                change = 0
-                            else:
-                                change = round(100 * (p - usd_price) / usd_price, 2)
-                        total_change = total_change + change
-                        counter = counter + 1
-                        change = get_change_label(change).ljust(5,' ')
-                        symbol = symbol.upper()
-                        usd_value = coins * p
-                        total_value = total_value + usd_value
-                        coins = str(round_sense(coins)).ljust(6,' ')
-                        the_chat = await bot.get_chat(chat_id)
-                        the_chat_title = the_chat.title
-                        if last_the_chat_title != the_chat_title:
-                            out = out + f"{the_chat_title}\n"
-                            last_the_chat_title = the_chat_title
-                        out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
-                else:
-                    out = out + f"| {symbol} | NA | NA | NA | NA\n"
+                out = out + f"| {symbol} | NA | NA | NA | NA\n"
             i = i + 1
             
         if chat_id is not None:
