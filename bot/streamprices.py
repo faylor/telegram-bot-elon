@@ -62,13 +62,14 @@ class Crytream():
                 last_volume = float(interval["volumeQuoteStr"])
                 self.volumes.append(last_volume)
         if len(self.volumes) > 5:
-            if last_average < last_volume * 5:
-                bot_key = TELEGRAM_BOT
-                chat_id = self.chat_ids[0]
-                text = "ALERT SPIKE IN BTC VOLUME: " + str(last_volume) + "  AVERAGE:" + str(last_average)
-                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-                resp = requests.post(send_message_url)
-    
+            if last_average < last_volume * 1.02:
+                text = "ALERT 1.02 times"
+        bot_key = TELEGRAM_BOT
+        chat_id = self.chat_ids[0]
+        text = text + "..ALERT SPIKE IN BTC VOLUME: " + str(last_volume) + "  AVERAGE:" + str(last_average)
+        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+        resp = requests.post(send_message_url)
+
     
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
