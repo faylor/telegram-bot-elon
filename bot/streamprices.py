@@ -18,7 +18,8 @@ class Crytream():
         # cw.stream.on_trades_update = self.handle_trades_update
         self.bot = None
         self.volumes = []
-
+        self.last_average = 0
+        self.volume_count = 0
     
 
     def handle_intervals_update(self, interval_update):
@@ -56,20 +57,21 @@ class Crytream():
         # }
         last_message = json.loads(MessageToJson(interval_update))
         intervals = last_message["marketUpdate"]["intervalsUpdate"]["intervals"]
-        if len(self.volumes) > 5:
-            last_average = sum(self.volumes)/len(self.volumes)
+
         for interval in intervals:
             if interval["periodName"] == "60":
                 last_volume = float(interval["volumeQuoteStr"])
-                self.volumes.append(last_volume)
-        if len(self.volumes) > 5:
-            if last_average < last_volume * 1.02:
-                text = "ALERT 1.02 times"
-        bot_key = TELEGRAM_BOT
-        chat_id = self.chat_ids[0]
-        text = text + "..ALERT SPIKE IN BTC VOLUME: " + str(last_volume) + "  AVERAGE:" + str(last_average)
-        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-        resp = requests.post(send_message_url)
+
+        if self.last_average > 0 and self.volume_count > 5:
+            if self.last_average < last_volume * 3:
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "ALERT SPIKE IN BTC VOLUME:\nLATEST:" + str(last_volume) + "\nAVERAGE:" + str(self.last_average)
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
+        
+        self.last_average = ((self.last_average * self.volume_count) + last_volume)/(self.volume_count + 1)
+        self.volume_count = self.volume_count + 1
 
     
     def add_chat_id(self, chat_id):
