@@ -14,47 +14,52 @@ class Crytream():
     def __init__(self) -> None:
         self.chat_ids = []
         cw.api_key = os.environ["CRYPTOWATCH_API"]
-        cw.stream.subscriptions = ["assets:60:ohlc"]
+        cw.stream.subscriptions = ["assets:60:book:snapshots"]
         # cw.stream.on_trades_update = self.handle_trades_update
         self.bot = None
         self.volumes = []
         self.last_average = 0
         self.volume_count = 0
     
+    def handle_orderbook_snapshot_updates(self, orderbook_snapshot_update):
+        # "orderBookUpdate": {
+        #       "seqNum": 3143,
+        #       "bids": [
+        #         {
+        #           "priceStr": "8087",
+        #           "amountStr": "0.04",
+        #         },
+        #         {
+        #           "priceStr": "8086.2",
+        #           "amountStr": "0.089",
+        #         },
+        #         // ...
+        #       ],
+        #       "asks": [
+        #         {
+        #           "priceStr": "8087.2",
+        #           "amountStr": "1.15590988",
+        #         },
+        #         {
+        #           "priceStr": "8090",
+        #           "amountStr": "1",
+        #         },
+        #         // ...
+        #       ]
+        #     }
+        last_message = json.loads(MessageToJson(orderbook_snapshot_update))
+        bids = last_message["marketUpdate"]["orderBookUpdate"]["bids"]
+        asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
+
+        buy_pressure = bids / asks
+        bot_key = TELEGRAM_BOT
+        chat_id = self.chat_ids[0]
+        text = "BUY PRESSURE:\nLATEST:" + str(float(buy_pressure))
+        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+        resp = requests.post(send_message_url)
+
 
     def handle_intervals_update(self, interval_update):
-        # market_msg = ">>> Market#{} Exchange#{} Pair#{}: {} New Trades".format(
-        #     trade_update.marketUpdate.market.marketId,
-        #     trade_update.marketUpdate.market.exchangeId,
-        #     trade_update.marketUpdate.market.currencyPairId,
-        #     len(trade_update.marketUpdate.tradesUpdate.trades),
-        # )
-        # print(market_msg)
-        #         {
-        #   "marketUpdate": {
-        #     "intervalsUpdate": {
-        #       "intervals": [
-        #         {
-        #           "closetime": "1616142540",
-        #           "ohlc": {
-        #             "openStr": "54121.8",
-        #             "highStr": "54161",
-        #             "lowStr": "54121.6",
-        #             "closeStr": "54160.5"
-        #           },
-        #           "volumeBaseStr": "0.11336775",
-        #           "volumeQuoteStr": "6139.861519969",
-        #           "periodName": "60"
-        #         }
-        #       ]
-        #     },
-        #     "market": {
-        #       "exchangeId": "4",
-        #       "currencyPairId": "5284",
-        #       "marketId": "61496"
-        #     }
-        #   }
-        # }
         last_message = json.loads(MessageToJson(interval_update))
         intervals = last_message["marketUpdate"]["intervalsUpdate"]["intervals"]
 
@@ -84,6 +89,10 @@ class Crytream():
 
     def start(self, bot):
         self.bot = bot
+  
+
+        cw.stream.on_orderbook_snapshot_update = self.handle_orderbook_snapshot_updates
+
 
         cw.stream.on_intervals_update = self.handle_intervals_update
         cw.stream.connect()
