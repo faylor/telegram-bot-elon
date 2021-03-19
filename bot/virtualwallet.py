@@ -183,7 +183,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         keys = []
         chat_ids = []
         for key in saves:
-            key_split = key.split("_")
+            key_split = key.decode('utf-8').split("_")
             if "At_" + this_chat_id in key or len(key_split) < 4:
                 # not this chats
                 logging.info("Not a chat_id key:" + str(key))  
