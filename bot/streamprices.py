@@ -51,7 +51,7 @@ class Crytream():
         bids = last_message["marketUpdate"]["orderBookUpdate"]["bids"]
         asks = last_message["marketUpdate"]["orderBookUpdate"]["asks"]
 
-        buy_pressure = bids / asks
+        buy_pressure = len(bids) / len(asks)
         bot_key = TELEGRAM_BOT
         chat_id = self.chat_ids[0]
         text = "BUY PRESSURE:\nLATEST:" + str(float(buy_pressure))
