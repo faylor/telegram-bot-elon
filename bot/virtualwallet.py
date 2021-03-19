@@ -183,15 +183,16 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         keys = []
         chat_ids = []
         for key in saves:
-            key_split = key.decode('utf-8').split("_")
+            key = key.decode('utf-8')
+            key_split = key.split("_")
             if "At_" + this_chat_id in key or len(key_split) < 4:
                 # not this chats
                 logging.info("Not a chat_id key:" + str(key))  
             else:
                 chat_id = key_split[1]
                 chat_ids.append(chat_id)
-                symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
-                keys.append(key.decode('utf-8'))
+                symbols.append(key.replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
+                keys.append(key)
 
         try:
             coin_prices = None
