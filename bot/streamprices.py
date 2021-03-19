@@ -62,14 +62,16 @@ class Crytream():
                 text = "SELL PRESSURE: " + str(float(buy_pressure))
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                self.sell_updates = self.sell_updates + 1
+                self.sell_updates = self.buy_updates + 1
+                self.buy_updates = 0
             if buy_pressure > 10 and self.buy_updates == 0:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 text = "BUY PRESSURE: " + str(float(buy_pressure))
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                self.buy_updates = self.buy_updates + 1
+                self.buy_updates = self.sell_updates + 1
+                self.sell_updates = 0
             if self.buy_updates + self.sell_updates > 4:
                 self.stop()
                 text = "Stopped after 10 switches"
