@@ -179,16 +179,34 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         last_the_chat_title = ""
         chat_id = None
 
+        symbols = []
+        keys = []
         for key in saves:
-            _key = key.decode('utf-8')
-            key_split = _key.split("_")
-            if "At_" + this_chat_id in _key or len(key_split) < 4:
-                # not this chats
-                logging.info("Not a chat_id key:" + str(_key))  
+            symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
+            keys.append(key.decode('utf-8'))
+
+        try:
+            coin_prices = None
+            coin_prices = coin_price(symbols)
+        except:
+            logging.error("FAILED TO GET COIN PRICES")
+        i = 0
+        for key in keys:
+            symbol = symbols[i]
+            if coin_prices is not None and symbol.upper() in coin_prices:
+                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                c = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
+                c24 = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
+                btc_price = 1
             else:
-                symbol = key_split[2]
+                p, c, c24, btc_price = get_price(symbol)  
+
+            key_split = key.split("_")
+            if "At_" + this_chat_id in key or len(key_split) < 4:
+                # not this chats
+                logging.info("Not a chat_id key:" + str(key))  
+            else:
                 chat_id = key_split[1]
-                p, c, c24, btc_price = get_price(symbol)
                 logging.info("PRICE FOR KEY::" + str(p)) 
                 if float(p) > 0:
                     value = r.get(key)
@@ -234,6 +252,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                         out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
                 else:
                     out = out + f"| {symbol} | NA | NA | NA | NA\n"
+            i = i + 1
+            
         if chat_id is not None:
             _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
             out = out + "\n             UNUSED USD = " + str(round(usd,2))
