@@ -60,7 +60,7 @@ class Crytream():
 
         for interval in intervals:
             if interval["periodName"] == "60":
-                last_volume = float(interval["volumeQuoteStr"])
+                last_volume = float(interval["volumeBaseStr"])
 
         if self.last_average > 0 and self.volume_count > 50:
             if (self.last_average * 50) < last_volume:
