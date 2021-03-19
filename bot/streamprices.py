@@ -101,7 +101,7 @@ class Crytream():
         cw.stream.on_orderbook_snapshot_update = self.handle_orderbook_snapshot_updates
 
 
-        cw.stream.on_intervals_update = self.handle_intervals_update
+        # cw.stream.on_intervals_update = self.handle_intervals_update
         cw.stream.connect()
 
     def stop(self):
