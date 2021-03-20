@@ -232,38 +232,64 @@ def get_gecko_id(symbol):
             return d["id"]
     return None
 
-def get_price_gecko(label):
-    price, change_1hr, change_24hr = 0, 0, 0
+def get_gecko_ids(symbols):
+    data = get_gecko_list()
+    o = []
+    for d in data:
+        if d["symbol"].lower() in symbols:
+            return o.append(d["id"])
+    return o 
+
+def get_simple_prices_gecko(labels):
     try:
-        id = get_gecko_id(label)
-        if id is None: 
-            return 0, 0, 0, 0
-        
+        ids = get_gecko_id(labels)
+        if ids is None: 
+            return {}
+        csv_ids = ','.join(ids)
         http.headers.clear()
-        url = f"https://api.coingecko.com/api/v3/coins/{id}/tickers"
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={csv_ids}&vs_currencies=usd,btc"
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
-            price = js["data"]["market_data"]["price_usd"]
-            price_btc = js["data"]["market_data"]["price_btc"]
-            change_1hr = js["data"]["market_data"]["percent_change_usd_last_1_hour"]
-            change_24hr = js["data"]["market_data"]["percent_change_usd_last_24_hours"]
+            i = 0 
+            for id in ids:
+                js[labels[i].upper()] = js[id]
+                i = i + 1
+            return js
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
-            return 0,0,0,0
+            return {}
     except Exception as e:
         logging.error(e)
-        return 0, 0, 0, 0
-    if price is None:
-        price = 0
-    if change_1hr is None:
-        change_1hr = 0
-    if change_24hr is None:
-        change_24hr = 0
+        return {}
+
+def get_simple_price_gecko(label):
+    price_usd, price_btc = 0, 0
+    try:
+        id = get_gecko_id(label)
+        if id is None: 
+            return 0
+        
+        http.headers.clear()
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={id}&vs_currencies=usd,btc"
+        resp = http.get(url, timeout=(1, 1))
+        if resp.status_code == 200:
+            js = resp.json()
+            price_usd = js[id]["usd"]
+            price_btc = js[id]["btc"]
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return 0, 0
+    except Exception as e:
+        logging.error(e)
+        return 0, 0
+    if price_usd is None:
+        price_usd = 0
     if price_btc is None:
         price_btc = 0
-    return price, change_1hr, change_24hr, price_btc
+    return price_usd, price_btc
 
 def get_price(label):
     price, change_1hr, change_24hr = 0, 0, 0
