@@ -478,7 +478,7 @@ def get_users_live_value(chat_id, user_id):
             symbol = symbols[i]
 
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                p = coin_prices[symbol.upper()]["usd"]
             else:
                 p, _, _, _ = get_price(symbol)
             if float(p) > 0:
