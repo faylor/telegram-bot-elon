@@ -298,6 +298,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         try:
             coin_prices = None
             coin_prices = get_simple_prices_gecko(symbols)
+            logging.error("COIN PRICES:" + json.dumps(coin_prices))
         except:
             logging.error("FAILED TO GET COIN PRICES")
         i = 0
@@ -542,7 +543,7 @@ async def totals_user_scores2(message: types.Message):
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['ggrab ([0-9a-zA-Z]*)']))
-async def grab_point(message: types.Message, regexp_command, state: FSMContext):
+async def grab_point_gecko(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
