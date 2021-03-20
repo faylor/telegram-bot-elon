@@ -51,15 +51,16 @@ class DataWatcher():
                 else:
                     if len(js["p"]) > 3:
                         last_price = js["p"][-1]
-                        diff = price_data - last_price
-                        bot_key = TELEGRAM_BOT
-                        chat_id = self.chat_ids[0]
-                        text = "DIFF PRESSURE: " + str(float(diff))
-                        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-                        resp = requests.post(send_message_url)
-                    logging.error("JS000:" + json.dumps(js))
+                        diff = 100 * (price_data - last_price)/last_price
+                        if abs(diff) > 2:
+                            bot_key = TELEGRAM_BOT
+                            chat_id = self.chat_ids[0]
+                            text = "BTC DIFF > 2%    " + str(float(diff))
+                            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                            resp = requests.post(send_message_url)
+                    if len(js["p"]) > 50:
+                        js["p"] = []
                     js["p"].append(price_data) 
-                    logging.error("JS111:" + json.dumps(js))
             else:
                 js = {"p": [price_data]}
         else:
