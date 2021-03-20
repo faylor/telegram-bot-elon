@@ -46,7 +46,7 @@ class DataWatcher():
         if data is not None:
             js = json.loads(data.decode("utf-8"))
             if "p" in js:
-                if len(js["p"]) > 3:
+                if js["p"] is not None and len(js["p"]) > 3:
                     last_price = js["p"][-1]
                     diff = price_data - last_price
                     bot_key = TELEGRAM_BOT
