@@ -19,11 +19,19 @@ class DataWatcher():
 
     def __init__(self):
         self.stored = 0
+        self.timer = 60
         
-    async def start(self, timer=30):
+    async def start(self, timer=60):
+        self.timer = timer
+        while self.timer is not None:
+            logging.error("CALLING STORE_DATA")
+            self.store_data()
+            await asyncio.sleep(self.timer)
+    
+    def stop(self):
         self.store_data()
-        logging.error("CALLED STORING")
-        await asyncio.sleep(timer)
+        logging.error("STOP STORING")
+        self.timer = None
 
     async def store_data(self):
         data = get_simple_price_gecko("btc")
