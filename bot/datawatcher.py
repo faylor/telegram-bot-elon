@@ -46,7 +46,7 @@ class DataWatcher():
                 resp = requests.post(send_message_url)
                 js["p"] = js["p"].append(price_data) 
             else:
-                js["p"] = [price_data]
+                js = {"p": [price_data]}
         else:
             js = {"p": [price_data]}
         logging.error("JS:" + json.dumps(js))
