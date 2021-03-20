@@ -33,7 +33,7 @@ class DataWatcher():
         logging.error("STOP STORING")
         self.timer = None
 
-    async def store_data(self):
+    def store_data(self):
         data = get_simple_price_gecko("btc")
         logging.error("GOT PRICES:" + json.dumps(data))
         
