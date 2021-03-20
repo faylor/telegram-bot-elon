@@ -237,11 +237,12 @@ def get_gecko_ids(symbols):
     o = []
     for d in data:
         if d["symbol"].lower() in symbols:
-            return o.append(d["id"])
-    return o 
+            o.append(d["id"])
+    return o
 
 def get_simple_prices_gecko(labels):
     try:
+        logging.error("HERE-1:" + str(labels))
         ids = get_gecko_ids(labels)
         if ids is None: 
             return {}
