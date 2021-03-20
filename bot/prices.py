@@ -242,7 +242,6 @@ def get_gecko_ids(symbols):
 
 def get_simple_prices_gecko(labels):
     try:
-        logging.error("HERE-1:" + str(labels))
         ids = get_gecko_ids(labels)
         if ids is None: 
             return {}
@@ -250,6 +249,8 @@ def get_simple_prices_gecko(labels):
         http.headers.clear()
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={csv_ids}&vs_currencies=usd,btc"
         logging.error("HERE0:" + url)
+        logging.error("HERE0:" + labels)
+        logging.error("HERE0:" + str(ids))
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
