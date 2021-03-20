@@ -249,7 +249,7 @@ def get_simple_prices_gecko(labels):
         http.headers.clear()
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={csv_ids}&vs_currencies=usd,btc"
         logging.error("HERE0:" + url)
-        logging.error("HERE0:" + labels)
+        logging.error("HERE0:" + str(labels))
         logging.error("HERE0:" + str(ids))
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
