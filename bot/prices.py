@@ -252,9 +252,11 @@ def get_simple_prices_gecko(labels):
         if resp.status_code == 200:
             js = resp.json()
             i = 0 
+            logging.error("HERE:" + json.dumps(js))
             for id in ids:
                 js[labels[i].upper()] = js[id]
                 i = i + 1
+            logging.error("HERE2:" + json.dumps(js))
             return js
         else:
             logging.error("Response Failed..." + str(resp.status_code))
