@@ -234,15 +234,17 @@ def get_gecko_id(symbol):
 
 def get_gecko_ids(symbols):
     data = get_gecko_list()
-    o = []
+    js = {}
+    l = []
     for d in data:
         if d["symbol"].lower() in symbols:
-            o.append(d["id"])
-    return o
+            l.append(d["id"])
+            js[d["symbol"].upper()] = d["id"]
+    return l, js
 
 def get_simple_prices_gecko(labels):
     try:
-        ids = get_gecko_ids(labels)
+        ids, ids_dict = get_gecko_ids(labels)
         if ids is None: 
             return {}
         csv_ids = ','.join(ids)
@@ -251,13 +253,14 @@ def get_simple_prices_gecko(labels):
         logging.error("HERE0:" + url)
         logging.error("HERE0:" + str(labels))
         logging.error("HERE0:" + str(ids))
+        logging.error("HERE0:" + json.dumps(ids_dict))
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
             i = 0 
             logging.error("HERE:" + json.dumps(js))
-            for id in ids:
-                js[labels[i].upper()] = js[id]
+            for lab in labels:
+                js[lab.upper()] =   js[ids_dict[lab.upper()]["id"]]
                 i = i + 1
             logging.error("HERE2:" + json.dumps(js))
             return js
