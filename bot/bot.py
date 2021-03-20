@@ -18,7 +18,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news, get_rapids
-from .streamprices import Crytream
+from .datawatcher import DataWatcher
 
 r = redis.from_url(REDIS_URL)
 
@@ -27,7 +27,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
-crytream = Crytream()
+data_watcher = DataWatcher()
 
 from .watchalts import *
 from .watchlist import *
@@ -137,8 +137,8 @@ APIS:
 async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to start...")
-        crytream.add_chat_id(message.chat.id)
-        crytream.start(bot)
+        # crytream.add_chat_id(message.chat.id)
+        data_watcher.start(bot)
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
@@ -149,14 +149,12 @@ async def stopPriceWatch(message: types.Message):
     try:
         logging.warn("____CHAT IT_____ " + str(message.chat.id))
         await bot.send_message(chat_id=message.chat.id, text="Trying to stop price watch...")
-        crytream.remove_chat_id(message.chat.id)
-        crytream.stop()
+        # crytream.remove_chat_id(message.chat.id)
+        data_watcher.stop()
         await bot.send_message(chat_id=message.chat.id, text="Stopped.")
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
-
-
 
 @dp.message_handler(commands=['startstream'])
 async def startStream(message: types.Message):
