@@ -14,10 +14,6 @@ from .settings import (REDIS_URL)
 r = redis.from_url(REDIS_URL)
 
 COIN_DATA_KEY = "DATA_{}"
-def fire_and_forget(f):
-    def wrapped(*args, **kwargs):
-        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
-    return wrapped
 
 class DataWatcher():
 
@@ -25,16 +21,14 @@ class DataWatcher():
         self.stored = 0
         self.timer = 60
         
-    @fire_and_forget
-    def start(self, timer=60):
+    async def start(self, timer=60):
         self.timer = timer
         while self.timer is not None:
             logging.error("CALLING STORE_DATA")
             self.store_data()
-            asyncio.sleep(self.timer)
+            await asyncio.sleep(self.timer)
     
     def stop(self):
-        self.store_data()
         logging.error("STOP STORING")
         self.timer = None
 
