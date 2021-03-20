@@ -37,7 +37,7 @@ class DataWatcher():
         data = get_simple_price_gecko("btc")
         logging.error("GOT PRICES:" + json.dumps(data))
         
-        r.save(COIN_DATA_KEY.format("btc"), data)
+        r.set(COIN_DATA_KEY.format("btc"), json.dumps(data))
         self.stored = self.stored + 1
         logging.error("STORED:" + str(self.stored))
 
