@@ -46,13 +46,14 @@ class DataWatcher():
         if data is not None:
             js = json.loads(data.decode("utf-8"))
             if "p" in js:
-                last_price = js["p"][-1]
-                diff = price_data - last_price
-                bot_key = TELEGRAM_BOT
-                chat_id = self.chat_ids[0]
-                text = "DIFF PRESSURE: " + str(float(diff))
-                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-                resp = requests.post(send_message_url)
+                if len(js["p"]) > 3:
+                    last_price = js["p"][-1]
+                    diff = price_data - last_price
+                    bot_key = TELEGRAM_BOT
+                    chat_id = self.chat_ids[0]
+                    text = "DIFF PRESSURE: " + str(float(diff))
+                    send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                    resp = requests.post(send_message_url)
                 js["p"] = js["p"].append(price_data) 
             else:
                 js = {"p": [price_data]}
