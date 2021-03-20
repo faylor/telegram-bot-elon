@@ -122,6 +122,14 @@ RANDOM:
   /-<anything> (remove from list)
 
 * NOTHING I SAY IS FINANCIAL ADVICE * NOTHING! Built For Fun.
+
+APIS: 
+  GeckoCoin
+  CoinMarketCap
+  cryptometer
+  cryptorank
+  messari
+  cryptowat.ch
     """
     await bot.send_message(chat_id=message.chat.id, text=out)
 
