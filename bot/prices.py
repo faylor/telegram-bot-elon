@@ -236,6 +236,7 @@ def get_gecko_ids(symbols):
     data = get_gecko_list()
     o = []
     for d in data:
+        logging.error("WHAT LIST: " + d)
         if d["symbol"].lower() in symbols:
             return o.append(d["id"])
     return o 
