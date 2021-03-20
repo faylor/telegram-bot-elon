@@ -32,24 +32,24 @@ class DataWatcher():
         self.timer = None
 
     def store_data(self):
-        price_data = get_simple_price_gecko("btc")
-        logging.error("GOT PRICES:" + json.dumps(price_data))
+        price_data, _ = get_simple_price_gecko("btc")
+        logging.error("GOT PRICES:" + price_data)
         data = r.get(COIN_DATA_KEY.format("btc"))
         if data is not None:
             js = json.loads(data.decode("utf-8"))
             if "p" in js:
                 last_price = js["p"][-1]
-                diff = price_data["btc"]["usd"] - last_price
+                diff = price_data - last_price
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 text = "DIFF PRESSURE: " + str(float(diff))
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                js["p"] = js["p"].append(price_data["btc"]["usd"]) 
+                js["p"] = js["p"].append(price_data) 
             else:
-                js = {"p": [price_data["btc"]["usd"]]}
+                js["p"] = [price_data]
         else:
-            js = {"p": [price_data["btc"]["usd"]]}
+            js = {"p": [price_data]}
         logging.error("JS:" + json.dumps(js))
         r.set(COIN_DATA_KEY.format("btc"), json.dumps(js))
         self.stored = self.stored + 1
