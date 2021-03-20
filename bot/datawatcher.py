@@ -19,6 +19,15 @@ class DataWatcher():
     def __init__(self):
         self.stored = 0
         self.timer = 60
+        self.chat_ids = []
+    
+    def add_chat_id(self, chat_id):
+        if chat_id not in self.chat_ids:
+            self.chat_ids.append(chat_id)
+
+    def remove_chat_id(self, chat_id):
+        if chat_id in self.chat_ids:
+            self.chat_ids.remove(chat_id)
         
     async def start(self, timer=60):
         self.timer = timer
