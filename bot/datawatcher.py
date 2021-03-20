@@ -6,7 +6,7 @@ import asyncio
 
 import requests
 import asyncio
-improt json
+import json
 import logging
 from .prices import get_simple_price_gecko
 import redis
