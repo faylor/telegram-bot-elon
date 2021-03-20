@@ -47,7 +47,7 @@ class DataWatcher():
                 resp = requests.post(send_message_url)
                 js["p"] = js["p"].append(price_data["btc"]["usd"]) 
             else:
-                js["p"] = [price_data["btc"]["usd"]]
+                js = {"p": [price_data["btc"]["usd"]]}
         else:
             js = {"p": [price_data["btc"]["usd"]]}
         logging.error("JS:" + json.dumps(js))
