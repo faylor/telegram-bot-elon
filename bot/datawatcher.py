@@ -33,7 +33,7 @@ class DataWatcher():
 
     def store_data(self):
         price_data = get_simple_price_gecko("btc")
-        logging.error("GOT PRICES:" + json.dumps(data))
+        logging.error("GOT PRICES:" + json.dumps(price_data))
         data = r.get(COIN_DATA_KEY.format("btc"))
         if data is not None:
             js = json.loads(data.decode("utf-8"))
