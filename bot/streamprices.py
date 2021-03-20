@@ -24,31 +24,7 @@ class Crytream():
         self.buy_updates = 0
     
     def handle_orderbook_snapshot_updates(self, orderbook_snapshot_update):
-        # "orderBookUpdate": {
-        #       "seqNum": 3143,
-        #       "bids": [
-        #         {
-        #           "priceStr": "8087",
-        #           "amountStr": "0.04",
-        #         },
-        #         {
-        #           "priceStr": "8086.2",
-        #           "amountStr": "0.089",
-        #         },
-        #         // ...
-        #       ],
-        #       "asks": [
-        #         {
-        #           "priceStr": "8087.2",
-        #           "amountStr": "1.15590988",
-        #         },
-        #         {
-        #           "priceStr": "8090",
-        #           "amountStr": "1",
-        #         },
-        #         // ...
-        #       ]
-        #     }
+        
         last_message = json.loads(MessageToJson(orderbook_snapshot_update))
         order_book = last_message["marketUpdate"]["orderBookUpdate"]
         if "bids" in order_book and "asks" in order_book:
