@@ -687,7 +687,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             elif spent_response == "75%":
                 spend = float(data['balance']) * 0.75
             elif spent_response == "50%":
-                spend = float(data['balance']) * 0.75
+                spend = float(data['balance']) * 0.50
             elif spent_response == "25%":
                 spend = float(data['balance']) * 0.25
             elif spent_response == "cancel":
