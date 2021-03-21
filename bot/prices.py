@@ -257,7 +257,7 @@ def get_simple_prices_gecko(labels):
             logging.error("TEST HERE:" + json.dumps(ids_dict))
             logging.error("LABELS HERE:" + json.dumps(labels))
             for lab in labels:
-                js[lab.upper()] =   js[ids_dict[lab.upper()]["id"]]
+                js[lab.upper()] =  js[ids_dict[lab.upper()]]
                 i = i + 1
             return js
         else:
