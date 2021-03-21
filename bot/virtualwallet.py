@@ -161,6 +161,42 @@ def user_spent_usd(chat_id, user_id, usd, coin):
         return None
 
 
+
+# @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['stoploss([\sa-zA-Z]*)']))
+# async def create_stop_loss(message: types.Message, regexp_command):
+#     try:
+#         string = regexp_command.group(1)
+#         split_st = string.strip().split()
+#         coin = split_st[0]
+#         amount = float(split_st[0])
+#         chat_id = str(message.chat.id)
+#         user_id = message.from_user.id
+#         saves = r.get("SL_" + coin.upper())
+#         if saves is None:
+#             saves = {amount: [{"c": chat_id, "u": user_id}]}
+#         else:
+#             saves = json.loads(saves.decode("utf-8"))
+#             i = 0
+#             for key in saves.keys():
+#                 if saves[key] is not None:
+#                     for s in saves[key]:
+#                         if s["u"] == user_id and s["c"] == chat_id:
+#                             saves[i] = 
+#                 i = i + 1
+                
+#     except Exception as e:
+#         logging.error("FAILED to create stop loss:" + str(e))
+#         return None
+
+# def trigger_stop_losses(price):
+#     saves = r.get("SL_BTC")
+#     if saves is not None:
+#         saves = json.loads(saves.decode("utf-8"))
+#         for key in saves.keys():
+
+           
+        
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gobag([\sa-zA-Z]*)']))
 async def send_user_balance_from_other_chat(message: types.Message, regexp_command):
     try:

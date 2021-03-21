@@ -245,7 +245,7 @@ def get_gecko_ids(symbols):
 def get_simple_prices_gecko(labels):
     try:
         ids, ids_dict = get_gecko_ids(labels)
-        if ids is None: 
+        if ids is None or len(ids) == 0: 
             return {}
         csv_ids = ','.join(ids)
         http.headers.clear()
@@ -254,6 +254,8 @@ def get_simple_prices_gecko(labels):
         if resp.status_code == 200:
             js = resp.json()
             i = 0 
+            logging.error("TEST HERE:" + json.dumps(ids_dict))
+            logging.error("LABELS HERE:" + json.dumps(labels))
             for lab in labels:
                 js[lab.upper()] =   js[ids_dict[lab.upper()]["id"]]
                 i = i + 1
