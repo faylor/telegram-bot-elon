@@ -238,10 +238,11 @@ def get_gecko_ids(symbols):
     l = []
     for d in data:
         if d["symbol"].lower() in symbols:
-            if d["id"] == d["symbol"]:
-                l.append(d["id"])
-                js[d["symbol"].upper()] = d["id"]
-            elif d["symbol"].upper() not in js:
+            if d["symbol"].lower() == "one":
+                if d["id"].lower() == "harmony":
+                    l.append(d["id"])
+                    js[d["symbol"].upper()] = d["id"]
+            else:
                 l.append(d["id"])
                 js[d["symbol"].upper()] = d["id"]
     return l, js
