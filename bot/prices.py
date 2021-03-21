@@ -241,7 +241,7 @@ def get_gecko_ids(symbols):
             if d["id"] == d["symbol"]:
                 l.append(d["id"])
                 js[d["symbol"].upper()] = d["id"]
-            elif d["symbol".upper()] not in js:
+            elif d["symbol"].upper() not in js:
                 l.append(d["id"])
                 js[d["symbol"].upper()] = d["id"]
     return l, js
