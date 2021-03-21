@@ -659,12 +659,14 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 
-@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel"], state=Form.spent)
+@dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel", "cancel"], state=Form.spent)
 async def process_spent_invalid(message: types.Message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     markup.add("25%", "50%", "75%", "100%")
     markup.add("Cancel")
+    logging.error("HERE1:" + message.text.lower().strip())
     return await message.reply("Total Spend has gotta be a number.\nSelect percentage or write a number in box.", reply_markup=markup)
+
 
 @dp.message_handler(lambda message: message.text in ["cancel", "Cancel"], state=Form.spent)
 async def cancel_spent(message: types.Message, state: FSMContext):
@@ -674,9 +676,12 @@ async def cancel_spent(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
     try:
+        logging.error("HERE0")
         async with state.proxy() as data:
             markup = types.ReplyKeyboardRemove()
             spent_response = message.text.lower().strip()
+            logging.error("HERE0:" + spent_response)
+        
             if spent_response == "100%":
                 spend = float(data['balance'])
             elif spent_response == "75%":
