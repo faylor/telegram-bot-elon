@@ -238,8 +238,12 @@ def get_gecko_ids(symbols):
     l = []
     for d in data:
         if d["symbol"].lower() in symbols:
-            l.append(d["id"])
-            js[d["symbol"].upper()] = d["id"]
+            if d["id"] == d["symbol"]:
+                l.append(d["id"])
+                js[d["symbol"].upper()] = d["id"]
+            elif d["symbol".upper()] not in js:
+                l.append(d["id"])
+                js[d["symbol"].upper()] = d["id"]
     return l, js
 
 def get_simple_prices_gecko(labels):
