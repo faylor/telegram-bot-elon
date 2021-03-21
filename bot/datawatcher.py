@@ -52,7 +52,7 @@ class DataWatcher():
                     if len(js["p"]) > 3:
                         last_price = js["p"][-1]
                         diff = 100 * (price_data - last_price)/last_price
-                        if abs(diff) > 2:
+                        if abs(diff) > 0.1:
                             bot_key = TELEGRAM_BOT
                             chat_id = self.chat_ids[0]
                             text = "BTC DIFF > 2%    " + str(float(diff))
@@ -65,10 +65,8 @@ class DataWatcher():
                 js = {"p": [price_data]}
         else:
             js = {"p": [price_data]}
-        logging.error("JS:" + json.dumps(js))
         r.set(COIN_DATA_KEY.format("btc"), json.dumps(js))
         self.stored = self.stored + 1
-        logging.error("STORED:" + str(self.stored))
 
     
         
