@@ -81,7 +81,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         if regexp_command is not None:
             amount = float(regexp_command.group(1).strip())
         else: 
-            amount = 1000
+            amount = 10000
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))   
         for key in saves:
             key = key.decode('utf-8')
@@ -129,9 +129,9 @@ def get_user_bag_score(chat_id, user_id):
             js = json.loads(js)
             return float(js["live"]), float(js["usd"])
         else:
-            js = {"live": 0, "usd": 1000}
+            js = {"live": 0, "usd": 10000}
             r.set(key, json.dumps(js))
-            return 0, 1000
+            return 0, 10000
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
