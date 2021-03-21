@@ -52,10 +52,10 @@ class DataWatcher():
                     if len(js["p"]) > 3:
                         last_price = js["p"][-1]
                         diff = 100 * (price_data - last_price)/last_price
-                        if abs(diff) > 0.1:
+                        if abs(diff) > 1:
                             bot_key = TELEGRAM_BOT
                             chat_id = self.chat_ids[0]
-                            text = "BTC DIFF > 2%    " + str(float(diff))
+                            text = "BTC RAPID CHANGE " + str(round(float(diff),1)) + "%"
                             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                             resp = requests.post(send_message_url)
                     if len(js["p"]) > 50:
@@ -69,5 +69,3 @@ class DataWatcher():
         self.stored = self.stored + 1
 
     
-        
-        
