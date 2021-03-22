@@ -254,7 +254,9 @@ def get_simple_prices_gecko(labels):
             return {}
         csv_ids = ','.join(ids)
         http.headers.clear()
+        
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={csv_ids}&vs_currencies=usd,btc"
+        
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
@@ -282,10 +284,15 @@ def get_simple_price_gecko(label):
         
         http.headers.clear()
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={id}&vs_currencies=usd,btc"
+        logging.error("Test URL:" + url)
+
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
+
             js = resp.json()
             price_usd = js[id]["usd"]
+            logging.error("Test URL:" + str(price_usd))
+
             price_btc = js[id]["btc"]
         else:
             logging.error("Response Failed..." + str(resp.status_code))
