@@ -700,6 +700,11 @@ async def process_spend(message: types.Message, state: FSMContext):
                 return await message.reply("Coin error, <= 0.")
 
             price = float(data['price_usd'])
+            p, btc_price = get_simple_price_gecko(data['coin'])
+            if p != 0 and abs((p - price)/p) > 0.01:
+                 await state.finish()
+                 return await message.reply("Prices look odd - please retry buy again.")
+
             chat_id = str(message.chat.id)
             user_id = str(message.from_user.id)
             if spend <= 0 or price == 0:
@@ -769,6 +774,10 @@ async def set_panic_point(message: types.Message, regexp_command):
             if js is not None:
                 js = json.loads(js)
                 price_usd = js["usd"]
+                if price_usd == sale_price_usd:
+                    logging.error("Prices are the same checking again...")
+                    sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
+                    logging.error("Prices are the same checking again..." + str(price_usd) + " and " + str(sale_price_usd))
                 price_btc = js["btc"]
                 available_coins = js["coins"]
             else:
@@ -886,6 +895,10 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 if js is not None:
                     js = json.loads(js)
                     price_usd = js["usd"]
+                    if price_usd == sale_price_usd:
+                        logging.error("Prices are the same checking again...")
+                        sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
+                        logging.error("Prices are the same checking again..." + str(price_usd) + " and " + str(sale_price_usd))
                     price_btc = js["btc"]
                     available_coins = js["coins"]
                 else:
