@@ -240,7 +240,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             symbol = symbols[i]
             if coin_prices is not None and symbol.upper() in coin_prices:
                 p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
-                btc_price = coin_prices[symbol.upper()]["quote"]["BTC"]["price"]
+                btc_price = 0
+                # btc_price = 0 coin_prices[symbol.upper()]["quote"]["BTC"]["price"]
             else:
                 p, _, _, btc_price = get_price(symbol)  
 
