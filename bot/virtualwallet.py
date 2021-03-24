@@ -307,7 +307,7 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         logging.warn("Couldnt get hodl data:" + str(e))
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckobag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
     try:
         if regexp_command is not None:
@@ -398,7 +398,7 @@ async def send_user_balance(message: types.Message, regexp_command):
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['oldbag([\sa-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
     try:
         if regexp_command is not None:
@@ -576,7 +576,7 @@ async def totals_user_scores2(message: types.Message):
 
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckograb ([0-9a-zA-Z]*)']))
 async def grab_point_gecko(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -617,7 +617,7 @@ async def grab_point_gecko(message: types.Message, regexp_command, state: FSMCon
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['oldgrab ([0-9a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
 async def grab_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -630,6 +630,9 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
             p, _, _, btc_price = get_price(symbol)
+            data = coin_price_realtime(symbol)
+            usd_data = data[symbol.upper()]["quote"]["USD"]
+            p = usd_data["price"]
 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
@@ -752,7 +755,7 @@ async def process_spend(message: types.Message, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckopanic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
     try:
         to_symbol = regexp_command.group(1)
@@ -814,7 +817,7 @@ async def set_panic_point(message: types.Message, regexp_command):
     except Exception as e:
         logging.error("Panic error: " + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['oldpanic([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
     try:
         to_symbol = regexp_command.group(1)
@@ -833,6 +836,9 @@ async def set_panic_point(message: types.Message, regexp_command):
             symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
             logging.error("COIN: " + symbol)
             sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            data = coin_price_realtime(symbol)
+            usd_data = data[symbol.upper()]["quote"]["USD"]
+            sale_price_usd = usd_data["price"]
             if js is not None:
                 js = json.loads(js)
                 price_usd = js["usd"]
@@ -873,7 +879,7 @@ async def set_panic_point(message: types.Message, regexp_command):
         logging.error("Panic error: " + str(e))
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckodump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -930,7 +936,7 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /dumper btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['olddump ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
         symbols = regexp_command.group(1)
@@ -945,6 +951,9 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
             sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            data = coin_price_realtime(symbol)
+            usd_data = data[symbol.upper()]["quote"]["USD"]
+            sale_price_usd = usd_data["price"]
             if sale_price_usd == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
             else:
