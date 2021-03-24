@@ -23,7 +23,7 @@ async def send_price_of(message: types.Message, regexp_command):
         _, c, c24, _ = get_price(symbol)
         p, btc_price = get_simple_price_gecko(symbol)
         data = coin_price_realtime(symbol)
-        data_dump = json.dumps(data)
+        data_dump = json.dumps(data[symbol.upper()]["quote"]["USD"])
         await bot.send_message(chat_id=message.chat.id, 
                                 text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr \nData: {data_dump}</pre>", 
         parse_mode="HTML")
