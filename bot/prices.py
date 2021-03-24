@@ -332,6 +332,24 @@ def get_price(label):
         price_btc = 0
     return price, change_1hr, change_24hr, price_btc
 
+def coin_price_realtime(label):
+    try:
+        http.headers.clear()
+        http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+        parameters = {
+            'symbol': label
+        }
+        response = http.get(url, params=parameters)
+        if response.status_code == 429:
+            logging.error("HIT LIMIT")
+        else:
+            data = response.json()
+            data_arr = data["data"]
+            return data_arr
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        logging.error("COIN_PRICE Error: " + str(e))
+
 def coin_price(labels):
     try:
         lab_hash = hash(str(labels))

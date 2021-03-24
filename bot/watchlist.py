@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_price, coin_price, get_simple_price_gecko, round_sense, get_change_label
+from .prices import get_price, coin_price, get_simple_price_gecko, round_sense, get_change_label, coin_price_realtime
 from .user import get_user_price_config
 from .chart import fibs_chart_extended
 
@@ -22,7 +22,11 @@ async def send_price_of(message: types.Message, regexp_command):
         symbol = regexp_command.group(1).strip()
         _, c, c24, _ = get_price(symbol)
         p, btc_price = get_simple_price_gecko(symbol)
-        await bot.send_message(chat_id=message.chat.id, text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", parse_mode="HTML")
+        data = coin_price_realtime(symbol)
+        data_dump = json.dumps(data)
+        await bot.send_message(chat_id=message.chat.id, 
+                                text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr \nData: {data_dump}</pre>", 
+        parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
             saved = saved.decode('utf-8')
