@@ -372,7 +372,7 @@ def coin_price(labels):
         else:
             data = response.json()
             data_arr = data["data"]
-            r.set("QUOTES_cmc_" + str(lab_hash), json.dumps(data_arr), ex=60)
+            r.set("QUOTES_cmc_" + str(lab_hash), json.dumps(data_arr), ex=5)
             return data_arr
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("COIN_PRICE Error: " + str(e))
