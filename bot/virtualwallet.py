@@ -19,7 +19,7 @@ from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
-from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense
+from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime
 from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
