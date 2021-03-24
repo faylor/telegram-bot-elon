@@ -703,7 +703,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 return await message.reply("Coin error, <= 0.")
 
             price = float(data['price_usd'])
-            if p == 0:
+            if price == 0:
                  await state.finish()
                  return await message.reply("Prices look odd - please retry buy again.")
 
