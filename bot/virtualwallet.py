@@ -703,8 +703,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 return await message.reply("Coin error, <= 0.")
 
             price = float(data['price_usd'])
-            p, btc_price = get_simple_price_gecko(data['coin'])
-            if p != 0 and abs((p - price)/p) > 0.01:
+            if p == 0:
                  await state.finish()
                  return await message.reply("Prices look odd - please retry buy again.")
 
