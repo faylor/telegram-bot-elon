@@ -502,7 +502,7 @@ def get_users_live_value(chat_id, user_id):
         
         try:
             coin_prices = None
-            coin_prices = get_simple_prices_gecko(symbols)
+            coin_prices = coin_prices(symbols)
         except:
             logging.error("FAILED TO GET COIN PRICES")
 
@@ -512,7 +512,7 @@ def get_users_live_value(chat_id, user_id):
             symbol = symbols[i]
 
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["usd"]
+                p = coin_prices[symbol.upper()]["quote"]["USD"]
             else:
                 p, _, _, _ = get_price(symbol)
             if float(p) > 0:
