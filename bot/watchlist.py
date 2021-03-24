@@ -27,10 +27,8 @@ async def send_price_of(message: types.Message, regexp_command):
         p = usd_data["price"]
         c = usd_data["percent_change_1h"]
         c24 = usd_data["percent_change_24h"]
-
-        data_dump = json.dumps()
         await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr \nData: {data_dump}</pre>", 
+                                text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
         parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
