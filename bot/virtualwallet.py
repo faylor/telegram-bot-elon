@@ -232,15 +232,15 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
 
         try:
             coin_prices = None
-            coin_prices = get_simple_prices_gecko(symbols)
+            coin_prices = coin_price(symbols)
         except:
             logging.error("FAILED TO GET COIN PRICES")
         i = 0
         for key in keys:
             symbol = symbols[i]
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["usd"]
-                btc_price = coin_prices[symbol.upper()]["btc"]
+                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                btc_price = coin_prices[symbol.upper()]["quote"]["BTC"]["price"]
             else:
                 p, _, _, btc_price = get_price(symbol)  
 
@@ -502,7 +502,7 @@ def get_users_live_value(chat_id, user_id):
         
         try:
             coin_prices = None
-            coin_prices = coin_prices(symbols)
+            coin_prices = coin_price(symbols)
         except:
             logging.error("FAILED TO GET COIN PRICES")
 
@@ -512,7 +512,7 @@ def get_users_live_value(chat_id, user_id):
             symbol = symbols[i]
 
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["quote"]["USD"]
+                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
             else:
                 p, _, _, _ = get_price(symbol)
             if float(p) > 0:
