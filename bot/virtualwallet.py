@@ -906,6 +906,63 @@ async def set_panic_point(message: types.Message, regexp_command):
         logging.error("Panic error: " + str(e))
 
 
+
+
+@dp.message_handler(commands=['feelinglucky'])
+async def set_panic_point(message: types.Message):
+    try:
+        user_id = str(message.from_user.id)
+        chat_id = str(message.chat.id)
+        
+        keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
+        for key in keys:
+            js = r.get(key).decode('utf-8')
+            symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
+            logging.error("COIN: " + symbol)
+            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            data = coin_price_realtime(symbol)
+            usd_data = data[symbol.upper()]["quote"]["USD"]
+            sale_price_usd = usd_data["price"]
+            if js is not None:
+                js = json.loads(js)
+                price_usd = js["usd"]
+                price_btc = js["btc"]
+                available_coins = js["coins"]
+            else:
+                return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
+
+            sale_usd = available_coins * sale_price_usd
+            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            
+            r.delete(key)
+            profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
+            if profit_or_loss > 0:
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
+            else:
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
+            # And send message
+            await bot.send_message(
+                message.chat.id,
+                md.text(
+                    md.text('User:', md.code(message.from_user.mention)),
+                    md.text('Coin:', md.code(symbol.upper())),
+                    md.text('Buy Price USD:', md.text(round_sense(price_usd))),
+                    md.text('Buy Price BTC:', md.text(round(price_btc, 6))),
+                    md.text('Sale Price USD:', md.text(round_sense(sale_price_usd))),
+                    md.text('Sale Price BTC:', md.text(round(sale_price_btc, 6))),
+                    md.text('Total Coins Sold:', md.text(str(available_coins))),
+                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    profit_or_loss_md,
+                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    sep='\n',
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
+        await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
+    except Exception as e:
+        logging.error("Panic error: " + str(e))
+
+
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckodump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
