@@ -85,8 +85,37 @@ async def add_bag_usd(message: types.Message, regexp_command):
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))   
         for key in saves:
             key = key.decode('utf-8')
-            js = {"live": 0, "usd": amount}
+            saved = r.get(key)
+            current_amount = 0
+            if saved is not None:
+                js = json.loads(saved.decode("utf-8"))
+                if "usd" in js:
+                    current_amount = float(js["usd"])
+            js = {"live": 0, "usd": amount + current_amount}
             r.set(key, json.dumps(js))
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO JELLYS CANDLE CLUB \n')
+    except Exception as e:
+        logging.error("Gimme failed:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bonus([\s0-9.]*)']))
+async def add_bag_usd(message: types.Message, regexp_command):
+    try:
+        if regexp_command is not None:
+            user_id = message.from_user.id
+            amount = float(regexp_command.group(1).strip())
+        else: 
+            return await message.reply(f'Need the user and amount\n')
+        key = SCORE_KEY.format(chat_id=str(message.chat.id), user_id=str(user_id))
+        save = r.get(key) 
+        current_amount = 0  
+        if save is not None:
+            js = json.loads(save.decode("utf-8"))
+            if "usd" in js:
+                current_amount = float(js["usd"])
+        js = {"live": 0, "usd": amount + current_amount}
+        r.set(key, json.dumps(js))
+
         await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO JELLYS CANDLE CLUB \n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
