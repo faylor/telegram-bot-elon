@@ -21,14 +21,14 @@ async def send_price_of(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1).strip()
         # _, c, c24, _ = get_price(symbol)
-        p, btc_price = get_simple_price_gecko(symbol)
+        price_gecko, btc_price = get_simple_price_gecko(symbol)
         data = coin_price_realtime(symbol)
         usd_data = data[symbol.upper()]["quote"]["USD"]
         p = usd_data["price"]
         c = usd_data["percent_change_1h"]
         c24 = usd_data["percent_change_24h"]
         await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>{symbol}: ${round_sense(p)}  {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
+                                text=f"<pre>CoinMarketCap - {symbol}: ${round_sense(p)}\Gecko API - {symbol}: ${round_sense(price_gecko)} {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
         parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
