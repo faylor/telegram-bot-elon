@@ -284,7 +284,7 @@ def get_bn_price(label):
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
-            price_usd = js["price"]
+            price_usd = float(js["price"])
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
