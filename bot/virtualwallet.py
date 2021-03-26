@@ -19,7 +19,7 @@ from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
-from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime
+from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
@@ -663,6 +663,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
             p = usd_data["price"]
+            p = get_bn_price(symbol)
 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
@@ -866,6 +867,9 @@ async def set_panic_point(message: types.Message, regexp_command):
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
             sale_price_usd = usd_data["price"]
+
+            sale_price_usd = get_bn_price(symbol)
+
             if js is not None:
                 js = json.loads(js)
                 price_usd = js["usd"]
@@ -1038,6 +1042,8 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
             sale_price_usd = usd_data["price"]
+            sale_price_usd = get_bn_price(symbol)
+
             if sale_price_usd == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
             else:
