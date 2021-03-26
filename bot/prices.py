@@ -279,6 +279,7 @@ def get_bn_price(label):
     price_usd = 0
     try:
         http.headers.clear()
+        label = label.upper().strip()
         url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}USDT"
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
