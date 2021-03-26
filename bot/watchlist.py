@@ -13,7 +13,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, r, bot
-from .prices import get_price, coin_price, get_simple_price_gecko, round_sense, get_change_label, coin_price_realtime
+from .prices import get_price, coin_price, get_simple_price_gecko, round_sense, get_change_label, coin_price_realtime, get_bn_price
 from .user import get_user_price_config
 from .chart import fibs_chart_extended
 
@@ -22,13 +22,14 @@ async def send_price_of(message: types.Message, regexp_command):
         symbol = regexp_command.group(1).strip()
         # _, c, c24, _ = get_price(symbol)
         price_gecko, btc_price = get_simple_price_gecko(symbol)
+        price_bn = get_bn_price(symbol)
         data = coin_price_realtime(symbol)
         usd_data = data[symbol.upper()]["quote"]["USD"]
         p = usd_data["price"]
         c = usd_data["percent_change_1h"]
         c24 = usd_data["percent_change_24h"]
         await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>CoinMarketCap - {symbol}: ${round_sense(p)}\nGecko API - {symbol}: ${round_sense(price_gecko)} {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
+                                text=f"<pre>Binance - {symbol}: ${round_sense(price_bn)}\nCoinMarketCap - {symbol}: ${round_sense(p)}\nGecko API - {symbol}: ${round_sense(price_gecko)} {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
         parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:

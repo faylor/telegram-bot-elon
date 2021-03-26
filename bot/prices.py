@@ -275,6 +275,27 @@ def get_simple_prices_gecko(labels):
         logging.error("get_simple_prices_gecko ERROR:" + str(e))
         return {}
 
+def get_bn_price(label):
+    price_usd = 0
+    try:
+        http.headers.clear()
+        url = f"https://api.binance.com//api/v3/ticker/price?symbol={label}USDT"
+        resp = http.get(url, timeout=(1, 1))
+        if resp.status_code == 200:
+            js = resp.json()
+            price_usd = js["price"]
+        else:
+            logging.error("Response Failed..." + str(resp.status_code))
+            logging.error("Response Test..." + str(resp.text))
+            return 0, 0
+    except Exception as e:
+        logging.error(e)
+        return 0, 0
+    if price_usd is None:
+        price_usd = 0
+    return price_usd
+    
+
 def get_simple_price_gecko(label):
     price_usd, price_btc = 0, 0
     try:
