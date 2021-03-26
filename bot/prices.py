@@ -279,7 +279,7 @@ def get_bn_price(label):
     price_usd = 0
     try:
         http.headers.clear()
-        url = f"https://api.binance.com//api/v3/ticker/price?symbol={label}USDT"
+        url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}USDT"
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
@@ -287,10 +287,10 @@ def get_bn_price(label):
         else:
             logging.error("Response Failed..." + str(resp.status_code))
             logging.error("Response Test..." + str(resp.text))
-            return 0, 0
+            return 0
     except Exception as e:
         logging.error(e)
-        return 0, 0
+        return 0
     if price_usd is None:
         price_usd = 0
     return price_usd
