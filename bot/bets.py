@@ -30,6 +30,8 @@ async def weekly_tally(message: types.Message, r):
     winning_eth_name = ""
     winning_diff = 99999
     cid = str(message.chat.id)
+    ordered_btc = []
+    btc_scores = []
     for key in r.scan_iter(f"{cid}_BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
@@ -48,12 +50,25 @@ async def weekly_tally(message: types.Message, r):
                     winning = user_id
                     winning_name = mention_name
                     winning_diff = d
-            out = out + mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)) + "\n"
+            if len(ordered_btc) > 1:
+                i = 1
+                while i < len(btc_scores) and d < btc_scores[i]:
+                    i = i + 1
+                btc_scores.insert(i, d)
+                ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+            else:
+                btc_scores.append(d)
+                ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+            
+    out = "\n".join(ordered_btc)
+    
     out = out + "</pre>\nWINNING BTC: " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
     out = out + "<pre>Who             Bet     Diff\n"
     winning_eth = ""
     winning_diff = 99999
+    ordered_eth = []
+    eth_scores = []
     for key in r.scan_iter(f"{cid}_ETH_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_eth)
@@ -72,7 +87,17 @@ async def weekly_tally(message: types.Message, r):
                     winning_eth = user_id
                     winning_eth_name = mention_name
                     winning_diff = d
-            out = out + mention_name.ljust(15, ' ')  + " " + a.ljust(7, ' ') + " " + str(round(d,1)) + "\n"
+            if len(ordered_eth) > 1:
+                i = 1
+                while i < len(eth_scores) and d < eth_scores[i]:
+                    i = i + 1
+                eth_scores.insert(i, d)
+                ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+            else:
+                eth_scores.append(d)
+                ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+            
+    out = "\n".join(ordered_eth)
     out = out + "</pre>\nWINNING ETH: " + winning_eth_name + "\n"
     return out, winning, winning_eth, winning_name, winning_eth_name
 
