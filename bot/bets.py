@@ -50,16 +50,12 @@ async def weekly_tally(message: types.Message, r):
                     winning = user_id
                     winning_name = mention_name
                     winning_diff = d
-            if len(ordered_btc) > 1:
+            if len(ordered_btc) > 0:
                 i = 0
                 while i < len(btc_scores) and d > btc_scores[i]:
                     i = i + 1
-                if i == len(btc_scores):
-                    btc_scores.append(d)
-                    ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
-                else:
-                    btc_scores.insert(i, d)
-                    ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                btc_scores.insert(i, d)
+                ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
             else:
                 btc_scores.append(d)
                 ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
@@ -91,16 +87,12 @@ async def weekly_tally(message: types.Message, r):
                     winning_eth = user_id
                     winning_eth_name = mention_name
                     winning_diff = d
-            if len(ordered_eth) > 1:
+            if len(ordered_eth) > 0:
                 i = 0
                 while i < len(eth_scores) and d > eth_scores[i]:
                     i = i + 1
-                if i == len(eth_scores):
-                    eth_scores.append(d)
-                    ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
-                else:
-                    eth_scores.insert(i, d)
-                    ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                eth_scores.insert(i, d)
+                ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
             else:
                 eth_scores.append(d)
                 ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
