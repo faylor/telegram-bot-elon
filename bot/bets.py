@@ -60,7 +60,7 @@ async def weekly_tally(message: types.Message, r):
                 btc_scores.append(d)
                 ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
             
-    out = "\n".join(ordered_btc)
+    out = out + "\n".join(ordered_btc)
     
     out = out + "</pre>\nWINNING BTC: " + winning_name + "\n"
     out = out + "\nETH Bets (Current=" + str(round(p_eth,0)) + "):\n"
@@ -97,7 +97,7 @@ async def weekly_tally(message: types.Message, r):
                 eth_scores.append(d)
                 ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
             
-    out = "\n".join(ordered_eth)
+    out = out + "\n".join(ordered_eth)
     out = out + "</pre>\nWINNING ETH: " + winning_eth_name + "\n"
     return out, winning, winning_eth, winning_name, winning_eth_name
 
