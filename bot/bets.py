@@ -51,8 +51,8 @@ async def weekly_tally(message: types.Message, r):
                     winning_name = mention_name
                     winning_diff = d
             if len(ordered_btc) > 1:
-                i = 1
-                while i < len(btc_scores) and d < btc_scores[i]:
+                i = 0
+                while i < len(btc_scores) and d > btc_scores[i]:
                     i = i + 1
                 btc_scores.insert(i, d)
                 ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
@@ -88,8 +88,8 @@ async def weekly_tally(message: types.Message, r):
                     winning_eth_name = mention_name
                     winning_diff = d
             if len(ordered_eth) > 1:
-                i = 1
-                while i < len(eth_scores) and d < eth_scores[i]:
+                i = 0
+                while i < len(eth_scores) and d > eth_scores[i]:
                     i = i + 1
                 eth_scores.insert(i, d)
                 ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
