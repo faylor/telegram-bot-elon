@@ -39,7 +39,10 @@ class Bntream():
                     else:
                         if len(js["Q"]) > 3:
                             last_VOL = float(js["Q"][-1])
-                            diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
+                            if last_VOL > 0:
+                                diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
+                            else:
+                                diff = 0
                             if abs(diff) > 1:
                                 bot_key = TELEGRAM_BOT
                                 chat_id = self.chat_ids[0]
