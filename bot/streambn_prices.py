@@ -29,7 +29,7 @@ class Bntream():
            
     def process_message(self, msg):
         try:
-            taker_buy_vol = msg["k"]["Q"]
+            taker_buy_vol = float(msg["k"]["Q"])
             data = r.get(COIN_DATA_KEY.format("AUDIO"))
             if data is not None:
                 js = json.loads(data.decode("utf-8"))
@@ -38,7 +38,7 @@ class Bntream():
                         js = {"Q": [taker_buy_vol]}
                     else:
                         if len(js["Q"]) > 3:
-                            last_VOL = js["Q"][-1]
+                            last_VOL = float(js["Q"][-1])
                             diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
                             if abs(diff) > 1:
                                 bot_key = TELEGRAM_BOT
