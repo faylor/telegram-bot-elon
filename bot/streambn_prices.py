@@ -43,7 +43,7 @@ class Bntream():
                                 diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
                             else:
                                 diff = 0
-                            if abs(diff) > 1:
+                            if abs(diff) > 1000:
                                 bot_key = TELEGRAM_BOT
                                 chat_id = self.chat_ids[0]
                                 text = "AUDIO RAPID CHANGE " + str(round(float(diff),1)) + "%"
