@@ -36,12 +36,14 @@ class Bntream():
             if is_end == True:
                 open_price = float(msg["k"]["o"])
                 close_price = float(msg["k"]["c"])
-                if open_price > close_price:
+                if close_price > open_price:
                     self.green_count = self.green_count + 1
                     self.red_count = 0
+                    logging.error("PUMP UP!")
                 else:
                     self.red_count = self.red_count + 1
                     self.green_count = 0
+                    logging.error("DUMP Down!")
                 data = r.get(COIN_DATA_KEY.format("AUDIO"))
                 if data is not None:
                     js = json.loads(data.decode("utf-8"))
