@@ -12,7 +12,7 @@ class Bntream():
     def __init__(self) -> None:
         self.chat_ids = []
         self.client = Client(BN_API_KEY, BN_API_SECRET)
-        self.bm = BinanceSocketManager(client)
+        self.bm = BinanceSocketManager(self.client)
         self.bot = None
         self.volumes = []
         self.last_average = 0
@@ -43,7 +43,7 @@ class Bntream():
 
     def start(self, bot):
         self.bot = bot
-        self.bm.start_aggtrade_socket('BNBBTC', process_message)
+        self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
         self.bm.start()
 
     def stop(self):
