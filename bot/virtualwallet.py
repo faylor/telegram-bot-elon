@@ -662,8 +662,11 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             p, _, _, btc_price = get_price(symbol)
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
-            p = usd_data["price"]
-            p = get_bn_price(symbol)
+            if usd_data["price"] > 0:
+                p = usd_data["price"]
+            sale_price_usd_tmp = get_bn_price(symbol) 
+            if sale_price_usd_tmp > 0:
+                p = sale_price_usd_tmp
 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
@@ -1041,8 +1044,11 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
             sale_price_usd, _, _, sale_price_btc = get_price(symbol)
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
-            sale_price_usd = usd_data["price"]
-            sale_price_usd = get_bn_price(symbol)
+            if usd_data["price"] > 0:
+                sale_price_usd = usd_data["price"]
+            sale_price_usd_tmp = get_bn_price(symbol) 
+            if sale_price_usd_tmp > 0:
+                sale_price_usd = sale_price_usd_tmp
 
             if sale_price_usd == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
