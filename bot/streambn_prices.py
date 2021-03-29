@@ -34,7 +34,7 @@ class Bntream():
             taker_buy_vol = float(msg["k"]["Q"])
             is_end = msg["k"]["x"]
             logging.error("is end?" + str(is_end))
-            if is_end == "true":
+            if is_end == True:
                 open_price = float(msg["k"]["o"])
                 close_price = float(msg["k"]["c"])
                 if close_price > open_price:
