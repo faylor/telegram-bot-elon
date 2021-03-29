@@ -104,7 +104,7 @@ class Bntream():
     def start(self):
         self.conn_key = self.bm.start_kline_socket('AUDIOUSDT', self.process_message, interval=KLINE_INTERVAL_3MINUTE)
         # self.conn_key = self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
-        # self.bm.start()
+        self.bm.start()
 
     def stop(self):
         self.bm.stop_socket(self.conn_key)
