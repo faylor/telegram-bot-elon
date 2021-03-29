@@ -3,7 +3,7 @@ import json
 import asyncio
 
 import requests
-from bot.settings import (BN_API_KEY, BN_API_SECRET)
+from bot.settings import (BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
 from binance.websockets import BinanceSocketManager
 from binance.client import Client
 
@@ -22,9 +22,11 @@ class Bntream():
     def process_message(self, msg):
         print("message type: {}".format(msg['e']))
         print(msg)
-        text = "BN Message: " + json.dumps(msg)
-        send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-        resp = requests.post(send_message_url)
+        if len(self.chat_ids) > 0:
+            chat_id = self.chat_ids[0]
+            text = "BN Message: " + json.dumps(msg)
+            send_message_url = f'https://api.telegram.org/bot{TELEGRAM_BOT}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
         # do something
 
     # def handle_intervals_update(self, interval_update):
