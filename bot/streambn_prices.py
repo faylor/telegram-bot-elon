@@ -43,8 +43,8 @@ class Bntream():
             self.chat_ids.remove(chat_id)
 
     def start(self):
-        self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
-        self.conn_key = self.bm.start()
+        self.conn_key = self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
+        self.bm.start()
 
     def stop(self):
         self.bm.stop_socket(self.conn_key)
