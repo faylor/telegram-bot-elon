@@ -33,7 +33,6 @@ class Bntream():
         try:
             taker_buy_vol = float(msg["k"]["Q"])
             is_end = msg["k"]["x"]
-            logging.error("is end?" + str(is_end))
             if is_end == True:
                 open_price = float(msg["k"]["o"])
                 close_price = float(msg["k"]["c"])
@@ -58,10 +57,10 @@ class Bntream():
                                     diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
                                 else:
                                     diff = 0
-                                if abs(diff) > 1000:
+                                if abs(diff) > 10000:
                                     bot_key = TELEGRAM_BOT
                                     chat_id = self.chat_ids[0]
-                                    text = "2 RAPID CHANGE " + str(round(float(diff),1)) + "%"
+                                    text = "AUDIO RAPID CHANGE " + str(round(float(diff),1)) + "%"
                                     send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                                     resp = requests.post(send_message_url)
                             if len(js["Q"]) > 50:
