@@ -20,6 +20,7 @@ class Bntream():
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         self.bm = BinanceSocketManager(self.client)
         self.volumes = []
+        self.stored = 0
         self.last_average = 0
         self.volume_count = 0
         self.sell_updates = 0
