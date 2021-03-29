@@ -18,6 +18,7 @@ class Bntream():
         self.volume_count = 0
         self.sell_updates = 0
         self.buy_updates = 0
+        self.conn_key = ""
            
     def process_message(self, msg):
         print("message type: {}".format(msg['e']))
@@ -43,7 +44,7 @@ class Bntream():
 
     def start(self):
         self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
-        self.bm.start()
+        self.conn_key = self.bm.start()
 
     def stop(self):
-        self.bm.stop()
+        self.bm.stop_socket(self.conn_key)
