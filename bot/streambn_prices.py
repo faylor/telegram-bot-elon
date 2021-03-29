@@ -19,8 +19,7 @@ class Bntream():
         self.sell_updates = 0
         self.buy_updates = 0
            
-    # start aggregated trade websocket for BNBBTC
-    def process_message(msg):
+    def process_message(self, msg):
         print("message type: {}".format(msg['e']))
         print(msg)
         text = "BN Message: " + json.dumps(msg)
