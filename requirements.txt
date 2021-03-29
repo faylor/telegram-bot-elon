@@ -31,3 +31,4 @@ cairosvg==2.5.1
 mplfinance==0.12.7a7
 pandas
 cryptowatch-sdk
+python-binance

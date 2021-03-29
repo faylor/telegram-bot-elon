@@ -18,7 +18,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from .twits import Twits, get_stream
 from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news, get_rapids
-from .datawatcher import DataWatcher
+# from .datawatcher import DataWatcher
+from .streambn_prices import Bntream
 
 r = redis.from_url(REDIS_URL)
 
@@ -27,7 +28,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
-data_watcher = DataWatcher()
+data_watcher = Bntream()
 
 from .watchalts import *
 from .watchlist import *
@@ -138,7 +139,7 @@ async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to start...")
         data_watcher.add_chat_id(message.chat.id)
-        asyncio.create_task(data_watcher.start(30))
+        asyncio.create_task(data_watcher.start())
         await bot.send_message(chat_id=message.chat.id, text="Running...")
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
