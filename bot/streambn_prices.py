@@ -39,14 +39,13 @@ class Bntream():
                 open_price = float(msg["k"]["o"])
                 close_price = float(msg["k"]["c"])
                 self.velocity_previous = self.velocity
+                self.velocity = (close_price - open_price)/1 # 1min
                 if close_price > open_price:
                     self.green_count = self.green_count + 1
-                    self.velocity = (close_price - open_price)/1 # 1min
                     self.red_count = 0
                     logging.error("PUMP UP!")
                 else:
                     self.red_count = self.red_count + 1
-                    self.velocity = (open_price - close_price)/1 # 1min
                     self.green_count = 0
                     logging.error("DUMP Down!")
                 data = r.get(COIN_DATA_KEY.format("AUDIO"))
@@ -80,14 +79,14 @@ class Bntream():
             elif self.green_count > 1 and self.velocity > self.velocity_previous:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "POSSIBLE AUDIO PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
+                text = "GREENS: " + str(self.green_count) + " POSSIBLE AUDIO PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.green_count = 0
-            elif self.red_count > 1 and self.velocity > self.velocity_previous:
+            elif self.red_count > 1 and self.velocity < self.velocity_previous:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "POSSIBLE AUDIO DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
+                text = "RED: " + str(self.red_count) + "POSSIBLE AUDIO DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.red_count = 0
