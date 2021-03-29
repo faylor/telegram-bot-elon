@@ -26,38 +26,62 @@ class Bntream():
         self.sell_updates = 0
         self.buy_updates = 0
         self.conn_key = ""
+        self.green_count = 0
+        self.red_count = 0
            
     def process_message(self, msg):
         try:
             taker_buy_vol = float(msg["k"]["Q"])
-            data = r.get(COIN_DATA_KEY.format("AUDIO"))
-            if data is not None:
-                js = json.loads(data.decode("utf-8"))
-                if "Q" in js:
-                    if js["Q"] is None:
-                        js = {"Q": [taker_buy_vol]}
+            is_end = msg["k"]["x"]
+            if is_end == True:
+                open_price = float(msg["k"]["o"])
+                close_price = float(msg["k"]["c"])
+                if open_price > close_price:
+                    self.green_count = self.green_count + 1
+                    self.red_count = 0
+                else:
+                    self.red_count = self.red_count + 1
+                    self.green_count = 0
+                data = r.get(COIN_DATA_KEY.format("AUDIO"))
+                if data is not None:
+                    js = json.loads(data.decode("utf-8"))
+                    if "Q" in js:
+                        if js["Q"] is None:
+                            js = {"Q": [taker_buy_vol]}
+                        else:
+                            if len(js["Q"]) > 1:
+                                last_VOL = float(js["Q"][-1])
+                                if last_VOL > 0:
+                                    diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
+                                else:
+                                    diff = 0
+                                if abs(diff) > 1000:
+                                    bot_key = TELEGRAM_BOT
+                                    chat_id = self.chat_ids[0]
+                                    text = "2 RAPID CHANGE " + str(round(float(diff),1)) + "%"
+                                    send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                                    resp = requests.post(send_message_url)
+                            if len(js["Q"]) > 50:
+                                js["Q"] = js["Q"][:25]
+                            js["Q"].append(taker_buy_vol) 
                     else:
-                        if len(js["Q"]) > 3:
-                            last_VOL = float(js["Q"][-1])
-                            if last_VOL > 0:
-                                diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
-                            else:
-                                diff = 0
-                            if abs(diff) > 1000:
-                                bot_key = TELEGRAM_BOT
-                                chat_id = self.chat_ids[0]
-                                text = "AUDIO RAPID CHANGE " + str(round(float(diff),1)) + "%"
-                                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-                                resp = requests.post(send_message_url)
-                        if len(js["Q"]) > 50:
-                            js["Q"] = js["Q"][:25]
-                        js["Q"].append(taker_buy_vol) 
+                        js = {"Q": [taker_buy_vol]}
                 else:
                     js = {"Q": [taker_buy_vol]}
-            else:
-                js = {"Q": [taker_buy_vol]}
-            r.set(COIN_DATA_KEY.format("AUDIO"), json.dumps(js))
-            self.stored = self.stored + 1
+                r.set(COIN_DATA_KEY.format("AUDIO"), json.dumps(js))
+                self.stored = self.stored + 1
+            elif self.green_count > 1:
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "POSSIBLE AUDIO PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol"
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
+            elif self.red_count > 1:
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "POSSIBLE AUDIO DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol"
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
         except Exception as e:
             logging.error("BN Stream process error:" + str(e))
         # do something
@@ -77,7 +101,7 @@ class Bntream():
     def start(self):
         self.conn_key = self.bm.start_kline_socket('AUDIOUSDT', self.process_message, interval=KLINE_INTERVAL_3MINUTE)
         # self.conn_key = self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
-        self.bm.start()
+        # self.bm.start()
 
     def stop(self):
         self.bm.stop_socket(self.conn_key)
