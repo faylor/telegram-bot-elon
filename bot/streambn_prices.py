@@ -78,12 +78,14 @@ class Bntream():
                 text = "POSSIBLE AUDIO PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol"
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
+                self.green_count = 0
             elif self.red_count > 1:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 text = "POSSIBLE AUDIO DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol"
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
+                self.red_count = 0
         except Exception as e:
             logging.error("BN Stream process error:" + str(e))
         # do something
