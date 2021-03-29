@@ -13,7 +13,6 @@ class Bntream():
         self.chat_ids = []
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         self.bm = BinanceSocketManager(self.client)
-        self.bot = None
         self.volumes = []
         self.last_average = 0
         self.volume_count = 0
@@ -41,8 +40,7 @@ class Bntream():
         if chat_id in self.chat_ids:
             self.chat_ids.remove(chat_id)
 
-    def start(self, bot):
-        self.bot = bot
+    def start(self):
         self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
         self.bm.start()
 
