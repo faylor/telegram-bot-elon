@@ -96,14 +96,14 @@ class Bntream():
                 
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "GREENS: " + str(self.green_count[stream]) + " POSSIBLE PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
+                text = str(stream) + " GREENS: " + str(self.green_count[stream]) + " POSSIBLE PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.green_count = 0
             elif stream in self.red_count and self.red_count > 1 and self.velocity < self.velocity_previous:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "RED: " + str(self.red_count[stream]) + " POSSIBLE DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
+                text = str(stream) + " RED: " + str(self.red_count[stream]) + " POSSIBLE DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.red_count = 0
