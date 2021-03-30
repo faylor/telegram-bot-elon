@@ -34,14 +34,19 @@ class Bntream():
     def process_message(self, msg):
         try:
             stream, data = msg['stream'], msg['data']
+            logging.error("STREAM:" + str(stream))
+            logging.error("Data:" + str(data))
             taker_buy_vol = float(data["k"]["Q"])
             is_end = data["k"]["x"]
             if is_end == True:
+                logging.error("HERE")
                 open_price = float(data["k"]["o"])
                 close_price = float(data["k"]["c"])
                 if stream in self.velocity:
                     self.velocity_previous[stream] = self.velocity[stream]
                 self.velocity[stream] = (close_price - open_price)/1 # 1min
+                logging.error("HERE3")
+                
                 if close_price > open_price:
                     if stream in self.green_count:
                         self.green_count[stream] = self.green_count[stream] + 1
@@ -56,6 +61,8 @@ class Bntream():
                         self.red_count[stream] = 1
                     self.green_count[stream] = 0
                     logging.error("DUMP Down!")
+                logging.error("HERE2")
+                
                 data_db = r.get(COIN_DATA_KEY.format("AUDIO"))
                 if data_db is not None:
                     js = json.loads(data_db.decode("utf-8"))
@@ -85,6 +92,8 @@ class Bntream():
                 r.set(COIN_DATA_KEY.format("AUDIO"), json.dumps(js))
                 self.stored = self.stored + 1
             elif stream in self.green_count and self.green_count[stream] > 1 and self.velocity[stream]  > self.velocity_previous[stream]:
+                logging.error("HERE1")
+                
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 text = "GREENS: " + str(self.green_count[stream]) + " POSSIBLE PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
