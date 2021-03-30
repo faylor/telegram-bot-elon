@@ -90,18 +90,18 @@ class Bntream():
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 ratio = self.velocity[stream]/self.velocity_previous[stream]
-                text = stream.replace("usdt@kline_1m", "").upper() + str(self.green_count[stream]) + " GREEN. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
+                text = stream.replace("usdt@kline_1m", "").upper() + " " + str(self.green_count[stream]) + " GREEN. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                self.green_count = 0
+                self.green_count[stream] = 0
             elif stream in self.red_count and self.red_count[stream] > 1 and self.velocity[stream] < self.velocity_previous[stream]:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 ratio = self.velocity[stream]/self.velocity_previous[stream]
-                text = stream.replace("usdt@kline_1m", "").upper() + str(self.red_count[stream]) + " RED. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
+                text = stream.replace("usdt@kline_1m", "").upper() + " " + str(self.red_count[stream]) + " RED. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
-                self.red_count = 0
+                self.red_count[stream] = 0
         except Exception as e:
             logging.error("BN Stream process error:" + str(e))
         # do something
