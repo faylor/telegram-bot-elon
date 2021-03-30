@@ -26,31 +26,38 @@ class Bntream():
         self.sell_updates = 0
         self.buy_updates = 0
         self.conn_key = ""
-        self.green_count = 0
-        self.red_count = 0
-        self.velocity = 0
-        self.velocity_previous = 0
+        self.green_count = {}
+        self.red_count = {}
+        self.velocity = {}
+        self.velocity_previous = {}
            
     def process_message(self, msg):
         try:
-            taker_buy_vol = float(msg["k"]["Q"])
-            is_end = msg["k"]["x"]
+            stream, data = msg['stream'], msg['data']
+            taker_buy_vol = float(data["k"]["Q"])
+            is_end = data["k"]["x"]
             if is_end == True:
-                open_price = float(msg["k"]["o"])
-                close_price = float(msg["k"]["c"])
-                self.velocity_previous = self.velocity
-                self.velocity = (close_price - open_price)/1 # 1min
+                open_price = float(data["k"]["o"])
+                close_price = float(data["k"]["c"])
+                self.velocity_previous[stream] = self.velocity[stream]
+                self.velocity[stream] = (close_price - open_price)/1 # 1min
                 if close_price > open_price:
-                    self.green_count = self.green_count + 1
-                    self.red_count = 0
+                    if stream in self.green_count:
+                        self.green_count[stream] = self.green_count[stream] + 1
+                    else:
+                        self.green_count[stream] = 1
+                    self.red_count[stream] = 0
                     logging.error("PUMP UP!")
                 else:
-                    self.red_count = self.red_count + 1
-                    self.green_count = 0
+                    if stream in self.red_count:
+                        self.red_count[stream] = self.red_count[stream] + 1
+                    else:
+                        self.red_count[stream] = 1
+                    self.green_count[stream] = 0
                     logging.error("DUMP Down!")
-                data = r.get(COIN_DATA_KEY.format("AUDIO"))
-                if data is not None:
-                    js = json.loads(data.decode("utf-8"))
+                data_db = r.get(COIN_DATA_KEY.format("AUDIO"))
+                if data_db is not None:
+                    js = json.loads(data_db.decode("utf-8"))
                     if "Q" in js:
                         if js["Q"] is None:
                             js = {"Q": [taker_buy_vol]}
@@ -76,17 +83,17 @@ class Bntream():
                     js = {"Q": [taker_buy_vol]}
                 r.set(COIN_DATA_KEY.format("AUDIO"), json.dumps(js))
                 self.stored = self.stored + 1
-            elif self.green_count > 1 and self.velocity > self.velocity_previous:
+            elif stream in self.green_count and self.green_count[stream] > 1 and self.velocity[stream]  > self.velocity_previous[stream]:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "GREENS: " + str(self.green_count) + " POSSIBLE AUDIO PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
+                text = "GREENS: " + str(self.green_count[stream]) + " POSSIBLE PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.green_count = 0
-            elif self.red_count > 1 and self.velocity < self.velocity_previous:
+            elif stream in self.red_count and self.red_count > 1 and self.velocity < self.velocity_previous:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = "RED: " + str(self.red_count) + "POSSIBLE AUDIO DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity) + " - " + str(self.velocity_previous)
+                text = "RED: " + str(self.red_count[stream]) + " POSSIBLE DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.red_count = 0
@@ -107,7 +114,8 @@ class Bntream():
             self.chat_ids.remove(chat_id)
 
     def start(self):
-        self.conn_key = self.bm.start_kline_socket('AUDIOUSDT', self.process_message, interval=KLINE_INTERVAL_3MINUTE)
+        self.conn_key = self.bm.start_multiplex_socket(['audiousdt@akline_1m', 'btcusdt@akline_1m'], self.process_message)
+        # self.conn_key = self.bm.start_kline_socket('AUDIOUSDT', self.process_message, interval=KLINE_INTERVAL_1MINUTE)
         # self.conn_key = self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
         self.bm.start()
 
