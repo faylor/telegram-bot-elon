@@ -114,7 +114,7 @@ class Bntream():
             self.chat_ids.remove(chat_id)
 
     def start(self):
-        self.conn_key = self.bm.start_multiplex_socket(['audiousdt@akline_1m', 'btcusdt@akline_1m'], self.process_message)
+        self.conn_key = self.bm.start_multiplex_socket(['audiousdt@kline_1m', 'btcusdt@kline_1m'], self.process_message)
         # self.conn_key = self.bm.start_kline_socket('AUDIOUSDT', self.process_message, interval=KLINE_INTERVAL_1MINUTE)
         # self.conn_key = self.bm.start_aggtrade_socket('BNBBTC', self.process_message)
         self.bm.start()
