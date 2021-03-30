@@ -34,8 +34,6 @@ class Bntream():
     def process_message(self, msg):
         try:
             stream, data = msg['stream'], msg['data']
-            logging.error("STREAM:" + str(stream))
-            logging.error("Data:" + str(data))
             taker_buy_vol = float(data["k"]["Q"])
             is_end = data["k"]["x"]
             if is_end == True:
@@ -100,7 +98,7 @@ class Bntream():
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.green_count = 0
-            elif stream in self.red_count and self.red_count > 1 and self.velocity < self.velocity_previous:
+            elif stream in self.red_count and self.red_count[stream] > 1 and self.velocity[stream] < self.velocity_previous[stream]:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 text = str(stream) + " RED: " + str(self.red_count[stream]) + " POSSIBLE DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
