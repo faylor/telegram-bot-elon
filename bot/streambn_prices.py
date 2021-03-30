@@ -77,7 +77,7 @@ class Bntream():
                                 if abs(diff) > 10000:
                                     bot_key = TELEGRAM_BOT
                                     chat_id = self.chat_ids[0]
-                                    text = "AUDIO RAPID CHANGE " + str(round(float(diff),1)) + "%"
+                                    text = stream.replace("usdt@kline_1m", "").upper() + " VOLUME RAPID CHANGE " + str(round(float(diff),1)) + "%"
                                     send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                                     resp = requests.post(send_message_url)
                             if len(js["Q"]) > 50:
@@ -94,14 +94,16 @@ class Bntream():
                 
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = str(stream) + " GREENS: " + str(self.green_count[stream]) + " POSSIBLE PUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
+                ratio = self.velocity[stream]/self.velocity_previous[stream]
+                text = stream.replace("usdt@kline_1m", "").upper() + str(self.green_count[stream]) + " GREEN. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.green_count = 0
             elif stream in self.red_count and self.red_count[stream] > 1 and self.velocity[stream] < self.velocity_previous[stream]:
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
-                text = str(stream) + " RED: " + str(self.red_count[stream]) + " POSSIBLE DUMP: " + str(round(float(taker_buy_vol),1)) + "Vol" + str(self.velocity[stream]) + " - " + str(self.velocity_previous[stream])
+                ratio = self.velocity[stream]/self.velocity_previous[stream]
+                text = stream.replace("usdt@kline_1m", "").upper() + str(self.red_count[stream]) + " RED. Velocity:" + str(round(ratio,1)) + "  Buy Vol:" + str(round(float(taker_buy_vol),1)) 
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
                 self.red_count = 0
