@@ -39,7 +39,8 @@ class Bntream():
             if is_end == True:
                 open_price = float(data["k"]["o"])
                 close_price = float(data["k"]["c"])
-                self.velocity_previous[stream] = self.velocity[stream]
+                if stream in self.velocity:
+                    self.velocity_previous[stream] = self.velocity[stream]
                 self.velocity[stream] = (close_price - open_price)/1 # 1min
                 if close_price > open_price:
                     if stream in self.green_count:
