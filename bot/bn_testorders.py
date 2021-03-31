@@ -36,6 +36,48 @@ class BnOrder():
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
 
+    def create_order(self, chat_id):
+        try:
+            order = self.client.order_limit_buy(
+                        symbol='WRXBNB',
+                        quantity=4,
+                        price='0.002598')
+            bot_key = TELEGRAM_BOT
+            text = "TEST ORDER CREATED: " + json.dumps(order)
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
+
+            self.last_order_id = order
+
+            orders = self.client.get_open_orders(symbol='WRXBNB')
+            bot_key = TELEGRAM_BOT
+            text = "ORDERS: " + json.dumps(orders)
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
+        except Exception as e:
+            logging.error("Test Order Failed error:" + str(e))
+
+    def check_orders(self, chat_id):
+        try:
+            orders = self.client.get_open_orders(symbol='WRXBNB')
+            bot_key = TELEGRAM_BOT
+            text = "ORDERS: " + json.dumps(orders)
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
+        except Exception as e:
+            logging.error("Check Order Failed error:" + str(e))
+
+    def cancel_order(self, chat_id):
+        try:
+            result = self.client.cancel_order(symbol='BNBBTC', orderId=self.last_order_id)
+            bot_key = TELEGRAM_BOT
+            text = "CANCEL RESULT: " + json.dumps(result)
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+            resp = requests.post(send_message_url)
+        except Exception as e:
+            logging.error("Cancel Order Failed error:" + str(e))
+
+
     def get_wallet(self, chat_id):
         try:
             # info = self.client.get_account()

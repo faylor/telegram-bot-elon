@@ -147,6 +147,23 @@ async def startPriceWatch(message: types.Message):
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
 
+@dp.message_handler(commands=['checkorders'])
+async def startPriceWatch(message: types.Message):
+    try:
+        bn_order.check_orders(message.chat.id)
+    except Exception as e:
+        logging.error("START UP ERROR:" + str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+
+@dp.message_handler(commands=['cancelorder'])
+async def startPriceWatch(message: types.Message):
+    try:
+        bn_order.cancel_order(message.chat.id)
+    except Exception as e:
+        logging.error("START UP ERROR:" + str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+
+
 @dp.message_handler(commands=['smiles'])
 async def startPriceWatch(message: types.Message):
     try:
