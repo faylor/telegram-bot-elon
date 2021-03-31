@@ -21,15 +21,15 @@ class BnOrder():
         self.bm = BinanceSocketManager(self.client)
         self.last_order_id = None
            
-    def create_test_order(self, chat_id):
+    def create_test_order(self, chat_id, symbols, buy_price, amount):
         try:
             order = self.client.create_test_order(
-                    symbol='BTCUSDT',
+                    symbol=symbols,
                     side=SIDE_BUY,
                     type=ORDER_TYPE_LIMIT,
                     timeInForce=TIME_IN_FORCE_GTC,
-                    quantity=100,
-                    price='58513.20')
+                    quantity=amount,
+                    price=buy_price)
             bot_key = TELEGRAM_BOT
             text = "TEST ORDER CREATED: " + json.dumps(order)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
@@ -37,12 +37,12 @@ class BnOrder():
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
 
-    def create_order(self, chat_id):
+    def create_order(self, chat_id, symbols, buy_price, amount):
         try:
             order = self.client.order_limit_buy(
-                        symbol='WRXBNB',
-                        quantity=12,
-                        price='0.002594')
+                        symbol=symbols,
+                        quantity=amount,
+                        price=buy_price)
             bot_key = TELEGRAM_BOT
             text = "TEST ORDER CREATED: " + json.dumps(order)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
