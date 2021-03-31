@@ -146,7 +146,7 @@ async def startPriceWatch(message: types.Message):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(commands=['yeswearewemental'])
+@dp.message_handler(commands=['yeswearemental'])
 async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to order...")

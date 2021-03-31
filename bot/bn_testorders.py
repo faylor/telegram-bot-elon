@@ -41,8 +41,8 @@ class BnOrder():
         try:
             order = self.client.order_limit_buy(
                         symbol='WRXBNB',
-                        quantity=4,
-                        price='0.002598')
+                        quantity=12,
+                        price='0.002594')
             bot_key = TELEGRAM_BOT
             text = "TEST ORDER CREATED: " + json.dumps(order)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
