@@ -39,12 +39,14 @@ class BnOrder():
 
     def get_wallet(self):
         try:
+            logging.error("Account settings here:" + str(self.chat_ids[0]))
             info = self.client.get_account()
+            logging.error("Account settings here:" + str(info))
             balance = self.client.get_asset_balance(asset='BNB')
             trades = self.client.get_my_trades(symbol='BNBBTC')
             bot_key = TELEGRAM_BOT
             chat_id = self.chat_ids[0]
-            text = "ACCOUNT INFO: " + json.dumps(info) + "\nBALANCE:" + json.dumps(balance) + "\nTRADES:" + json.dumps(trades)
+            text = "ACCOUNT INFO: " + json.dumps(info) + "\nBALANCE:" + balance + "\nTRADES:" + trades
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
             resp = requests.post(send_message_url)
         except Exception as e:
