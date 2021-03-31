@@ -20,7 +20,7 @@ from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news, get_rapids
 # from .datawatcher import DataWatcher
 from .streambn_prices import Bntream
-
+from .bn_testorders import BnOrder
 r = redis.from_url(REDIS_URL)
 
 bot = Bot(token=TELEGRAM_BOT)
@@ -29,6 +29,7 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
 data_watcher = Bntream()
+bn_order = BnOrder()
 
 from .watchalts import *
 from .watchlist import *
@@ -133,6 +134,17 @@ APIS:
   cryptowat.ch
     """
     await bot.send_message(chat_id=message.chat.id, text=out)
+
+@dp.message_handler(commands=['arewemental'])
+async def startPriceWatch(message: types.Message):
+    try:
+        await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
+        bn_order.add_chat_id(message.chat.id)
+        bn_order.crete_test_order()
+    except Exception as e:
+        logging.error("START UP ERROR:" + str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+
 
 @dp.message_handler(commands=['smiles'])
 async def startPriceWatch(message: types.Message):
