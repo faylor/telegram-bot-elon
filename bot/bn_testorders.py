@@ -20,7 +20,7 @@ class BnOrder():
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         self.bm = BinanceSocketManager(self.client)
            
-    def create_test_order(self):
+    def create_test_order(self, chat_id):
         try:
             order = self.client.create_test_order(
                     symbol='BTCUSDT',
@@ -30,20 +30,18 @@ class BnOrder():
                     quantity=100,
                     price='58513.20')
             bot_key = TELEGRAM_BOT
-            chat_id = self.chat_ids[0]
             text = "TEST ORDER CREATED: " + json.dumps(order)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
             resp = requests.post(send_message_url)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
 
-    def get_wallet(self):
+    def get_wallet(self, chat_id):
         try:
             # info = self.client.get_account()
             balance = self.client.get_asset_balance(asset='BNB')
             trades = self.client.get_my_trades(symbol='BNBBTC')
             bot_key = TELEGRAM_BOT
-            chat_id = self.chat_ids[0]
             text = "ACCOUNT BNB BALANCE:" + str(balance) + "\nTRADES:" + json.dumps(trades)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
             resp = requests.post(send_message_url)
