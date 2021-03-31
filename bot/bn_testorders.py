@@ -23,12 +23,12 @@ class BnOrder():
     def crete_test_order(self):
         try:
             order = self.client.create_test_order(
-                    symbol='BNBBTC',
+                    symbol='BTCUSDT',
                     side=SIDE_BUY,
                     type=ORDER_TYPE_LIMIT,
                     timeInForce=TIME_IN_FORCE_GTC,
                     quantity=100,
-                    price='0.00001')
+                    price='58513.20')
             bot_key = TELEGRAM_BOT
             chat_id = self.chat_ids[0]
             text = "TEST ORDER CREATED: " + json.dumps(order)
