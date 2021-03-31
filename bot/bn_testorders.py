@@ -35,7 +35,7 @@ class BnOrder():
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
             resp = requests.post(send_message_url)
         except Exception as e:
-            logging.error("BN Stream process error:" + str(e))
+            logging.error("Test Order Failed error:" + str(e))
 
     def get_wallet(self):
         try:
@@ -44,11 +44,11 @@ class BnOrder():
             trades = self.client.get_my_trades(symbol='BNBBTC')
             bot_key = TELEGRAM_BOT
             chat_id = self.chat_ids[0]
-            text = "TEST ORDER CREATED: " + json.dumps(info) + "\n BAL:" + json.dumps(balance) + " TRADES:" + json.dumps(trades)
+            text = "ACCOUNT INFO: " + json.dumps(info) + "\nBALANCE:" + json.dumps(balance) + "\nTRADES:" + json.dumps(trades)
             send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
             resp = requests.post(send_message_url)
         except Exception as e:
-            logging.error("BN Stream process error:" + str(e))
+            logging.error("Account settings error:" + str(e))
    
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:
