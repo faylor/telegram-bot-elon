@@ -40,7 +40,7 @@ class BnOrder():
     def get_wallet(self):
         try:
             info = self.client.get_account()
-            balance = self.client.get_asset_balance(asset='BTC')
+            balance = self.client.get_asset_balance(asset='BNB')
             trades = self.client.get_my_trades(symbol='BNBBTC')
             bot_key = TELEGRAM_BOT
             chat_id = self.chat_ids[0]
