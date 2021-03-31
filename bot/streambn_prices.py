@@ -74,7 +74,7 @@ class Bntream():
                                     diff = 100 * (taker_buy_vol - last_VOL)/last_VOL
                                 else:
                                     diff = 0
-                                if abs(diff) > 10000:
+                                if abs(diff) > 50000:
                                     bot_key = TELEGRAM_BOT
                                     chat_id = self.chat_ids[0]
                                     text = stream.replace("usdt@kline_1m", "").upper() + " VOLUME RAPID CHANGE " + str(round(float(diff),1)) + "%"
@@ -97,12 +97,12 @@ class Bntream():
                     bot_key = TELEGRAM_BOT
                     chat_id = self.chat_ids[0]
                     ratio = self.velocity[stream]/self.velocity_previous[stream]
-                    text = f"""{symbol} {self.green_count[stream]}  GREEN\n 
-                            24hr High - 24hr Low: {round(high_to_low_diff, 4)}\n
-                            24hr High - Price: {round(high_to_price_diff, 4)}\n
-                            Price - 24hr Low: {round(low_to_price_diff, 4)}\n
-                            Velocity: {round(ratio,1)}\n
-                            Buy Vol: {round(float(taker_buy_vol),1)}
+                    text = f"""{symbol} {self.green_count[stream]}  GREEN
+24hr High - 24hr Low: {round(high_to_low_diff, 4)}
+24hr High - Price: {round(high_to_price_diff, 4)}
+Price - 24hr Low: {round(low_to_price_diff, 4)}
+Velocity: {round(ratio,1)}
+Buy Vol: {round(float(taker_buy_vol),1)}
                     """
                     send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                     resp = requests.post(send_message_url)
@@ -114,12 +114,12 @@ class Bntream():
                 bot_key = TELEGRAM_BOT
                 chat_id = self.chat_ids[0]
                 ratio = self.velocity[stream]/self.velocity_previous[stream]
-                text = f"""{symbol} {self.green_count[stream]}  RED\n 
-                        24hr High - 24hr Low: {round(high_to_low_diff, 4)}\n
-                        24hr High - Price: {round(high_to_price_diff, 4)}\n
-                        Price - 24hr Low: {round(low_to_price_diff, 4)}\n
-                        Velocity: {round(ratio,1)}\n
-                        Buy Vol: {round(float(taker_buy_vol),1)}
+                text = f"""{symbol} {self.red_count[stream]}  RED
+24hr High - 24hr Low: {round(high_to_low_diff, 4)}
+24hr High - Price: {round(high_to_price_diff, 4)}
+Price - 24hr Low: {round(low_to_price_diff, 4)}
+Velocity: {round(ratio,1)}
+Buy Vol: {round(float(taker_buy_vol),1)}
                 """
                 send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
                 resp = requests.post(send_message_url)
