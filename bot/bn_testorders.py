@@ -20,7 +20,7 @@ class BnOrder():
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         self.bm = BinanceSocketManager(self.client)
            
-    def crete_test_order(self):
+    def create_test_order(self):
         try:
             order = self.client.create_test_order(
                     symbol='BTCUSDT',
@@ -36,9 +36,19 @@ class BnOrder():
             resp = requests.post(send_message_url)
         except Exception as e:
             logging.error("BN Stream process error:" + str(e))
-        # do something
 
-    
+        def get_wallet(self):
+            try:
+                info = self.client.get_account()
+                balance = self.client.get_asset_balance(asset='BTC')
+                trades = self.client.get_my_trades(symbol='BNBBTC')
+                bot_key = TELEGRAM_BOT
+                chat_id = self.chat_ids[0]
+                text = "TEST ORDER CREATED: " + json.dumps(info) + "\n BAL:" + json.dumps(balance) + " TRADES:" + json.dumps(trades)
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
+            except Exception as e:
+                logging.error("BN Stream process error:" + str(e))
    
     def add_chat_id(self, chat_id):
         if chat_id not in self.chat_ids:

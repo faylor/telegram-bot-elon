@@ -140,7 +140,8 @@ async def startPriceWatch(message: types.Message):
     try:
         await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
         bn_order.add_chat_id(message.chat.id)
-        bn_order.crete_test_order()
+        bn_order.create_test_order()
+        bn_order.get_wallet()
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
