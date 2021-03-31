@@ -19,6 +19,7 @@ class BnOrder():
         self.chat_ids = []
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         self.bm = BinanceSocketManager(self.client)
+        self.last_order_id = None
            
     def create_test_order(self, chat_id):
         try:
@@ -69,11 +70,12 @@ class BnOrder():
 
     def cancel_order(self, chat_id):
         try:
-            result = self.client.cancel_order(symbol='BNBBTC', orderId=self.last_order_id)
-            bot_key = TELEGRAM_BOT
-            text = "CANCEL RESULT: " + json.dumps(result)
-            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
-            resp = requests.post(send_message_url)
+            if self.last_order_id is not None:
+                result = self.client.cancel_order(symbol='BNBBTC', orderId=self.last_order_id)
+                bot_key = TELEGRAM_BOT
+                text = "CANCEL RESULT: " + json.dumps(result)
+                send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={chat_id}&text={text}'
+                resp = requests.post(send_message_url)
         except Exception as e:
             logging.error("Cancel Order Failed error:" + str(e))
 
