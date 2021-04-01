@@ -138,7 +138,7 @@ APIS:
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mock ([\s0-9.,a-zA-Z]*)']))
 async def test_bn_order(message: types.Message, regexp_command):
     try:
-        logging.error("CHAT:" + message.chat.id)
+        logging.error("CHAT:" + str(message.chat.id))
         # all = regexp_command.group(1)
         # symbols, price, amount = all.strip().split()
         # await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
