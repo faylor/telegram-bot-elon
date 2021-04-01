@@ -56,7 +56,7 @@ class BnOrder():
                 self.last_order_id = order['orderId']
                 saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
                 if saved_orders is None:
-                    r.set(LIVE_ORDER_KEY.format(self.chat_id), {"orders": [order]})
+                    r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps({"orders": [order]}))
                 else:
                     ar = json.loads(saved_orders.decode("utf-8"))
                     ar["orders"].append(order)
