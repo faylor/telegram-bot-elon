@@ -147,7 +147,7 @@ async def test_bn_order(message: types.Message, regexp_command):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^limitbuy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['limitbuy ([\s0-9.,a-zA-Z]*)']))
 async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
@@ -158,18 +158,19 @@ async def bn_order_start(message: types.Message, regexp_command):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^marketbuy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['marketbuy ([\s0-9.,a-zA-Z]*)']))
 async def bn_order_market_buy(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
         symbols, amount = all.strip().split()
+        logging.error("HERE:" + symbols)
         bn_order.create_market_buy(message.chat.id, symbols, amount)
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("MARKET BUY ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy" + str(e))
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^marketsell ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['marketsell ([\s0-9.,a-zA-Z]*)']))
 async def bn_order_market_sell(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
