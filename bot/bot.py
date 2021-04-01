@@ -138,13 +138,12 @@ APIS:
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mock ([\s0-9.,a-zA-Z]*)']))
 async def test_bn_order(message: types.Message, regexp_command):
     try:
-        logging.error("CHAT:" + str(message.chat.id))
-        # all = regexp_command.group(1)
-        # symbols, price, amount = all.strip().split()
-        # await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
-        # bn_order.add_chat_id(message.chat.id)
-        # bn_order.create_test_order(message.chat.id, symbols, price, amount)
-        # bn_order.get_wallet(message.chat.id)
+        all = regexp_command.group(1)
+        symbols, price, amount = all.strip().split()
+        await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
+        bn_order.add_chat_id(message.chat.id)
+        bn_order.create_test_order(message.chat.id, symbols, price, amount)
+        bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
@@ -162,8 +161,8 @@ async def bn_order_start(message: types.Message, regexp_command):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(commands=['mentalwallet'])
-async def startPriceWatch(message: types.Message):
+@dp.message_handler(commands=['balance'])
+async def get_balance(message: types.Message):
     try:
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
@@ -172,17 +171,17 @@ async def startPriceWatch(message: types.Message):
 
 
 @dp.message_handler(commands=['checkorders'])
-async def startPriceWatch(message: types.Message):
+async def check_open_orders(message: types.Message):
     try:
         bn_order.check_orders(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(commands=['cancelorder'])
-async def startPriceWatch(message: types.Message):
+@dp.message_handler(commands=['cancelorders'])
+async def cancel_open_orders(message: types.Message):
     try:
-        bn_order.cancel_order(message.chat.id)
+        bn_order.cancel_open_orders(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
