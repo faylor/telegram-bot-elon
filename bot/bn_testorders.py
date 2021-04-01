@@ -138,25 +138,26 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 info = self.client.get_account()
-                logging.error("TEST:" + json.dumps(info))
-                balance = self.client.get_asset_balance(asset='BTC')
-                bnb_balance = self.client.get_asset_balance(asset='BNB')
-                # get latest price from Binance API
-                btc_price = self.client.get_symbol_ticker(symbol="BTCUSDT")
-                # print full output (dictionary)
-                print(btc_price)
-                trades = self.client.get_my_trades(symbol='BNBBTC')
-                out = ""
-                for t in trades:
-                    if t["isBuyer"] == True:
-                        action = "BUY"
-                    else:
-                        action = "SELL"
-                    out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
-                text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
-                text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
-                text = text + "TRADES:\n" + out
-                self.send_chat_message(text)
+                balances = info["balances"]
+                # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
+                out = "COIN    FREE     LOCKED     USD"
+                for b in balances:
+                    usd_price = self.client.get_symbol_ticker(symbol=b["asset"].upper() + "USDT")
+                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + usd_price
+                self.send_chat_message(out)
+
+                # trades = self.client.get_my_trades(symbol='BNBBTC')
+                # out = ""
+                # for t in trades:
+                #     if t["isBuyer"] == True:
+                #         action = "BUY"
+                #     else:
+                #         action = "SELL"
+                #     out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
+                # text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
+                # text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
+                # text = text + "TRADES:\n" + out
+                
         except Exception as e:
             logging.error("Account settings error:" + str(e))
             self.send_chat_message("FAILED TO GET WALLET: " + str(e))
