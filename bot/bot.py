@@ -135,7 +135,7 @@ APIS:
     """
     await bot.send_message(chat_id=message.chat.id, text=out)
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mockbuy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mock ([\s0-9.,a-zA-Z]*)']))
 async def test_bn_order(message: types.Message, regexp_command):
     try:
         logging.error("CHAT:" + message.chat.id)
@@ -149,7 +149,7 @@ async def test_bn_order(message: types.Message, regexp_command):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['farkbuy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['fark ([\s0-9.,a-zA-Z]*)']))
 async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
