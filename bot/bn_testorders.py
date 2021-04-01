@@ -96,10 +96,14 @@ class BnOrder():
 
     def get_wallet(self, chat_id):
         try:
+            logging.error("Get Wallet 1")
             if self.is_authorized(chat_id):
+                logging.error("Get Wallet 2")
                 # info = self.client.get_account()
                 balance = self.client.get_asset_balance(asset='BNB')
+                logging.error("Get Wallet 3")
                 trades = self.client.get_my_trades(symbol='BNBBTC')
+                logging.error("Get Wallet 4")
                 text = "ACCOUNT BNB BALANCE:" + str(balance) + "\nTRADES:" + json.dumps(trades)
                 logging.error("HERE" + text)
                 self.send_chat_message(text)
