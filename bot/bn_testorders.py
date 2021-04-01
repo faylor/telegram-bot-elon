@@ -118,7 +118,9 @@ class BnOrder():
                 out = ""
                 for t in trades:
                     out = out + t["symbol"] + "  " + t["price"] + "   " + t["qty"] + "\n"
-                text = "BTC BALANCE:" + str(balance) + "\nBNB BALANCE:" + str(bnb_balance) + "\nTRADES:\n" + out
+                text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
+                text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
+                text = text + "TRADES:\n" + out
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Account settings error:" + str(e))
