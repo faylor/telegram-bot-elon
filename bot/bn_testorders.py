@@ -137,9 +137,14 @@ class BnOrder():
     def get_wallet(self, chat_id):
         try:
             if self.is_authorized(chat_id):
-                # info = self.client.get_account()
+                info = self.client.get_account()
+                logging.error("TEST:" + json.dumps(info))
                 balance = self.client.get_asset_balance(asset='BTC')
                 bnb_balance = self.client.get_asset_balance(asset='BNB')
+                # get latest price from Binance API
+                btc_price = self.client.get_symbol_ticker(symbol="BTCUSDT")
+                # print full output (dictionary)
+                print(btc_price)
                 trades = self.client.get_my_trades(symbol='BNBBTC')
                 out = ""
                 for t in trades:

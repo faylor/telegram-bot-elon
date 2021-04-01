@@ -145,7 +145,7 @@ async def totals_user_scores(message: types.Message):
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^buy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodlbuy ([\s0-9.,a-zA-Z]*)']))
 async def set_buy_point(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
@@ -166,7 +166,7 @@ async def set_buy_point(message: types.Message, regexp_command):
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^buyat ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodlbuyat ([\s0-9.,a-zA-Z]*)']))
 async def set_buy_point_prices(message: types.Message, regexp_command):
     try:
         coin_price = regexp_command.group(1)
@@ -193,7 +193,7 @@ async def set_buy_point_prices(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buyat btc 23450 1')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^sell ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['^hodlsell ([\s0-9.,a-zA-Z]*)']))
 async def set_sell_point(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
@@ -253,7 +253,7 @@ async def set_sell_point(message: types.Message, regexp_command):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /sell btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['deletecoins ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['hodldeletecoins ([\s0-9.,a-zA-Z]*)']))
 async def delete_coin(message: types.Message, regexp_command):
     try:
         symbols = regexp_command.group(1)
