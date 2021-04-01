@@ -56,14 +56,26 @@ class BnOrder():
                 self.last_order_id = order['orderId']
                 saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
                 if saved_orders is None:
-                    r.set(LIVE_ORDER_KEY.format(self.chat_id), [order])
+                    r.set(LIVE_ORDER_KEY.format(self.chat_id), {"orders": [order]})
                 else:
                     ar = json.loads(saved_orders.decode("utf-8"))
-                    ar.append(order)
+                    ar["orders"].append(order)
                     r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps(ar))
                 orders = self.client.get_open_orders(symbol=symbol)
                 text = "ORDERS: " + json.dumps(orders)
                 self.send_chat_message(text)
+
+                order_oco = self.client.create_oco_order(
+                        symbol=symbol,
+                        side='SELL',
+                        quantity=amount,
+                        price=buy_price * 1.03,
+                        stopPrice=buy_price * 0.99,
+                        stopLimitPrice=buy_price * 0.989,
+                        stopLimitTimeInForce='GTC')
+                text = "OCO ORDERS: " + json.dumps(orders)
+                self.send_chat_message(text)
+
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
