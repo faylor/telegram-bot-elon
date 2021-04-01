@@ -89,7 +89,7 @@ class BnOrder():
             if self.is_authorized(chat_id) and self.last_order_id is not None:
                 orders = self.client.get_open_orders()
                 for order in orders:
-                    result = self.client.cancel_order(symbol=order['symbol'], orderId=order["order_id"])
+                    result = self.client.cancel_order(symbol=order['symbol'], orderId=order["orderId"])
                     text = "CANCEL RESULT: " + json.dumps(result)
                     self.send_chat_message(text)
         except Exception as e:
