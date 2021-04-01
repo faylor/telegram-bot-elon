@@ -121,5 +121,5 @@ class BnOrder():
 
     def is_authorized(self, chat_id):
         if self.chat_id is None or int(self.chat_id) != int(chat_id):
-            raise Exception("Unauthorized Chat")
+            raise Exception("Unauthorized Chat:" + str(chat_id) + " != " + str(self.chat_id))
         return True
