@@ -27,6 +27,8 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 symbol = symbol.strip().upper() + "BTC"
+                logging.error("SYMBOL: " + symbol)
+                
                 order = self.client.create_test_order(
                         symbol=symbol,
                         side=SIDE_BUY,
