@@ -165,8 +165,8 @@ async def get_bn_balance(message: types.Message):
         await bot.send_message(chat_id=message.chat.id, text="Getting Account...")
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
-        logging.error("START UP ERROR:" + str(e))
-        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+        logging.error("Account ERROR:" + str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Get Account")
 
 
 @dp.message_handler(commands=['checkorders'])

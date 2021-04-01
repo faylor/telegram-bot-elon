@@ -100,7 +100,7 @@ class BnOrder():
                 # info = self.client.get_account()
                 balance = self.client.get_asset_balance(asset='BTC')
                 bnb_balance = self.client.get_asset_balance(asset='BNB')
-                trades = self.client.get_my_trades()
+                trades = self.client.get_my_trades(symbol='BNBBTC')
                 text = "BTC BALANCE:" + str(balance) + "\nBNB BALANCE:" + str(bnb_balance) + "\nTRADES:\n" + json.dumps(trades)
                 self.send_chat_message(text)
         except Exception as e:
