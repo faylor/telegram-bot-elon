@@ -69,11 +69,11 @@ class BnOrder():
                         symbol=symbol,
                         side='SELL',
                         quantity=amount,
-                        price=buy_price * 1.03,
-                        stopPrice=buy_price * 0.99,
-                        stopLimitPrice=buy_price * 0.989,
+                        price=float(buy_price) * 1.03,
+                        stopPrice=float(buy_price) * 0.99,
+                        stopLimitPrice=float(buy_price) * 0.989,
                         stopLimitTimeInForce='GTC')
-                text = "OCO ORDERS: " + json.dumps(orders)
+                text = "OCO ORDERS: " + json.dumps(order_oco)
                 self.send_chat_message(text)
 
         except Exception as e:
