@@ -59,7 +59,7 @@ class BnOrder():
                     ar = json.loads(saved_orders.decode("utf-8"))
                     ar.append(order)
                     r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps(ar))
-                orders = self.client.get_open_orders(symbol='WRXBNB')
+                orders = self.client.get_open_orders(symbol=symbol)
                 text = "ORDERS: " + json.dumps(orders)
                 self.send_chat_message(text)
         except Exception as e:
@@ -87,7 +87,7 @@ class BnOrder():
             if self.is_authorized(chat_id) and self.last_order_id is not None:
                 orders = self.client.get_open_orders()
                 for order in orders:
-                    result = self.client.cancel_order(symbol='BNBBTC', orderId=order["order_id"])
+                    result = self.client.cancel_order(symbol=order['symbol'], orderId=order["order_id"])
                     text = "CANCEL RESULT: " + json.dumps(result)
                     self.send_chat_message(text)
         except Exception as e:
@@ -96,16 +96,12 @@ class BnOrder():
 
     def get_wallet(self, chat_id):
         try:
-            logging.error("Get Wallet 1" + str(chat_id))
             if self.is_authorized(chat_id):
-                logging.error("Get Wallet 2")
                 # info = self.client.get_account()
-                balance = self.client.get_asset_balance(asset='BNB')
-                logging.error("Get Wallet 3")
-                trades = self.client.get_my_trades(symbol='BNBBTC')
-                logging.error("Get Wallet 4")
-                text = "ACCOUNT BNB BALANCE:" + str(balance) + "\nTRADES:" + json.dumps(trades)
-                logging.error("HERE" + text)
+                balance = self.client.get_asset_balance(asset='BTC')
+                bnb_balance = self.client.get_asset_balance(asset='BNB')
+                trades = self.client.get_my_trades()
+                text = "BTC BALANCE:" + str(balance) + "\nBNB BALANCE:" + str(bnb_balance) + "\nTRADES:\n" + json.dumps(trades)
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Account settings error:" + str(e))
