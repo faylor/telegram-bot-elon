@@ -53,7 +53,7 @@ class BnOrder():
                 text = "REAL ORDER CREATED: " + json.dumps(order)
                 self.send_chat_message(text)
 
-                self.last_order_id = order['order_id']
+                self.last_order_id = order['orderId']
                 saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
                 if saved_orders is None:
                     r.set(LIVE_ORDER_KEY.format(self.chat_id), [order])
