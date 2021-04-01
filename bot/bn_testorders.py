@@ -115,7 +115,10 @@ class BnOrder():
                 balance = self.client.get_asset_balance(asset='BTC')
                 bnb_balance = self.client.get_asset_balance(asset='BNB')
                 trades = self.client.get_my_trades(symbol='BNBBTC')
-                text = "BTC BALANCE:" + str(balance) + "\nBNB BALANCE:" + str(bnb_balance) + "\nTRADES:\n" + json.dumps(trades)
+                out = ""
+                for t in trades:
+                    out = out + t["symbol"] + "  " + t["price"] + "   " + t["qty"] + "\n"
+                text = "BTC BALANCE:" + str(balance) + "\nBNB BALANCE:" + str(bnb_balance) + "\nTRADES:\n" + out
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Account settings error:" + str(e))
