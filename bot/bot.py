@@ -138,12 +138,13 @@ APIS:
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mockbuy ([\s0-9.,a-zA-Z]*)']))
 async def test_bn_order(message: types.Message, regexp_command):
     try:
-        all = regexp_command.group(1)
-        symbols, price, amount = all.strip().split()
-        await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
-        bn_order.add_chat_id(message.chat.id)
-        bn_order.create_test_order(message.chat.id, symbols, price, amount)
-        bn_order.get_wallet(message.chat.id)
+        logging.error("CHAT:" + message.chat.id)
+        # all = regexp_command.group(1)
+        # symbols, price, amount = all.strip().split()
+        # await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
+        # bn_order.add_chat_id(message.chat.id)
+        # bn_order.create_test_order(message.chat.id, symbols, price, amount)
+        # bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")

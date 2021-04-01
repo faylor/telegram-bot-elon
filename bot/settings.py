@@ -28,3 +28,6 @@ TWITTER_ACCESS_TOKEN_SECRET = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
 
 BN_API_KEY = os.environ.get("BN_API")
 BN_API_SECRET = os.environ.get("BN_SECRET")
+BN_TEST_API_KEY = os.environ.get("BN_TEST_API")
+BN_TEST_API_SECRET = os.environ.get("BN_TEST_SECRET")
+BN_CHAT_ID = os.environ.get("BN_CHAT_ID")
