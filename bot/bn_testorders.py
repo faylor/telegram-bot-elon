@@ -117,7 +117,11 @@ class BnOrder():
                 trades = self.client.get_my_trades(symbol='BNBBTC')
                 out = ""
                 for t in trades:
-                    out = out + t["symbol"] + "  " + t["price"] + "   " + t["qty"] + "\n"
+                    if t["isBuyer"] == True:
+                        action = "BUY"
+                    else:
+                        action = "SELL"
+                    out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
                 text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
                 text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
                 text = text + "TRADES:\n" + out
