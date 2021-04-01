@@ -96,7 +96,7 @@ class BnOrder():
 
     def get_wallet(self, chat_id):
         try:
-            logging.error("Get Wallet 1")
+            logging.error("Get Wallet 1" + str(chat_id))
             if self.is_authorized(chat_id):
                 logging.error("Get Wallet 2")
                 # info = self.client.get_account()
@@ -120,6 +120,6 @@ class BnOrder():
             logging.error("Failed to send chat message:" + str(e))
 
     def is_authorized(self, chat_id):
-        if self.chat_id is None or self.chat_id != chat_id:
+        if self.chat_id is None or int(self.chat_id) != int(chat_id):
             raise Exception("Unauthorized Chat")
         return True
