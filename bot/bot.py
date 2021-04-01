@@ -162,8 +162,9 @@ async def bn_order_start(message: types.Message, regexp_command):
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
 @dp.message_handler(commands=['account'])
-async def get_balance(message: types.Message):
+async def get_bn_balance(message: types.Message):
     try:
+        await bot.send_message(chat_id=message.chat.id, text="Getting Account...")
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
