@@ -42,6 +42,20 @@ class BnOrder():
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE TEST ORDER FAILED: " + str(e))
 
+
+    def create_market_sell(self, chat_id, symbol, amount):
+        try:
+            if self.is_authorized(chat_id):
+                symbol = symbol.strip().upper() + "BTC"
+                order = self.client.order_market_sell(
+                            symbol=symbol,
+                            quantity=amount)
+                text = "REAL SELL CREATED: " + json.dumps(order)
+                self.send_chat_message(text)
+        except Exception as e:
+            logging.error("Test Order Failed error:" + str(e))
+            self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+
     def create_order(self, chat_id, symbol, buy_price, amount):
         try:
             if self.is_authorized(chat_id):
@@ -75,7 +89,7 @@ class BnOrder():
                         stopLimitTimeInForce='GTC')
                 text = "OCO ORDERS: " + json.dumps(order_oco)
                 self.send_chat_message(text)
-
+            
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
