@@ -163,7 +163,7 @@ async def bn_order_start(message: types.Message, regexp_command):
 async def bn_order_market_sell(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
-        symbols, price, amount = all.strip().split()
+        symbols, amount = all.strip().split()
         await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
         bn_order.create_market_sell(message.chat.id, symbols, amount)
         bn_order.get_wallet(message.chat.id)
