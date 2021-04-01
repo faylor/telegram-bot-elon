@@ -120,7 +120,6 @@ class BnOrder():
             logging.error("Failed to send chat message:" + str(e))
 
     def is_authorized(self, chat_id):
-        if self.chat_id is None:
+        if self.chat_id is None or self.chat_id == chat_id:
             raise Exception("Unauthorized Chat")
-        else:
-            return self.chat_id == chat_id
+        return True
