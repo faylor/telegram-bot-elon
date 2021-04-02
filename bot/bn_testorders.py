@@ -143,7 +143,7 @@ class BnOrder():
                 out = "COIN    FREE     LOCKED     USD"
                 for b in balances:
                     usd_price = self.client.get_symbol_ticker(symbol=b["asset"].upper() + "USDT")
-                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + usd_price
+                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + json.dumps(usd_price)
                 self.send_chat_message(out)
 
                 # trades = self.client.get_my_trades(symbol='BNBBTC')
