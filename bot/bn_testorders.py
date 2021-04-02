@@ -149,13 +149,16 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "COIN    FREE     LOCKED     USD\n"
+                out = "COIN   FREE     LOCKED     USD\n"
+                val = 0
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
                     else:
-                        usd_price = self.get_usd_price(b["asset"])
-                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + str(usd_price) + "\n"
+                        usd_price = float(self.get_usd_price(b["asset"]))
+                    val = val + usd_price
+                    out = out + b["asset"].ljust(6,' ') + "   " + b["free"].ljust(8,' ') + "  " + b["locked"].ljust(8,' ') + "  $" + str(usd_price) + "\n"
+                out = out + "\nUSD VALUE: " + str(round(val, 2))
                 self.send_chat_message(out)
 
                 # trades = self.client.get_my_trades(symbol='BNBBTC')
