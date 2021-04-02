@@ -206,9 +206,7 @@ class BnOrder():
                     else:
                         action = "SELL"
                     out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
-                text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
-                text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
-                text = text + "TRADES:\n" + out
+                out = "TRADES:\n" + out
                 self.send_chat_message(out)
         except Exception as e:
             logging.error("Failed to get trades for symbol chat message:" + str(e))
