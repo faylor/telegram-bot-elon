@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import logging
+import time
 import requests
 from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
 from binance.websockets import BinanceSocketManager
@@ -180,7 +181,7 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "<pre>COIN  FREE    LOCKED    BTC      USD\n"
+                out = "<pre>COIN  FREE    LOCKED   BTC      USD\n"
                 val = 0
                 btc_val = 0
                 for b in balances:
@@ -223,15 +224,20 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 trades = self.client.get_my_trades(symbol=symbol.upper() + 'BTC')
-                logging.error(json.dumps(trades))
-                out = ""
+                # {"symbol": "BNBBTC", "id": 100, "orderId": 321, "orderListId": -1, "price": "0.00538790", "qty": "0.18000000",
+                # "quoteQty": "0.00096982", 
+                # "commission": "0.00000000", 
+                # "commissionAsset": "BNB", 
+                # "time": 1617288286153, "isBuyer": true, "isMaker": false, "isBestMatch": true},
+                out = "<pre>"
                 for t in trades:
                     if t["isBuyer"] == True:
                         action = "BUY"
                     else:
                         action = "SELL"
-                    out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
-                out = "TRADES:\n" + out
+                    time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(t["time"])))
+                    out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
+                out = "TRADES:\n" + out + "</pre>"
                 self.send_chat_message(out)
         except Exception as e:
             logging.error("Failed to get trades for symbol chat message:" + str(e))
