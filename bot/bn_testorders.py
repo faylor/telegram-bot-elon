@@ -22,7 +22,15 @@ class BnOrder():
         self.bm = BinanceSocketManager(self.client)
         self.last_order_id = None
         self.client.API_URL = 'https://testnet.binance.vision/api'
-           
+        self.bm.start_user_socket(self.process_message)
+
+    def process_message(self, msg):
+        try:
+            self.send_chat_message("Account Update:\n" + json.dumps(msg))
+        except Exception as e:
+            logging.error("Process Account Update Error:" + str(e))
+            self.send_chat_message("Process Account Update Error: " + str(e))
+
     def create_test_order(self, chat_id, symbol, buy_price, amount):
         try:
             if self.is_authorized(chat_id):
