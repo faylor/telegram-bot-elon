@@ -144,7 +144,6 @@ class BnOrder():
         usd_price = 0
         try:
             usd_price = self.client.get_symbol_ticker(symbol=symbol.upper() + "USDT")
-            logging.error("PRICE:" + symbol + " = " + str(usd_price["price"]))
             return usd_price["price"]
         except Exception as e:
             logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
@@ -172,7 +171,7 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "COIN   FREE     LOCKED     USD\n"
+                out = "<pre>COIN   FREE     LOCKED     USD\n"
                 val = 0
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
@@ -182,7 +181,7 @@ class BnOrder():
                         usd_price = float(self.get_usd_price(b["asset"])) * quantity
                     val = val + usd_price
                     out = out + b["asset"].ljust(8,' ') + str(self.round_sense(b["free"])).ljust(10,' ') + str(self.round_sense(b["locked"])).ljust(10,' ') + "  $" + str(self.round_sense(usd_price)) + "\n"
-                out = out + "\nUSD VALUE: $" + str(round(val, 2))
+                out = out + "</pre>\nUSD VALUE: $" + str(round(val, 2))
                 self.send_chat_message(out)
 
                
@@ -193,7 +192,7 @@ class BnOrder():
     def send_chat_message(self, text):
         try:
             bot_key = TELEGRAM_BOT
-            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={self.chat_id}&text={text}'
+            send_message_url = f'https://api.telegram.org/bot{bot_key}/sendMessage?chat_id={self.chat_id}&text={text}&parse_mode=HTML'
             resp = requests.post(send_message_url)
         except Exception as e:
             logging.error("Failed to send chat message:" + str(e))
