@@ -144,6 +144,7 @@ class BnOrder():
         usd_price = 0
         try:
             usd_price = self.client.get_symbol_ticker(symbol=symbol.upper() + "USDT")
+            logging.error("PRICE:" + symbol + " = " + str(usd_price["price"]))
             return usd_price["price"]
         except Exception as e:
             logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
@@ -199,7 +200,7 @@ class BnOrder():
 
     def is_authorized(self, chat_id):
         if self.chat_id is None or int(self.chat_id) != int(chat_id):
-            raise Exception("Unauthorized Chat:" + str(chat_id) + " != " + str(self.chat_id))
+            raise Exception("Unauthorized Chat, use only correct chat.")
         self.bm.start_user_socket(self.process_message)
         return True
 
