@@ -173,7 +173,7 @@ class BnOrder():
                     else:
                         usd_price = float(self.get_usd_price(b["asset"]))
                     val = val + usd_price
-                    out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(8,' ') + str(self.round_sense(b["locked"])).ljust(8,' ') + "  $" + str(self.round_sense(usd_price)) + "\n"
+                    out = out + b["asset"].ljust(8,' ') + str(self.round_sense(b["free"])).ljust(10,' ') + str(self.round_sense(b["locked"])).ljust(10,' ') + "  $" + str(self.round_sense(usd_price)) + "\n"
                 out = out + "\nUSD VALUE: $" + str(round(val, 2))
                 self.send_chat_message(out)
 
