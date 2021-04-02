@@ -22,7 +22,7 @@ class BnOrder():
         self.bm = BinanceSocketManager(self.client)
         self.last_order_id = None
         self.client.API_URL = 'https://testnet.binance.vision/api'
-        self.bm.start_user_socket(self.process_message)
+        
 
     def process_message(self, msg):
         try:
@@ -201,6 +201,7 @@ class BnOrder():
     def is_authorized(self, chat_id):
         if self.chat_id is None or int(self.chat_id) != int(chat_id):
             raise Exception("Unauthorized Chat:" + str(chat_id) + " != " + str(self.chat_id))
+        self.bm.start_user_socket(self.process_message)
         return True
 
     def get_symbol_trades(self, chat_id, symbol):
