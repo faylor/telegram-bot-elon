@@ -186,13 +186,14 @@ class BnOrder():
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
+                        btc_price = 1/float(self.get_usd_price("BTC")) * quantity
                     else:
                         quantity = float(b["free"]) + float(b["locked"])
                         usd_price = float(self.get_usd_price(b["asset"])) * quantity
-                    if b["asset"].upper() == "BTC":
-                        btc_price = float(b["free"]) + float(b["locked"])   
-                    else:
-                        btc_price = float(self.get_btc_price(b["asset"])) * quantity
+                        if b["asset"].upper() == "BTC":
+                            btc_price = float(b["free"]) + float(b["locked"])   
+                        else:
+                            btc_price = float(self.get_btc_price(b["asset"])) * quantity
                     val = val + usd_price
                     btc_val = btc_val + btc_price
                     out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(8,' ') + str(self.round_sense(b["locked"])).ljust(8,' ') + str(self.round_sense(btc_price)).ljust(8,' ') + str(self.round_sense(usd_price)) + "\n"
