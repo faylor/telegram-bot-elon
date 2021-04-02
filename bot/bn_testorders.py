@@ -177,18 +177,7 @@ class BnOrder():
                 out = out + "\nUSD VALUE: $" + str(round(val, 2))
                 self.send_chat_message(out)
 
-                # trades = self.client.get_my_trades(symbol='BNBBTC')
-                # out = ""
-                # for t in trades:
-                #     if t["isBuyer"] == True:
-                #         action = "BUY"
-                #     else:
-                #         action = "SELL"
-                #     out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
-                # text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
-                # text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
-                # text = text + "TRADES:\n" + out
-                
+               
         except Exception as e:
             logging.error("Account settings error:" + str(e))
             self.send_chat_message("FAILED TO GET WALLET: " + str(e))
@@ -205,3 +194,23 @@ class BnOrder():
         if self.chat_id is None or int(self.chat_id) != int(chat_id):
             raise Exception("Unauthorized Chat:" + str(chat_id) + " != " + str(self.chat_id))
         return True
+
+    def get_symbol_trades(self, chat_id, symbol):
+        try:
+            if self.is_authorized(chat_id):
+                trades = self.client.get_my_trades(symbol=symbol.upper() + 'BTC')
+                out = ""
+                for t in trades:
+                    if t["isBuyer"] == True:
+                        action = "BUY"
+                    else:
+                        action = "SELL"
+                    out = out + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
+                text = "BTC FREE:" + str(balance["free"]) + " LOCKED: " + str(balance["locked"])  + "\n"
+                text = text + "BNB FREE:" + str(bnb_balance["free"]) + " LOCKED: " + str(bnb_balance["locked"]) + "\n"
+                text = text + "TRADES:\n" + out
+                self.send_chat_message(out)
+        except Exception as e:
+            logging.error("Failed to get trades for symbol chat message:" + str(e))
+            self.send_chat_message("Failed to get trades for " + symbol + " -- " + str(e))
+        

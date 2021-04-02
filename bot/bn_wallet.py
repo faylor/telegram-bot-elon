@@ -80,6 +80,16 @@ async def check_open_orders(message: types.Message):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['checktrades ([0-9.,a-zA-Z]*)']))
+async def bn_check_symbol_trades(message: types.Message, regexp_command):
+    try:
+        symbol = regexp_command.group(1)
+        bn_order.get_symbol_trades(message.chat.id, symbol)
+    except Exception as e:
+        logging.error("START UP ERROR:" + str(e))
+        await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
+
+
 @dp.message_handler(commands=['cancelorders'])
 async def cancel_open_orders(message: types.Message):
     try:
