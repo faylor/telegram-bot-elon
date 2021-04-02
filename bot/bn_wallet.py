@@ -21,6 +21,7 @@ bn_order = BnOrder()
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['mock ([\s0-9.,a-zA-Z]*)']))
 async def test_bn_order(message: types.Message, regexp_command):
     try:
+        logging.error("CHAT:" + str(message.chat.id))
         all = regexp_command.group(1)
         symbols, price, amount = all.strip().split()
         bn_order.create_test_order(message.chat.id, symbols, price, amount)
