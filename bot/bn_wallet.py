@@ -35,7 +35,7 @@ async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
         symbols, price, amount = all.strip().split()
-        bn_order.create_order(message.chat.id, "BUY", symbols, price, amount)
+        bn_order.create_order(message.chat.id, symbols, price, amount)
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
