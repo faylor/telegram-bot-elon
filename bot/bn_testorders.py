@@ -149,10 +149,13 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "COIN    FREE     LOCKED     USD"
+                out = "COIN    FREE     LOCKED     USD\n"
                 for b in balances:
-                    usd_price = self.get_usd_price(b["asset"])
-                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + json.dumps(usd_price) + "\n"
+                    if b["asset"].upper() != "USDT":
+                        usd_price = self.get_usd_price(b["asset"])
+                    else:
+                        usd_price = float(b["free"]) + float(b["locked"])
+                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + usd_price + "\n"
                 self.send_chat_message(out)
 
                 # trades = self.client.get_my_trades(symbol='BNBBTC')
