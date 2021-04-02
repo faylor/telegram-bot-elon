@@ -23,7 +23,6 @@ async def test_bn_order(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
         symbols, price, amount = all.strip().split()
-        await bot.send_message(chat_id=message.chat.id, text="Trying to order...")
         bn_order.create_test_order(message.chat.id, symbols, price, amount)
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
@@ -67,7 +66,6 @@ async def bn_order_market_sell(message: types.Message, regexp_command):
 @dp.message_handler(commands=['account'])
 async def get_bn_balance(message: types.Message):
     try:
-        await bot.send_message(chat_id=message.chat.id, text="Getting Account...")
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("Account ERROR:" + str(e))

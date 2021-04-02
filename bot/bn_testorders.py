@@ -143,7 +143,7 @@ class BnOrder():
             logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
         return usd_price
 
-    def round_sense(price):
+    def round_sense(self, price):
         price = float(price)
         if price is None or price == 0:
             return 0
