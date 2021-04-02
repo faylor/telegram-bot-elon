@@ -134,6 +134,14 @@ class BnOrder():
             logging.error("Cancel Order Failed error:" + str(e))
             self.send_chat_message("FAILED TO CANCEL ORDER: " + str(e))
 
+    def get_usd_price(self, symbol):
+        usd_price = 0
+        try:
+            usd_price = self.client.get_symbol_ticker(symbol=symbol.upper() + "USDT")
+        except Exception as e:
+            logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
+        return usd_price
+
     def get_wallet(self, chat_id):
         try:
             if self.is_authorized(chat_id):
@@ -142,7 +150,7 @@ class BnOrder():
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
                 out = "COIN    FREE     LOCKED     USD"
                 for b in balances:
-                    usd_price = self.client.get_symbol_ticker(symbol=b["asset"].upper() + "USDT")
+                    usd_price = self.get_usd_price(b["symbol"])
                     out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + json.dumps(usd_price)
                 self.send_chat_message(out)
 
