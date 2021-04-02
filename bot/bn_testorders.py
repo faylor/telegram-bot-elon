@@ -182,6 +182,7 @@ class BnOrder():
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
                 out = "<pre>COIN   FREE     LOCKED    BTC    USD\n"
                 val = 0
+                btc_val = 0
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
@@ -221,6 +222,7 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 trades = self.client.get_my_trades(symbol=symbol.upper() + 'BTC')
+                logging.error(json.dumps(trades))
                 out = ""
                 for t in trades:
                     if t["isBuyer"] == True:
