@@ -180,13 +180,13 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "<pre>COIN  FREE    LOCKED     BTC      USD\n"
+                out = "<pre>COIN  FREE    LOCKED    BTC      USD\n"
                 val = 0
                 btc_val = 0
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
-                        btc_price = 1/float(self.get_usd_price("BTC")) * quantity
+                        btc_price = quantity/float(self.get_usd_price("BTC"))
                     else:
                         quantity = float(b["free"]) + float(b["locked"])
                         usd_price = float(self.get_usd_price(b["asset"])) * quantity
