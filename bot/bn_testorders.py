@@ -143,6 +143,22 @@ class BnOrder():
             logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
         return usd_price
 
+    def round_sense(price):
+        price = float(price)
+        if price is None or price == 0:
+            return 0
+        if price > 100:
+            return int(price)
+        if price > 10:
+            return round(price, 1)
+        if price > 1:
+            return round(price, 2)
+        if price > 0.01:
+            return round(price, 4)
+        if price > 0.001:
+            return round(price, 5)
+        return round(price, 8)
+
     def get_wallet(self, chat_id):
         try:
             if self.is_authorized(chat_id):
@@ -157,8 +173,8 @@ class BnOrder():
                     else:
                         usd_price = float(self.get_usd_price(b["asset"]))
                     val = val + usd_price
-                    out = out + b["asset"].ljust(6,' ') + "   " + b["free"].ljust(8,' ') + "  " + b["locked"].ljust(8,' ') + "  $" + str(usd_price) + "\n"
-                out = out + "\nUSD VALUE: " + str(round(val, 2))
+                    out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(8,' ') + str(self.round_sense(b["locked"])).ljust(8,' ') + "  $" + str(self.round_sense(usd_price)) + "\n"
+                out = out + "\nUSD VALUE: $" + str(round(val, 2))
                 self.send_chat_message(out)
 
                 # trades = self.client.get_my_trades(symbol='BNBBTC')
