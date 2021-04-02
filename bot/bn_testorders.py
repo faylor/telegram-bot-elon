@@ -236,7 +236,7 @@ class BnOrder():
                         action = "BUY"
                     else:
                         action = "SELL"
-                    time_str = datetime.datetime.fromtimestamp(int(t["time"])).strftime('%c')
+                    time_str = datetime.datetime.fromtimestamp(int(t["time"])/1000).strftime('%c')
                     out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
                 out = "TRADES:\n" + out + "</pre>"
                 self.send_chat_message(out)
