@@ -225,18 +225,14 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 trades = self.client.get_my_trades(symbol=symbol.upper() + 'BTC')
-                # {"symbol": "BNBBTC", "id": 100, "orderId": 321, "orderListId": -1, "price": "0.00538790", "qty": "0.18000000",
-                # "quoteQty": "0.00096982", 
-                # "commission": "0.00000000", 
-                # "commissionAsset": "BNB", 
-                # "time": 1617288286153, "isBuyer": true, "isMaker": false, "isBestMatch": true},
+                sorted_trades = sorted(trades, key=lambda k: k['time'], reverse=True)
                 out = "<pre>"
-                for t in trades:
+                for t in sorted_trades:
                     if t["isBuyer"] == True:
                         action = "BUY"
                     else:
                         action = "SELL"
-                    time_str = datetime.datetime.fromtimestamp(int(t["time"])/1000).strftime('%c')
+                    time_str = datetime.datetime.fromtimestamp(int(t["time"])/1000).strftime('%d-%m %H:%M')
                     out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
                 out = "TRADES:\n" + out + "</pre>"
                 self.send_chat_message(out)
