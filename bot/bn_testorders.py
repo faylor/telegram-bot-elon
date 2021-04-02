@@ -180,7 +180,7 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "<pre>COIN   FREE     LOCKED    BTC    USD\n"
+                out = "<pre>COIN  FREE    LOCKED     BTC      USD\n"
                 val = 0
                 btc_val = 0
                 for b in balances:
@@ -196,7 +196,7 @@ class BnOrder():
                             btc_price = float(self.get_btc_price(b["asset"])) * quantity
                     val = val + usd_price
                     btc_val = btc_val + btc_price
-                    out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(8,' ') + str(self.round_sense(b["locked"])).ljust(8,' ') + str(self.round_sense(btc_price)).ljust(8,' ') + str(self.round_sense(usd_price)) + "\n"
+                    out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(8,' ') + str(self.round_sense(b["locked"])).ljust(8,' ') + " " + str(self.round_sense(btc_price)).ljust(8,' ') + " " + str(self.round_sense(usd_price)) + "\n"
                 out = out + "</pre>\nUSD VALUE: " + str(round(val, 2)) + "\nBTC VALUE: " + str(round(btc_val, 6))
                 self.send_chat_message(out)
 
