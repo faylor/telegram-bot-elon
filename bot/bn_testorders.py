@@ -2,7 +2,7 @@ import os
 import json
 import asyncio
 import logging
-import time
+import datetime
 import requests
 from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
 from binance.websockets import BinanceSocketManager
@@ -235,7 +235,7 @@ class BnOrder():
                         action = "BUY"
                     else:
                         action = "SELL"
-                    time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(t["time"])))
+                    time_str = datetime.datetime.fromtimestamp(int(t["time"])).strftime('%c')
                     out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
                 out = "TRADES:\n" + out + "</pre>"
                 self.send_chat_message(out)
