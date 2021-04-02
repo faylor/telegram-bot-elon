@@ -186,7 +186,7 @@ class BnOrder():
                 for b in balances:
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
-                        btc_price = quantity/float(self.get_usd_price("BTC"))
+                        btc_price = usd_price/float(self.get_usd_price("BTC"))
                     else:
                         quantity = float(b["free"]) + float(b["locked"])
                         usd_price = float(self.get_usd_price(b["asset"])) * quantity
