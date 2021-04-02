@@ -20,9 +20,7 @@ class BnOrder():
         self.chat_id = BN_CHAT_ID
         self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
         self.client.API_URL = 'https://testnet.binance.vision/api'
-        self.bm = BinanceSocketManager(self.client)
-        self.last_order_id = None
-        
+        self.bm = BinanceSocketManager(self.client)        
         
     def process_message(self, msg):
         try:
@@ -179,7 +177,8 @@ class BnOrder():
                     if b["asset"].upper() in ["BUSD", "USDT"]:
                         usd_price = float(b["free"]) + float(b["locked"])
                     else:
-                        usd_price = float(self.get_usd_price(b["asset"]))
+                        quantity = float(b["free"]) + float(b["locked"])
+                        usd_price = float(self.get_usd_price(b["asset"])) * quantity
                     val = val + usd_price
                     out = out + b["asset"].ljust(8,' ') + str(self.round_sense(b["free"])).ljust(10,' ') + str(self.round_sense(b["locked"])).ljust(10,' ') + "  $" + str(self.round_sense(usd_price)) + "\n"
                 out = out + "\nUSD VALUE: $" + str(round(val, 2))
