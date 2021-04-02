@@ -138,6 +138,7 @@ class BnOrder():
         usd_price = 0
         try:
             usd_price = self.client.get_symbol_ticker(symbol=symbol.upper() + "USDT")
+            return usd_price["price"]
         except Exception as e:
             logging.error("USD Price Failed error:" + symbol + " -- " + str(e))
         return usd_price
@@ -151,7 +152,7 @@ class BnOrder():
                 out = "COIN    FREE     LOCKED     USD"
                 for b in balances:
                     usd_price = self.get_usd_price(b["asset"])
-                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + json.dumps(usd_price)
+                    out = out + b["asset"] + "   " + b["free"] + "  " + b["locked"] + "  $" + json.dumps(usd_price) + "\n"
                 self.send_chat_message(out)
 
                 # trades = self.client.get_my_trades(symbol='BNBBTC')
