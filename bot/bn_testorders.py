@@ -70,7 +70,7 @@ class BnOrder():
                             symbol=symbol,
                             quantity=amount)
                 text = "REAL SELL CREATED: " + json.dumps(order)
-                self.send_chat_message(text)
+                self.send_chat_message(text["status"])
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
@@ -217,7 +217,8 @@ class BnOrder():
     def is_authorized(self, chat_id):
         if self.chat_id is None or int(self.chat_id) != int(chat_id):
             raise Exception("Unauthorized Chat, use only correct chat.")
-        self.bm.start_user_socket(self.process_message)
+        starter = self.bm.start_user_socket(self.process_message)
+        logging.error("Stream resp:" + str(starter))
         return True
 
     def get_symbol_trades(self, chat_id, symbol):
