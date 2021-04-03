@@ -100,6 +100,8 @@ class BnOrder():
                 else:
                     amount_of_buy_coin = amount / float(price)
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
+                    logging.error("TYPE:" + str(amt_str))
+                    logging.error("TYPE:" + str(price))
                     order = self.client.order_market_buy(
                                 symbol=symbol,
                                 quantity=amt_str)
