@@ -705,7 +705,7 @@ async def process_spent_invalid(message: types.Message):
     return await message.reply("Total Spend has gotta be a number.\nSelect percentage or write a number in box.", reply_markup=markup)
 
 
-@dp.message_handler(command=["cancel", "Cancel"])
+@dp.message_handler(commands=["cancel", "Cancel"])
 async def cancel_spent(message: types.Message, state: FSMContext):
     await state.finish()
     markup = types.ReplyKeyboardRemove()
