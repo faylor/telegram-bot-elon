@@ -101,7 +101,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         await message.reply(f"{name}: {buy_or_sell} {coin} @ ~${round_sense(sale_price_usd_tmp)} and ~BTC{round_sense(sale_price_btc_tmp)}. \n{purchase_with_coin} Available Balance = {purchase_coin_balance} available. Use?", reply_markup=markup)
 
     except Exception as e:
-        logging.error("MARKET BUY ERROR:" + str(e))
+        logging.error("MARKET BUY OR SELL ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy" + str(e))
 
 

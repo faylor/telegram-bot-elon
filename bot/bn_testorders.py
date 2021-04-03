@@ -178,7 +178,8 @@ class BnOrder():
     def get_user_balance(self, symbol):
         try:
             balance = self.client.get_asset_balance(asset=symbol)
-            return balance
+            logging.error("CHeck" + json.dumps(balance))
+            return float(balance["balance"])
         except Exception as e:
             logging.error("Account settings error:" + str(e))
             self.send_chat_message("FAILED TO GET BALANCE: " + str(e))
