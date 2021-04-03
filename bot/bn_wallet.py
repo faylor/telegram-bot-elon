@@ -57,8 +57,11 @@ async def bn_order_market_buy(message: types.Message, regexp_command):
 async def bn_order_market_sell(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
-        symbols, amount = all.strip().split()
-        bn_order.create_market_sell(message.chat.id, symbols, amount)
+        splits = all.strip().split()
+        if len(splits) > 2:
+            bn_order.create_market_sell(message.chat.id, splits[0], splits[1], splits[2])
+        else:
+            bn_order.create_market_sell(message.chat.id, splits[0], splits[1])
         bn_order.get_wallet(message.chat.id)
     except Exception as e:
         logging.error("MARKET SELL ERROR:" + str(e))
