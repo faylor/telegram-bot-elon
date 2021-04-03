@@ -73,8 +73,8 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
         coin = splits[1].upper()
         purchase_with_coin = "BTC"
-        if len(splits) > 1:
-            purchase_with_coin = splits[1].upper()
+        if len(splits) > 2:
+            purchase_with_coin = splits[2].upper()
         sale_price_usd_tmp = bn_order.get_usd_price(coin)
         sale_price_btc_tmp = bn_order.get_btc_price(coin)
         purchase_coin_balance = bn_order.get_user_balance(purchase_with_coin)
