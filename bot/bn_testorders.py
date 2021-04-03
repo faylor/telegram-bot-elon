@@ -68,9 +68,9 @@ class BnOrder():
         try:
             symbol = buy_coin.strip().upper() + sell_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
-            logging.error("INFO:" + json.dumps(info))
             if info is not None:
-                return symbol, "BUY"
+                result = self.client.get_symbol_ticker(symbol=symbol)
+                return symbol, "BUY", result["price"]
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
 
@@ -78,7 +78,7 @@ class BnOrder():
             symbol = sell_coin.strip().upper() + buy_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
             if info is not None:
-                return symbol, "SELL"
+                return symbol, "SELL", "Not required"
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
@@ -86,7 +86,7 @@ class BnOrder():
     def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type = self.get_exchange_symbol(sell_coin, buy_coin)
+                symbol, sale_type, price = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = 5
                 
                 logging.error("SYMBOL:" + str(symbol))
@@ -98,7 +98,7 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                 else:
-                    amount_of_buy_coin = amount / 323
+                    amount_of_buy_coin = amount / price
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     order = self.client.order_market_buy(
                                 symbol=symbol,
