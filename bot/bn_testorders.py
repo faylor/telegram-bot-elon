@@ -68,6 +68,7 @@ class BnOrder():
         try:
             symbol = buy_coin.strip().upper() + sell_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
+            logging.error("HEREHREHRHE:" + json.dumps(info))
             return symbol, "BUY"
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
