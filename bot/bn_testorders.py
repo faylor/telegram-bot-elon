@@ -93,11 +93,12 @@ class BnOrder():
                     order = self.client.order_market_sell(
                                 symbol=symbol,
                                 quantity=amt_str)
+                    text = "BUY " + str(amt_str)+ " of " + symbol + " OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + json.dumps(order["fills"])
                 else:
                     order = self.client.order_market_buy(
                                 symbol=symbol,
                                 quantity=amt_str)
-                text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + json.dumps(order["fills"])
+                    text = "SELL " + str(amt_str)+ " of " + symbol + " OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + json.dumps(order["fills"])
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
