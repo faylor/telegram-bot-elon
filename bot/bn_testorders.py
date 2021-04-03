@@ -68,14 +68,14 @@ class BnOrder():
         try:
             symbol = buy_coin.strip().upper() + sell_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
-            return symbol, "SELL"
+            return symbol, "BUY"
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
 
         try:
             symbol = sell_coin.strip().upper() + buy_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
-            return symbol, "BUY"
+            return symbol, "SELL"
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
