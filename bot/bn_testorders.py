@@ -64,16 +64,38 @@ class BnOrder():
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
             raise e
 
-    def create_market_sell(self, chat_id, symbol, amount, to_currency = "BTC"):
+    def get_exchange_symbol(self, sell_coin, buy_coin):
+        try:
+            symbol = buy_coin.strip().upper() + sell_coin.strip().upper()
+            info = self.client.get_symbol_info(symbol)
+            return symbol, "SELL"
+        except Exception as e:
+            logging.error("Symbol fail:" + str(e))
+
+        try:
+            symbol = sell_coin.strip().upper() + buy_coin.strip().upper()
+            info = self.client.get_symbol_info(symbol)
+            return symbol, "BUY"
+        except Exception as e:
+            logging.error("Symbol fail:" + str(e))
+            raise e
+
+    def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol = symbol.strip().upper() + to_currency.strip().upper()
-                amount = round(amount, 8)
+                symbol, sale_type = self.get_exchange_symbol(sell_coin, buy_coin)
+                precision = 5
+                amt_str = "{:0.0{}f}".format(amount, precision)
                 logging.error("SYMBOL:" + str(symbol))
-                logging.error("AMOUNT:" + str(amount))
-                order = self.client.order_market_sell(
-                            symbol=symbol,
-                            quantity=amount)
+                logging.error("AMOUNT:" + str(amt_str))
+                if sale_type == "SELL":
+                    order = self.client.order_market_sell(
+                                symbol=symbol,
+                                quantity=amt_str)
+                else:
+                    order = self.client.order_market_buy(
+                                symbol=symbol,
+                                quantity=amount)
                 text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + str(order["fill"])
                 self.send_chat_message(text)
         except Exception as e:
