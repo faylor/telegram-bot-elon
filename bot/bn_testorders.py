@@ -96,7 +96,7 @@ class BnOrder():
                 else:
                     order = self.client.order_market_buy(
                                 symbol=symbol,
-                                quantity=amount)
+                                quantity=amt_str)
                 text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + json.dumps(order["fills"])
                 self.send_chat_message(text)
         except Exception as e:
