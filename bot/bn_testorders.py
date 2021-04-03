@@ -179,7 +179,7 @@ class BnOrder():
         try:
             balance = self.client.get_asset_balance(asset=symbol)
             logging.error("CHeck" + json.dumps(balance))
-            return float(balance["balance"])
+            return float(balance["free"])
         except Exception as e:
             logging.error("Account settings error:" + str(e))
             self.send_chat_message("FAILED TO GET BALANCE: " + str(e))

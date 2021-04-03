@@ -78,8 +78,8 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         if len(splits) > 1:
             purchase_with_coin = splits[1].upper()
         
-        sale_price_usd_tmp = bn_order.get_usd_price(coin)
-        sale_price_btc_tmp = bn_order.get_btc_price(coin)
+        sale_price_usd_tmp = bn_order.get_usd_price(coin + "USDT")
+        sale_price_btc_tmp = bn_order.get_btc_price(coin + "BTC")
         
         purchase_coin_balance = bn_order.get_user_balance(purchase_with_coin)
         if purchase_coin_balance <= 0:
