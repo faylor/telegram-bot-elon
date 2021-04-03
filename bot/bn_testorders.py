@@ -67,6 +67,7 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 symbol = symbol.strip().upper() + to_currency.strip().upper()
+                logging.error("SYMBOL:" + symbol)
                 order = self.client.order_market_sell(
                             symbol=symbol,
                             quantity=amount)
