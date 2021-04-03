@@ -276,6 +276,19 @@ class BnOrder():
                     out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
                 out = "TRADES:\n" + out + "</pre>"
                 self.send_chat_message(out)
+
+                trades = self.client.get_my_trades(symbol=symbol.upper() + 'USDT')
+                sorted_trades = sorted(trades, key=lambda k: k['time'], reverse=True)
+                out = "<pre>"
+                for t in sorted_trades:
+                    if t["isBuyer"] == True:
+                        action = "BUY"
+                    else:
+                        action = "SELL"
+                    time_str = datetime.datetime.fromtimestamp(int(t["time"])/1000).strftime('%d-%m %H:%M')
+                    out = out + time_str + "  " + t["symbol"] + "  " + action + "  " + t["price"] + "   " + t["qty"] + "\n"
+                out = "TRADES:\n" + out + "</pre>"
+                self.send_chat_message(out)
         except Exception as e:
             logging.error("Failed to get trades for symbol chat message:" + str(e))
             self.send_chat_message("Failed to get trades for " + symbol + " -- " + str(e))
