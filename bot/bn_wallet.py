@@ -120,7 +120,8 @@ async def process_spend(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             markup = types.ReplyKeyboardRemove()
             spent_response = message.text.lower().strip()
-        
+            logging.error("AMOUNT 1:" + str(spent_response))
+            logging.error("AMOUNT 2:" + str(data['balance']))
             if spent_response == "100%":
                 spend = float(data['balance'])
             elif spent_response == "75%":
@@ -138,6 +139,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             if spend <= 0:
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
+            logging.error("AMOUNT 3:" + str(spend))
             if data['buy_or_sell'] == "BUY":
                 bn_order.create_market_buy(message.chat.id, data['coin'], spend, data['purchase_with_coin'])
             else:
