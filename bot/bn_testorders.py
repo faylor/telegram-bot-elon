@@ -97,7 +97,7 @@ class BnOrder():
                     order = self.client.order_market_buy(
                                 symbol=symbol,
                                 quantity=amount)
-                text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + str(order["fill"])
+                text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:" + json.dumps(order["fills"])
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
