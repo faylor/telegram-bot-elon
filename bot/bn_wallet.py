@@ -68,23 +68,26 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
     try:
         all = regexp_command.group(1)
         splits = all.strip().split()
+        logging.error("1")
         if len(splits) < 2:
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, no Coin given, eg: /market buy eth")
         buy_or_sell = splits[0].upper()
+        logging.error("2")
         if buy_or_sell not in ["BUY", "SELL"]:
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
         coin = splits[1].upper()
         purchase_with_coin = "BTC"
+        logging.error("3")
         if len(splits) > 1:
             purchase_with_coin = splits[1].upper()
-        
+        logging.error("4")
         sale_price_usd_tmp = bn_order.get_usd_price(coin)
         sale_price_btc_tmp = bn_order.get_btc_price(coin)
-        
+        logging.error("5")
         purchase_coin_balance = bn_order.get_user_balance(purchase_with_coin)
         if purchase_coin_balance <= 0:
             return await message.reply(f"You have no balance in {purchase_with_coin}, you fool.")
-        
+        logging.error("6")
         await MarketForm.spent.set()
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
             proxy['price_usd'] = sale_price_usd_tmp
@@ -93,11 +96,12 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             proxy['balance'] = purchase_coin_balance
             proxy['purchase_with_coin'] = purchase_with_coin
             proxy['buy_or_sell'] = buy_or_sell
-        
+        logging.error("7")
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
         name = message.from_user.mention
+        logging.error("7")
         await message.reply(f"{name}: {buy_or_sell} {coin} @ ~${round_sense(sale_price_usd_tmp)} and ~BTC{round_sense(sale_price_btc_tmp)}. \n{purchase_with_coin} Available Balance = {purchase_coin_balance} available. Use?", reply_markup=markup)
 
     except Exception as e:
