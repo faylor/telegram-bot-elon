@@ -70,7 +70,7 @@ class BnOrder():
                             symbol=symbol,
                             quantity=amount)
                 text = "SELL OrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])
-                self.send_chat_message()
+                self.send_chat_message(text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
