@@ -117,7 +117,7 @@ async def process_spent_invalid(message: types.Message):
 async def cancel_spent(message: types.Message, state: FSMContext):
     markup = types.ReplyKeyboardRemove()
     await state.finish()
-    return await message.reply("Cancelled.")
+    return await message.reply("Cancelled.", reply_markup=markup)
 
 @dp.message_handler(state=MarketForm.spent)
 async def process_spend(message: types.Message, state: FSMContext):
@@ -153,8 +153,8 @@ async def process_spend(message: types.Message, state: FSMContext):
         await state.finish()
     except Exception as e:
         logging.error("MARKET BUY OR SELL ERROR:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. Market Buy Or Sell Failed. /market buy btc... ' + str(e))
         markup = types.ReplyKeyboardRemove()
+        await message.reply(f'{message.from_user.first_name} Fail. Market Buy Or Sell Failed. /market buy btc... ' + str(e), reply_markup=markup)
         await state.finish()
 
 
