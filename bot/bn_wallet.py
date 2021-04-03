@@ -87,7 +87,6 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             buying_coin = second_coin
             selling_coin = first_coin
         
-        exchange_symbol =  buying_coin + selling_coin
         purchase_coin_balance = bn_order.get_user_balance(selling_coin)
         selling_price_usd_tmp = bn_order.get_usd_price(selling_coin)
         selling_price_btc_tmp = bn_order.get_btc_price(selling_coin)
@@ -103,7 +102,6 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             proxy['buying_price_btc'] = buying_price_btc_tmp
             proxy['buying_coin'] = buying_coin
             proxy['selling_coin'] = selling_coin
-            proxy['exchange_symbol'] = exchange_symbol
             proxy['balance'] = purchase_coin_balance
             proxy['buy_or_sell'] = buy_or_sell
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -159,8 +157,8 @@ async def process_spend(message: types.Message, state: FSMContext):
             if spend <= 0:
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
-            logging.error("AMOUNT 3:" + str(spend))
-            bn_order.create_market_sell(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
+            
+            bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             bn_order.get_wallet(message.chat.id)
             
         await state.finish()
