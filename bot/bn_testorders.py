@@ -266,7 +266,7 @@ class BnOrder():
             if self.is_authorized(chat_id):
                 trades = self.client.get_my_trades(symbol=symbol.upper() + 'BTC')
                 sorted_trades = sorted(trades, key=lambda k: k['time'], reverse=True)
-                out = "<pre>"
+                out = "<pre>DATE TIME    SYMBOL   SIDE    PRICE     QUANTITY"
                 for t in sorted_trades:
                     if t["isBuyer"] == True:
                         action = "BUY"
@@ -279,7 +279,7 @@ class BnOrder():
 
                 trades = self.client.get_my_trades(symbol=symbol.upper() + 'USDT')
                 sorted_trades = sorted(trades, key=lambda k: k['time'], reverse=True)
-                out = "<pre>"
+                out = "<pre>DATE TIME    SYMBOL   SIDE    PRICE     QUANTITY"
                 for t in sorted_trades:
                     if t["isBuyer"] == True:
                         action = "BUY"
