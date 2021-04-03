@@ -88,6 +88,7 @@ class BnOrder():
                 amt_str = "{:0.0{}f}".format(amount, precision)
                 logging.error("SYMBOL:" + str(symbol))
                 logging.error("AMOUNT:" + str(amt_str))
+                logging.error("TYPE:" + str(sale_type))
                 if sale_type == "SELL":
                     order = self.client.order_market_sell(
                                 symbol=symbol,
