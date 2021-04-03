@@ -193,11 +193,11 @@ class BnOrder():
         price = float(price)
         if price is None or price == 0:
             return 0
-        if price > 100:
+        if price > 1000:
             return int(price)
-        if price > 10:
+        if price > 100:
             return round(price, 1)
-        if price > 1:
+        if price > 10:
             return round(price, 2)
         if price > 0.01:
             return round(price, 4)
