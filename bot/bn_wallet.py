@@ -88,7 +88,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             selling_coin = first_coin
         
         exchange_symbol =  buying_coin + selling_coin
-        purchase_coin_balance = bn_order.get_user_balance(exchange_symbol)
+        purchase_coin_balance = bn_order.get_user_balance(selling_coin)
         selling_price_usd_tmp = bn_order.get_usd_price(selling_coin)
         selling_price_btc_tmp = bn_order.get_btc_price(selling_coin)
         buying_price_usd_tmp = bn_order.get_usd_price(buying_coin)
@@ -99,7 +99,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
             proxy['selling_price_usd'] = selling_price_usd_tmp
             proxy['selling_price_btc'] = selling_price_btc_tmp
-            proxy['buying_price_usd'] = buying_price_btc_tmp
+            proxy['buying_price_usd'] = buying_price_usd_tmp
             proxy['buying_price_btc'] = buying_price_btc_tmp
             proxy['buying_coin'] = buying_coin
             proxy['selling_coin'] = selling_coin
