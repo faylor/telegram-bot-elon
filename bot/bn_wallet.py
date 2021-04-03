@@ -110,8 +110,8 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
         name = message.from_user.mention
-        text = f"""{name}: {buy_or_sell} {buying_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
-        Selling coin {selling_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}, available balance = {purchase_coin_balance} available. Use?
+        text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
+SELL {selling_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}, available balance = {purchase_coin_balance} available. Use?
         """
         await message.reply(text, reply_markup=markup)
 
