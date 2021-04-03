@@ -83,7 +83,7 @@ class BnOrder():
             logging.error("Symbol fail:" + str(e))
             raise e
 
-    def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin, approx_buy_price):
+    def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
                 symbol, sale_type = self.get_exchange_symbol(sell_coin, buy_coin)
@@ -98,7 +98,7 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                 else:
-                    amount_of_buy_coin = amount / approx_buy_price
+                    amount_of_buy_coin = amount / 323
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     order = self.client.order_market_buy(
                                 symbol=symbol,
