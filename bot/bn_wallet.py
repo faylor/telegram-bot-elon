@@ -115,6 +115,7 @@ async def process_spent_invalid(message: types.Message):
 
 @dp.message_handler(lambda message: message.text in ["cancel", "Cancel"], state=MarketForm.spent)
 async def cancel_spent(message: types.Message, state: FSMContext):
+    markup = types.ReplyKeyboardRemove()
     await state.finish()
     return await message.reply("Cancelled.")
 
@@ -134,6 +135,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             elif spent_response == "25%":
                 spend = float(data['balance']) * 0.25
             elif spent_response == "cancel":
+                markup = types.ReplyKeyboardRemove()
                 await state.finish()
                 return await message.reply("Cancelled.", reply_markup=markup)
             else:
@@ -152,6 +154,7 @@ async def process_spend(message: types.Message, state: FSMContext):
     except Exception as e:
         logging.error("MARKET BUY OR SELL ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. Market Buy Or Sell Failed. /market buy btc... ' + str(e))
+        markup = types.ReplyKeyboardRemove()
         await state.finish()
 
 
