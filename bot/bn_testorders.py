@@ -87,11 +87,12 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 symbol, sale_type, price = self.get_exchange_symbol(sell_coin, buy_coin)
-                precision = 5
+                
                 
                 logging.error("SYMBOL:" + str(symbol))
                 logging.error("TYPE:" + str(sale_type))
                 if sale_type == "SELL":
+                    precision = 5
                     amt_str = "{:0.0{}f}".format(amount, precision)
                     order = self.client.order_market_sell(
                                 symbol=symbol,
@@ -99,6 +100,7 @@ class BnOrder():
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                 else:
                     amount_of_buy_coin = amount / float(price)
+                    precision = 3
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     logging.error("TYPE:" + str(amt_str))
                     logging.error("TYPE:" + str(price))
