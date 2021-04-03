@@ -61,6 +61,7 @@ class BnOrder():
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+            raise e
 
     def create_market_sell(self, chat_id, symbol, amount, to_currency = "BTC"):
         try:
@@ -74,6 +75,7 @@ class BnOrder():
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+            raise e
 
     def create_order(self, chat_id, symbol, buy_price, amount):
         try:
