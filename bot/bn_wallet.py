@@ -113,7 +113,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         text = f"""{name}: {buy_or_sell} {buying_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
         Selling coin {selling_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}, available balance = {purchase_coin_balance} available. Use?
         """
-        await message.reply(f" . \n", reply_markup=markup)
+        await message.reply(text, reply_markup=markup)
 
     except Exception as e:
         logging.error("bn order market buy - MARKET BUY OR SELL ERROR:" + str(e))
