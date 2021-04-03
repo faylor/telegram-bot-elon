@@ -28,9 +28,13 @@ class LimitForm(StatesGroup):
 class MarketForm(StatesGroup):
     coin = State()
     buy_or_sell = State()
-    purchase_with_coin = State()
-    price_usd = State()
-    price_btc = State()
+    buying_coin = State()
+    selling_coin = State()
+    exchange_symbol = State()
+    buying_price_usd = State()
+    buying_price_btc = State()
+    selling_price_usd = State()
+    selling_price_btc = State()
     balance = State()
     spent = State()  # Will be represented in storage as 'Form:spent'
 
@@ -71,28 +75,45 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         buy_or_sell = splits[0].upper()
         if buy_or_sell not in ["BUY", "SELL"]:
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
-        coin = splits[1].upper()
-        purchase_with_coin = "BTC"
+        first_coin = splits[1].upper()
+        second_coin = "BTC"
         if len(splits) > 2:
-            purchase_with_coin = splits[2].upper()
-        sale_price_usd_tmp = bn_order.get_usd_price(coin)
-        sale_price_btc_tmp = bn_order.get_btc_price(coin)
-        purchase_coin_balance = bn_order.get_user_balance(purchase_with_coin)
+            second_coin = splits[2].upper()
+        
+        if buy_or_sell == "BUY":
+            buying_coin = first_coin
+            selling_coin = second_coin
+        else:
+            buying_coin = second_coin
+            selling_coin = first_coin
+        
+        exchange_symbol =  buying_coin + selling_coin
+        purchase_coin_balance = bn_order.get_user_balance(exchange_symbol)
+        selling_price_usd_tmp = bn_order.get_usd_price(selling_coin)
+        selling_price_btc_tmp = bn_order.get_btc_price(selling_coin)
+        buying_price_usd_tmp = bn_order.get_usd_price(buying_coin)
+        buying_price_btc_tmp = bn_order.get_btc_price(buying_coin)
         if purchase_coin_balance <= 0:
-            return await message.reply(f"You have no balance in {purchase_with_coin}, you fool.")
+            return await message.reply(f"You have no balance in {selling_coin}, you fool.")
         await MarketForm.spent.set()
         async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-            proxy['price_usd'] = sale_price_usd_tmp
-            proxy['price_btc'] = sale_price_btc_tmp
-            proxy['coin'] = coin
+            proxy['selling_price_usd'] = selling_price_usd_tmp
+            proxy['selling_price_btc'] = selling_price_btc_tmp
+            proxy['buying_price_usd'] = buying_price_btc_tmp
+            proxy['buying_price_btc'] = buying_price_btc_tmp
+            proxy['buying_coin'] = buying_coin
+            proxy['selling_coin'] = selling_coin
+            proxy['exchange_symbol'] = exchange_symbol
             proxy['balance'] = purchase_coin_balance
-            proxy['purchase_with_coin'] = purchase_with_coin
             proxy['buy_or_sell'] = buy_or_sell
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
         name = message.from_user.mention
-        await message.reply(f"{name}: {buy_or_sell} {coin} @ ~${bn_order.round_sense(sale_price_usd_tmp)} and ~BTC{bn_order.round_sense(sale_price_btc_tmp)}. \n{purchase_with_coin} Available Balance = {purchase_coin_balance} available. Use?", reply_markup=markup)
+        text = f"""{name}: {buy_or_sell} {buying_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
+        Selling coin {selling_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}, available balance = {purchase_coin_balance} available. Use?
+        """
+        await message.reply(f" . \n", reply_markup=markup)
 
     except Exception as e:
         logging.error("bn order market buy - MARKET BUY OR SELL ERROR:" + str(e))
@@ -140,10 +161,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
             logging.error("AMOUNT 3:" + str(spend))
-            if data['buy_or_sell'] == "BUY":
-                bn_order.create_market_buy(message.chat.id, data['coin'], spend, data['purchase_with_coin'])
-            else:
-                bn_order.create_market_sell(message.chat.id, data['coin'], spend, data['purchase_with_coin'])
+            bn_order.create_market_sell(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             bn_order.get_wallet(message.chat.id)
             
         # Finish conversation
