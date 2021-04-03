@@ -100,7 +100,7 @@ class BnOrder():
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                 else:
                     amount_of_buy_coin = amount / float(price)
-                    precision = 3
+                    precision = 2
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     logging.error("TYPE:" + str(amt_str))
                     logging.error("TYPE:" + str(price))
