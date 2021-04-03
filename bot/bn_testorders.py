@@ -175,6 +175,16 @@ class BnOrder():
             return round(price, 5)
         return round(price, 8)
 
+    def get_user_balance(self, symbol):
+        try:
+            balance = self.client.get_asset_balance(asset=symbol)
+            return balance
+        except Exception as e:
+            logging.error("Account settings error:" + str(e))
+            self.send_chat_message("FAILED TO GET BALANCE: " + str(e))
+            return 0
+
+
     def get_wallet(self, chat_id):
         try:
             if self.is_authorized(chat_id):
