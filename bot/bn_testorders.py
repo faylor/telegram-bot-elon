@@ -65,8 +65,7 @@ class BnOrder():
     def create_market_sell(self, chat_id, symbol, amount, to_currency = "BTC"):
         try:
             if self.is_authorized(chat_id):
-                logging.error("SYMBOLL" + symbol)
-                symbol = symbol.strip().upper() + to_currency
+                symbol = symbol.strip().upper() + to_currency.strip().upper()
                 order = self.client.order_market_sell(
                             symbol=symbol,
                             quantity=amount)
