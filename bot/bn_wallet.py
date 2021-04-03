@@ -110,8 +110,9 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
         name = message.from_user.mention
-        text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
-SELL {selling_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}, available balance = {purchase_coin_balance} available. Use?
+        text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_btc_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
+SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_btc_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
+Available balance = {purchase_coin_balance}. Use?
         """
         await message.reply(text, reply_markup=markup)
 
@@ -141,8 +142,6 @@ async def process_spend(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             markup = types.ReplyKeyboardRemove()
             spent_response = message.text.lower().strip()
-            logging.error("AMOUNT 1:" + str(spent_response))
-            logging.error("AMOUNT 2:" + str(data['balance']))
             if spent_response == "100%":
                 spend = float(data['balance'])
             elif spent_response == "75%":
@@ -164,8 +163,8 @@ async def process_spend(message: types.Message, state: FSMContext):
             bn_order.create_market_sell(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             bn_order.get_wallet(message.chat.id)
             
-        # Finish conversation
         await state.finish()
+        return await message.reply("Done.", reply_markup=markup)
     except Exception as e:
         logging.error("Process Spend - MARKET BUY OR SELL ERROR:" + str(e))
         markup = types.ReplyKeyboardRemove()
