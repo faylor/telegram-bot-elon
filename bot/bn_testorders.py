@@ -49,10 +49,10 @@ class BnOrder():
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE TEST ORDER FAILED: " + str(e))
 
-    def create_market_buy(self, chat_id, symbol, amount):
+    def create_market_buy(self, chat_id, symbol, amount, to_currency = "BTC"):
         try:
             if self.is_authorized(chat_id):
-                symbol = symbol.strip().upper() + "BTC"
+                symbol = symbol.strip().upper() + to_currency.strip().upper()
                 order = self.client.order_market_buy(
                             symbol=symbol,
                             quantity=amount)
