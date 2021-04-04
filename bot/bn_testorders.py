@@ -98,7 +98,8 @@ class BnOrder():
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
-                
+                    self.send_chat_message(text)
+                    
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
@@ -122,7 +123,8 @@ class BnOrder():
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
-                
+                    self.send_chat_message(text)
+
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='SELL',
@@ -132,8 +134,6 @@ class BnOrder():
                         stopLimitPrice=float(price) * 0.989,
                         stopLimitTimeInForce='GTC')
                 
-                self.send_chat_message(text)
-
                 text = "OCO ORDER:\n" + json.dumps(order_oco)
                 self.send_chat_message(text)
         except Exception as e:
