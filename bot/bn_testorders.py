@@ -104,9 +104,9 @@ class BnOrder():
                         symbol=symbol,
                         side='BUY',
                         quantity=amt_str,
-                        price=float(price) * 1.03,
-                        stopPrice=float(price) * 0.99,
-                        stopLimitPrice=float(price) * 0.989,
+                        price=round(float(price) * 1.03, 3),
+                        stopPrice=round(float(price) * 0.99, 3),
+                        stopLimitPrice=round(float(price) * 0.989, 3),
                         stopLimitTimeInForce='GTC')
                 else:
                     # TODO check filters
@@ -129,9 +129,9 @@ class BnOrder():
                         symbol=symbol,
                         side='SELL',
                         quantity=amt_str,
-                        price=round(float(price) * 1.03, 6),
-                        stopPrice=round(float(price) * 0.99, 6),
-                        stopLimitPrice=round(float(price) * 0.989, 6),
+                        price=round(float(price) * 1.03, 2),
+                        stopPrice=round(float(price) * 0.99, 2),
+                        stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
                 text = "OCO ORDER:\n" + json.dumps(order_oco)
