@@ -99,7 +99,7 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                     self.send_chat_message(text)
-                    
+
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
@@ -129,9 +129,9 @@ class BnOrder():
                         symbol=symbol,
                         side='SELL',
                         quantity=amt_str,
-                        price=float(price) * 1.03,
-                        stopPrice=float(price) * 0.99,
-                        stopLimitPrice=float(price) * 0.989,
+                        price=round(float(price) * 1.03, 6),
+                        stopPrice=round(float(price) * 0.99, 6),
+                        stopLimitPrice=round(float(price) * 0.989, 6),
                         stopLimitTimeInForce='GTC')
                 
                 text = "OCO ORDER:\n" + json.dumps(order_oco)
@@ -168,9 +168,9 @@ class BnOrder():
                         symbol=symbol,
                         side='SELL',
                         quantity=amount,
-                        price=float(buy_price) * 1.03,
-                        stopPrice=float(buy_price) * 0.99,
-                        stopLimitPrice=float(buy_price) * 0.989,
+                        price=round(float(buy_price) * 1.03, 6),
+                        stopPrice=round(float(buy_price) * 0.99, 6),
+                        stopLimitPrice=round(float(buy_price) * 0.989, 6),
                         stopLimitTimeInForce='GTC')
                 text = "OCO ORDERS: " + json.dumps(order_oco)
                 self.send_chat_message(text)
