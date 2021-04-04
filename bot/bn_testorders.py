@@ -98,7 +98,21 @@ class BnOrder():
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
+                
+                    order_oco = self.client.create_oco_order(
+                        symbol=symbol,
+                        side='SELL',
+                        quantity=amount,
+                        price=float(price) * 1.03,
+                        stopPrice=float(price) * 0.99,
+                        stopLimitPrice=float(price) * 0.989,
+                        stopLimitTimeInForce='GTC')
                 else:
+                    # TODO check filters
+                    # quantity >= minQty
+                    # quantity <= maxQty
+                    # (quantity-minQty) % stepSize == 0
+
                     amount_of_buy_coin = amount / float(price)
                     precision = 2
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
@@ -108,6 +122,19 @@ class BnOrder():
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
+                
+                    order_oco = self.client.create_oco_order(
+                        symbol=symbol,
+                        side='SELL',
+                        quantity=amount,
+                        price=float(price) * 1.03,
+                        stopPrice=float(price) * 0.99,
+                        stopLimitPrice=float(price) * 0.989,
+                        stopLimitTimeInForce='GTC')
+                
+                self.send_chat_message(text)
+
+                text = "OCO ORDER:\n" + json.dumps(order_oco)
                 self.send_chat_message(text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
