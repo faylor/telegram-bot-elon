@@ -101,8 +101,8 @@ class BnOrder():
                 
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
-                        side='SELL',
-                        quantity=amount,
+                        side='BUY',
+                        quantity=amt_str,
                         price=float(price) * 1.03,
                         stopPrice=float(price) * 0.99,
                         stopLimitPrice=float(price) * 0.989,
@@ -126,7 +126,7 @@ class BnOrder():
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='SELL',
-                        quantity=amount,
+                        quantity=amt_str,
                         price=float(price) * 1.03,
                         stopPrice=float(price) * 0.99,
                         stopLimitPrice=float(price) * 0.989,
