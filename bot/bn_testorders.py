@@ -134,9 +134,8 @@ class BnOrder():
                         stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
-                oco_text = "OCO ORDERS:\n"
-                for o in order_oco:
-                    logging.error("HAHDHA" + json.dumps(o))
+                oco_text = "OCO ORDERS: " + order_oco["listOrderStatus"] + "\n" 
+                for o in order_oco["orders"]:
                     if o["type"] == "STOP_LOSS_LIMIT":
                         oco_text = oco_text + "STOP LOSS" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     elif o["type"] == "LIMIT_MAKER":
