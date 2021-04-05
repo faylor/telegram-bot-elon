@@ -179,6 +179,8 @@ class BnOrder():
                 oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + " " + o["symbol"] + "- Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
             else:
                 oco_text = oco_text + "\n" + json.dumps(o) + "\n"
+        oco_text = oco_text + "\nCheck Order Status with: /checkorders\n" 
+        oco_text = oco_text + "\nCancel All Orders with: /cancelorders\n" 
         return oco_text
 
     def create_order(self, chat_id, symbol, buy_price, amount):
