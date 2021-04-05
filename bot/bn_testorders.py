@@ -185,13 +185,13 @@ class BnOrder():
                 symbol, sale_type, price, info, step_size = self.get_exchange_symbol(selling_coin, buying_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 if sale_type == "SELL":
-                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    amt_str = "{:0.0{}f}".format(float(amount), precision)
                     order = self.client.order_limit_sell(
                             symbol=symbol,
                             quantity=amt_str,
                             price=round(float(price), 5))
                 else:
-                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    amt_str = "{:0.0{}f}".format(float(amount), precision)
                     order = self.client.order_limit_buy(
                             symbol=symbol,
                             quantity=amt_str,
