@@ -99,12 +99,16 @@ class BnOrder():
                 
                 if sale_type == "SELL":
                     amt_str = "{:0.0{}f}".format(amount, precision)
+                    logging.error("PRICE:" + str(price))
+                    logging.error("amount_of_buy_coin:" + str(amt_str))
                     order = self.client.order_market_sell(
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                     self.send_chat_message(text)
 
+                    amount_of_buy_coin = amount * float(price)
+                    amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
@@ -147,7 +151,7 @@ class BnOrder():
                 oco_text = order_oco["listOrderStatus"] + " " + self.format_orders(order_oco["orderReports"])
                 self.send_chat_message(oco_text)
         except Exception as e:
-            logging.error("Test Order Failed error:" + str(e))
+            logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
             raise e
 
