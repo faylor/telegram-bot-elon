@@ -4,7 +4,7 @@ import asyncio
 import logging
 import datetime
 import requests
-from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
+from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_CHAT_ID_GROUP, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
 from binance.websockets import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
@@ -19,6 +19,7 @@ class BnOrder():
 
     def __init__(self) -> None:
         self.chat_id = BN_CHAT_ID
+        self.chat_ID = BN_CHAT_ID_GROUP
         self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
         self.client.API_URL = 'https://testnet.binance.vision/api'
         self.bm = BinanceSocketManager(self.client)        
@@ -137,8 +138,8 @@ class BnOrder():
                 oco_text = "OCO ORDERS: " + order_oco["listOrderStatus"] + "\n" 
                 for o in order_oco["orderReports"]:
                     if o["type"] == "STOP_LOSS_LIMIT":
-                        oco_text = oco_text + "STOP LOSS" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
-                    elif o["type"] == "LIMIT_MAKER":
+                        oco_text = oco_text + "STOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                    elif o["type"] == "LIMIT_MAKER:\n":
                         oco_text = oco_text + "PROFIT " + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     else:
                         oco_text = json.dumps(o) + "\n"
