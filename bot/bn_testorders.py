@@ -3,6 +3,7 @@ import json
 import asyncio
 import logging
 import datetime
+import math
 import requests
 from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_CHAT_ID_GROUP, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
 from binance.websockets import BinanceSocketManager
@@ -79,7 +80,7 @@ class BnOrder():
             symbol = sell_coin.strip().upper() + buy_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
             if info is not None:
-                return symbol, "SELL", "Not required"
+                return symbol, "SELL", "Not required", info
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
@@ -89,10 +90,15 @@ class BnOrder():
             if self.is_authorized(chat_id):
                 symbol, sale_type, price, info = self.get_exchange_symbol(sell_coin, buy_coin)
                 
+                step_size = 0.0
+                for f in info['filters']:
+                    if f['filterType'] == 'LOT_SIZE':
+                        step_size = float(f['stepSize'])
+
+                precision = int(round(-math.log(step_size, 10), 0))
                 
                 logging.error("INFO:" + str(info))
                 if sale_type == "SELL":
-                    precision = 5
                     amt_str = "{:0.0{}f}".format(amount, precision)
                     order = self.client.order_market_sell(
                                 symbol=symbol,
@@ -115,7 +121,6 @@ class BnOrder():
                     # (quantity-minQty) % stepSize == 0
 
                     amount_of_buy_coin = amount / float(price)
-                    precision = 2
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     logging.error("TYPE:" + str(amt_str))
                     logging.error("TYPE:" + str(price))
