@@ -216,11 +216,13 @@ class BnOrder():
                 orders = self.client.get_open_orders()
                 for order in orders:
                     result = self.client.cancel_order(symbol=order['symbol'], orderId=order["orderId"])
-                    text = "CANCEL RESULT: " + json.dumps(result)
+                    text = "CANCEL RESULT:\n" + json.dumps(result)
                     self.send_chat_message(text)
         except Exception as e:
             logging.error("Cancel Order Failed error:" + str(e))
-            self.send_chat_message("FAILED TO CANCEL ORDER: " + str(e))
+            orders = self.client.get_open_orders()
+            if len(orders) > 0:
+                self.send_chat_message("FAILED TO CANCEL ORDER: " + str(e))
 
     def get_usd_price(self, symbol):
         usd_price = 0
