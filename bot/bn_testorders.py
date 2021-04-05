@@ -97,7 +97,6 @@ class BnOrder():
 
                 precision = int(round(-math.log(step_size, 10), 0))
                 
-                logging.error("INFO:" + str(info))
                 if sale_type == "SELL":
                     amt_str = "{:0.0{}f}".format(amount, precision)
                     order = self.client.order_market_sell(
@@ -119,9 +118,15 @@ class BnOrder():
                     # quantity >= minQty
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
-
+                    logging.error("PRICE:" + str(price))
+                    
                     amount_of_buy_coin = amount / float(price)
+                    logging.error("amount_of_buy_coin:" + str(amount_of_buy_coin))
+
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
+
+                    logging.error("amt_str:" + str(amt_str))
+
                     logging.error("TYPE:" + str(amt_str))
                     logging.error("TYPE:" + str(price))
                     order = self.client.order_market_buy(
