@@ -19,8 +19,7 @@ LIVE_ORDER_KEY = "LIVE_{}"
 class BnOrder():
 
     def __init__(self) -> None:
-        self.chat_id = BN_CHAT_ID
-        self.chat_id = BN_CHAT_ID_GROUP
+        self.chat_id = BN_CHAT_ID # self.chat_id = BN_CHAT_ID_GROUP
         self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
         self.client.API_URL = 'https://testnet.binance.vision/api'
         self.bm = BinanceSocketManager(self.client)        
@@ -80,7 +79,8 @@ class BnOrder():
             symbol = sell_coin.strip().upper() + buy_coin.strip().upper()
             info = self.client.get_symbol_info(symbol)
             if info is not None:
-                return symbol, "SELL", "Not required", info
+                result = self.client.get_symbol_ticker(symbol=symbol)
+                return symbol, "SELL", result["price"], info
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
@@ -139,7 +139,7 @@ class BnOrder():
                         stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
-                oco_text = order_oco["listOrderStatus"] + self.format_orders(order_oco["orderReports"])
+                oco_text = order_oco["listOrderStatus"] + " " + self.format_orders(order_oco["orderReports"])
                 self.send_chat_message(oco_text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
