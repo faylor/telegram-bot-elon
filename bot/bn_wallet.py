@@ -56,7 +56,7 @@ async def test_bn_order(message: types.Message, regexp_command):
 async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
-        buy_or_sell, first_coin, second_coin, price, amount = all.strip().split()
+        buy_or_sell, first_coin, second_coin, price, amount = all.strip().upper().split()
         if buy_or_sell not in ["BUY", "SELL"]:
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
         if buy_or_sell == "BUY":
