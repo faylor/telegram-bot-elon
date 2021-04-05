@@ -35,6 +35,7 @@ class MarketForm(StatesGroup):
     buying_price_btc = State()
     selling_price_usd = State()
     selling_price_btc = State()
+    oco = State()
     balance = State()
     spent = State()  # Will be represented in storage as 'Form:spent'
 
@@ -77,9 +78,14 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
         first_coin = splits[1].upper()
         second_coin = "BTC"
+        oco = False
         if len(splits) > 2:
-            second_coin = splits[2].upper()
-        
+            if "OCO" in splits[2].upper():
+                oco = True
+            else:
+                second_coin = splits[2].upper()
+            if len(splits) > 3 and "OCO" in splits[3].upper():
+                oco = True
         if buy_or_sell == "BUY":
             buying_coin = first_coin
             selling_coin = second_coin
@@ -104,13 +110,22 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             proxy['selling_coin'] = selling_coin
             proxy['balance'] = purchase_coin_balance
             proxy['buy_or_sell'] = buy_or_sell
+            proxy['oco'] = oco
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
         name = message.from_user.mention
+        oco_text = "OCO is set to "
+        if oco:
+            oco_text = oco_text + "ON. 3% Profit or 1% Loss will trigger a Swap Back to Original."
+        else:
+            oco_text = "OFF. No stop limits or profit limits are raised. Use oco instead if required eg: /market buy bnb usdt oco"
         text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_usd_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
 SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
-Available balance = {purchase_coin_balance}. Use?
+
+NOTE: {oco_text}
+
+Available {selling_coin} balance is {purchase_coin_balance}. Use How Many {selling_coin}?
         """
         await message.reply(text, reply_markup=markup)
 
@@ -160,6 +175,8 @@ async def process_spend(message: types.Message, state: FSMContext):
             
             bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             bn_order.get_wallet(message.chat.id)
+            if data["oco"] == True:
+                bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             
         await state.finish()
         return await message.reply("Done.", reply_markup=markup)

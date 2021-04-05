@@ -99,48 +99,60 @@ class BnOrder():
                 
                 if sale_type == "SELL":
                     amt_str = "{:0.0{}f}".format(amount, precision)
-                    logging.error("PRICE:" + str(price))
-                    logging.error("amount_of_buy_coin:" + str(amt_str))
                     order = self.client.order_market_sell(
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
-                    self.send_chat_message(text)
+                
+                else:
+                    # TODO check filters
+                    # quantity >= minQty
+                    # quantity <= maxQty
+                    # (quantity-minQty) % stepSize == 0
+                    amount_of_buy_coin = amount / float(price)
+                    amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
+                    order = self.client.order_market_buy(
+                                symbol=symbol,
+                                quantity=amt_str)
+                    text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
+                self.send_chat_message(text)
+                    
+        except Exception as e:
+            logging.error("Order Failed error:" + str(e))
+            self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+            raise e
 
-                    # amount_of_buy_coin = amount * float(price)
-                    # amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
-                    logging.error("PRICE:" + str(price))
-                    logging.error("amt_str:" + str(amt_str))
+    def create_oco_conversion(self, chat_id, sell_coin, amount, buy_coin):
+        try:
+            if self.is_authorized(chat_id):
+                symbol, sale_type, price, info = self.get_exchange_symbol(sell_coin, buy_coin)
+                
+                step_size = 0.0
+                for f in info['filters']:
+                    if f['filterType'] == 'LOT_SIZE':
+                        step_size = float(f['stepSize'])
+
+                precision = int(round(-math.log(step_size, 10), 0))
+                
+                if sale_type == "SELL":
+                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    # BUY Orders: Limit Price < Last Price < Stop Price
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
                         quantity=amt_str,
-                        price=round(float(price) * 1.03, 3),
-                        stopPrice=round(float(price) * 0.99, 3),
-                        stopLimitPrice=round(float(price) * 0.989, 3),
+                        price=round(float(price) * 0.97, 3),
+                        stopPrice=round(float(price) * 1.01, 3),
+                        stopLimitPrice=round(float(price) * 1.01, 3),
                         stopLimitTimeInForce='GTC')
                 else:
                     # TODO check filters
                     # quantity >= minQty
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
-                    logging.error("PRICE:" + str(price))
-                    
                     amount_of_buy_coin = amount / float(price)
-                    logging.error("amount_of_buy_coin:" + str(amount_of_buy_coin))
-
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
-
-                    logging.error("amt_str:" + str(amt_str))
-
-                    logging.error("TYPE:" + str(amt_str))
-                    logging.error("TYPE:" + str(price))
-                    order = self.client.order_market_buy(
-                                symbol=symbol,
-                                quantity=amt_str)
-                    text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
-                    self.send_chat_message(text)
-
+                    # SELL Orders: Limit Price > Last Price > Stop Price
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='SELL',
@@ -153,9 +165,10 @@ class BnOrder():
                 oco_text = order_oco["listOrderStatus"] + " " + self.format_orders(order_oco["orderReports"])
                 self.send_chat_message(oco_text)
         except Exception as e:
-            logging.error("Order Failed error:" + str(e))
-            self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+            logging.error("OCO Failed error:" + str(e))
+            self.send_chat_message("CREATE OCO FAILED: " + str(e))
             raise e
+
 
     def format_orders(self, orders):
         oco_text = "OPEN ORDERS:\n" 
