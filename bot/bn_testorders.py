@@ -19,7 +19,7 @@ class BnOrder():
 
     def __init__(self) -> None:
         self.chat_id = BN_CHAT_ID
-        self.chat_ID = BN_CHAT_ID_GROUP
+        self.chat_id = BN_CHAT_ID_GROUP
         self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
         self.client.API_URL = 'https://testnet.binance.vision/api'
         self.bm = BinanceSocketManager(self.client)        
