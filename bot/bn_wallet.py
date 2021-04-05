@@ -52,13 +52,20 @@ async def test_bn_order(message: types.Message, regexp_command):
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['limitbuy ([\s0-9.,a-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['limit ([\s0-9.,a-zA-Z]*)']))
 async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
-        symbols, price, amount = all.strip().split()
-
-        bn_order.create_order(message.chat.id, symbols, price, amount)
+        buy_or_sell, first_coin, second_coin, price, amount = all.strip().split()
+        if buy_or_sell not in ["BUY", "SELL"]:
+            return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
+        if buy_or_sell == "BUY":
+            buying_coin = first_coin
+            selling_coin = second_coin
+        else:
+            buying_coin = second_coin
+            selling_coin = first_coin
+        bn_order.create_order(message.chat.id, selling_coin, buying_coin, price, amount)
         bn_order.get_wallet(message.chat.id)
         
     except Exception as e:

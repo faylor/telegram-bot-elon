@@ -71,7 +71,7 @@ class BnOrder():
             info = self.client.get_symbol_info(symbol)
             if info is not None:
                 result = self.client.get_symbol_ticker(symbol=symbol)
-                return symbol, "BUY", result["price"], info
+                return symbol, "BUY", result["price"], info, self.get_step_size(info)
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
 
@@ -80,21 +80,23 @@ class BnOrder():
             info = self.client.get_symbol_info(symbol)
             if info is not None:
                 result = self.client.get_symbol_ticker(symbol=symbol)
-                return symbol, "SELL", result["price"], info
+                return symbol, "SELL", result["price"], info, self.get_step_size(info)
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
 
+    def get_step_size(self, info):
+        step_size = 0.0
+        for f in info['filters']:
+            if f['filterType'] == 'LOT_SIZE':
+                step_size = float(f['stepSize'])
+                return step_size
+        return step_size
+
     def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type, price, info = self.get_exchange_symbol(sell_coin, buy_coin)
-                
-                step_size = 0.0
-                for f in info['filters']:
-                    if f['filterType'] == 'LOT_SIZE':
-                        step_size = float(f['stepSize'])
-
+                symbol, sale_type, price, info, step_size = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 
                 if sale_type == "SELL":
@@ -125,13 +127,7 @@ class BnOrder():
     def create_oco_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type, price, info = self.get_exchange_symbol(sell_coin, buy_coin)
-                
-                step_size = 0.0
-                for f in info['filters']:
-                    if f['filterType'] == 'LOT_SIZE':
-                        step_size = float(f['stepSize'])
-
+                symbol, sale_type, price, info, step_size  = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 
                 if sale_type == "SELL":
@@ -183,40 +179,36 @@ class BnOrder():
         oco_text = oco_text + "\nCancel All Orders with: /cancelorders\n" 
         return oco_text
 
-    def create_order(self, chat_id, symbol, buy_price, amount):
+    def create_order(self, chat_id, selling_coin, buying_coin, price, amount):
         try:
             if self.is_authorized(chat_id):
-                symbol = symbol.strip().upper() + "BTC"
-                order = self.client.order_limit_buy(
+                symbol, sale_type, price, info, step_size = self.get_exchange_symbol(selling_coin, buying_coin)
+                precision = int(round(-math.log(step_size, 10), 0))
+                if sale_type == "SELL":
+                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    order = self.client.order_limit_sell(
                             symbol=symbol,
-                            quantity=amount,
-                            price=buy_price)
-                text = "REAL ORDER CREATED: " + json.dumps(order)
-                self.send_chat_message(text)
-
-                self.last_order_id = order['orderId']
-                saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
-                if saved_orders is None:
-                    r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps({"orders": [order]}))
+                            quantity=amt_str,
+                            price=round(float(price), 5))
                 else:
-                    ar = json.loads(saved_orders.decode("utf-8"))
-                    ar["orders"].append(order)
-                    r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps(ar))
-                orders = self.client.get_open_orders(symbol=symbol)
-                text = "ORDERS: " + json.dumps(orders)
+                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    order = self.client.order_limit_buy(
+                            symbol=symbol,
+                            quantity=amt_str,
+                            price=round(float(price), 5))
+                text = "LIMIT ORDER CREATED:\n" + json.dumps(order)
                 self.send_chat_message(text)
 
-                order_oco = self.client.create_oco_order(
-                        symbol=symbol,
-                        side='SELL',
-                        quantity=amount,
-                        price=round(float(buy_price) * 1.03, 6),
-                        stopPrice=round(float(buy_price) * 0.99, 6),
-                        stopLimitPrice=round(float(buy_price) * 0.989, 6),
-                        stopLimitTimeInForce='GTC')
-                text = "OCO ORDERS: " + json.dumps(order_oco)
-                self.send_chat_message(text)
-            
+                # self.last_order_id = order['orderId']
+                # saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
+                # if saved_orders is None:
+                #     r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps({"orders": [order]}))
+                # else:
+                #     ar = json.loads(saved_orders.decode("utf-8"))
+                #     ar["orders"].append(order)
+                #     r.set(LIVE_ORDER_KEY.format(self.chat_id), json.dumps(ar))
+                self.check_orders(chat_id=chat_id)
+                
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
