@@ -102,7 +102,7 @@ class BnOrder():
                     order = self.client.order_market_sell(
                                 symbol=symbol,
                                 quantity=amt_str)
-                    text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
+                    text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 
                 else:
                     # TODO check filters
@@ -114,7 +114,7 @@ class BnOrder():
                     order = self.client.order_market_buy(
                                 symbol=symbol,
                                 quantity=amt_str)
-                    text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
+                    text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 self.send_chat_message(text)
                     
         except Exception as e:

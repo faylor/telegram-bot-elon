@@ -119,7 +119,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         if oco:
             oco_text = oco_text + "ON. 3% Profit or 1% Loss will trigger a Swap Back to Original."
         else:
-            oco_text = "OFF. No stop limits or profit limits are raised. Use oco instead if required eg: /market buy bnb usdt oco"
+            oco_text = oco_text + "OFF. No stop limits or profit limits are raised. Use oco instead if required eg: /market buy bnb usdt oco"
         text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_usd_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
 SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
 
