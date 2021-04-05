@@ -135,13 +135,13 @@ class BnOrder():
                         stopLimitTimeInForce='GTC')
                 
                 oco_text = "OCO ORDERS:\n"
-                for o in order_oco:
+                for o in json.loads(order_oco):
                     if o["type"] == "STOP_LOSS_LIMIT":
                         oco_text = oco_text + "STOP LOSS" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     elif o["type"] == "LIMIT_MAKER":
                         oco_text = oco_text + "PROFIT " + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     else:
-                        oco_text = json.dumps(order_oco) + "\n"
+                        oco_text = json.dumps(o) + "\n"
                     
                 self.send_chat_message(oco_text)
         except Exception as e:
