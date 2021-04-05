@@ -134,8 +134,16 @@ class BnOrder():
                         stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
-                text = "OCO ORDER:\n" + json.dumps(order_oco)
-                self.send_chat_message(text)
+                oco_text = "OCO ORDERS:\n"
+                for o in order_oco:
+                    if o["type"] == "STOP_LOSS_LIMIT":
+                        oco_text = oco_text + "STOP LOSS" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                    elif o["type"] == "LIMIT_MAKER":
+                        oco_text = oco_text + "PROFIT " + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                    else:
+                        oco_text = json.dumps(order_oco) + "\n"
+                    
+                self.send_chat_message(oco_text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
@@ -186,10 +194,10 @@ class BnOrder():
                 text = "ORDERS: " + json.dumps(orders)
                 self.send_chat_message(text)
                 
-                saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
-                if saved_orders is not None:
-                    ar = json.loads(saved_orders.decode("utf-8"))
-                    self.send_chat_message("SAVED ORDERS: " + json.dumps(ar))
+                # saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
+                # if saved_orders is not None:
+                #     ar = json.loads(saved_orders.decode("utf-8"))
+                #     self.send_chat_message("SAVED ORDERS: " + json.dumps(ar))
 
         except Exception as e:
             logging.error("Check Order Failed error:" + str(e))
