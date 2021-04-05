@@ -150,9 +150,9 @@ class BnOrder():
         oco_text = "OPEN ORDERS:\n" 
         for o in orders:
             if o["type"] == "STOP_LOSS_LIMIT":
-                oco_text = oco_text + "\nSTOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                oco_text = oco_text + "\nSTOP LOSS:\n" + o["side"] + " " + o["symbol"] + "- Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
             elif o["type"] == "LIMIT_MAKER":
-                oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + " " + o["symbol"] + "- Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
             else:
                 oco_text = oco_text + "\n" + json.dumps(o) + "\n"
         return oco_text
