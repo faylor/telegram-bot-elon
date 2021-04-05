@@ -109,6 +109,8 @@ class BnOrder():
 
                     amount_of_buy_coin = amount * float(price)
                     amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
+                    logging.error("PRICE:" + str(price))
+                    logging.error("amt_str:" + str(amt_str))
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
