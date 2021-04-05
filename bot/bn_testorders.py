@@ -71,7 +71,7 @@ class BnOrder():
             info = self.client.get_symbol_info(symbol)
             if info is not None:
                 result = self.client.get_symbol_ticker(symbol=symbol)
-                return symbol, "BUY", result["price"]
+                return symbol, "BUY", result["price"], info
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
 
@@ -87,11 +87,10 @@ class BnOrder():
     def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type, price = self.get_exchange_symbol(sell_coin, buy_coin)
+                symbol, sale_type, price, info = self.get_exchange_symbol(sell_coin, buy_coin)
                 
                 
-                logging.error("SYMBOL:" + str(symbol))
-                logging.error("TYPE:" + str(sale_type))
+                logging.error("INFO:" + str(info))
                 if sale_type == "SELL":
                     precision = 5
                     amt_str = "{:0.0{}f}".format(amount, precision)
@@ -138,9 +137,9 @@ class BnOrder():
                 oco_text = "OCO ORDERS: " + order_oco["listOrderStatus"] + "\n" 
                 for o in order_oco["orderReports"]:
                     if o["type"] == "STOP_LOSS_LIMIT":
-                        oco_text = oco_text + "STOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                        oco_text = oco_text + "\nSTOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     elif o["type"] == "LIMIT_MAKER":
-                        oco_text = oco_text + "PROFIT " + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+                        oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
                     else:
                         oco_text = oco_text + "\n" + json.dumps(o) + "\n"
                     
