@@ -139,20 +139,23 @@ class BnOrder():
                         stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
-                oco_text = "OCO ORDERS: " + order_oco["listOrderStatus"] + "\n" 
-                for o in order_oco["orderReports"]:
-                    if o["type"] == "STOP_LOSS_LIMIT":
-                        oco_text = oco_text + "\nSTOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
-                    elif o["type"] == "LIMIT_MAKER":
-                        oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
-                    else:
-                        oco_text = oco_text + "\n" + json.dumps(o) + "\n"
-                    
+                oco_text = order_oco["listOrderStatus"] + self.format_orders(order_oco["orderReports"])
                 self.send_chat_message(oco_text)
         except Exception as e:
             logging.error("Test Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
             raise e
+
+    def format_orders(self, orders):
+        oco_text = "OPEN ORDERS:\n" 
+        for o in orders:
+            if o["type"] == "STOP_LOSS_LIMIT":
+                oco_text = oco_text + "\nSTOP LOSS:\n" + o["side"]  + ", Stop Limit: " + o["stopPrice"] + " Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+            elif o["type"] == "LIMIT_MAKER":
+                oco_text = oco_text + "\nPROFIT:\n" + o["side"]  + ", Price: " + o["price"] + " Qty:" + o["origQty"] + "\n"
+            else:
+                oco_text = oco_text + "\n" + json.dumps(o) + "\n"
+        return oco_text
 
     def create_order(self, chat_id, symbol, buy_price, amount):
         try:
@@ -196,8 +199,7 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 orders = self.client.get_open_orders()
-                text = "ORDERS: " + json.dumps(orders)
-                self.send_chat_message(text)
+                self.send_chat_message(self.format_orders(orders))
                 
                 # saved_orders = r.get(LIVE_ORDER_KEY.format(self.chat_id))
                 # if saved_orders is not None:
