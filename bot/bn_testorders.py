@@ -107,8 +107,8 @@ class BnOrder():
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + " FILLS:\n" + json.dumps(order["fills"])
                     self.send_chat_message(text)
 
-                    amount_of_buy_coin = amount * float(price)
-                    amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
+                    # amount_of_buy_coin = amount * float(price)
+                    # amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     logging.error("PRICE:" + str(price))
                     logging.error("amt_str:" + str(amt_str))
                     order_oco = self.client.create_oco_order(
