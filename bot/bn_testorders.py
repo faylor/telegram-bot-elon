@@ -124,9 +124,9 @@ class BnOrder():
             if self.is_authorized(chat_id):
                 symbol, sale_type, price, info, step_size  = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
-                
+                amt_str = "{:0.0{}f}".format(amount, precision)
+                    
                 if sale_type == "SELL":
-                    amt_str = "{:0.0{}f}".format(amount, precision)
                     # BUY Orders: Limit Price < Last Price < Stop Price
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
@@ -141,8 +141,6 @@ class BnOrder():
                     # quantity >= minQty
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
-                    amount_of_buy_coin = amount / float(price)
-                    amt_str = "{:0.0{}f}".format(amount_of_buy_coin, precision)
                     # SELL Orders: Limit Price > Last Price > Stop Price
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
