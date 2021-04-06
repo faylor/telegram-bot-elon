@@ -159,7 +159,6 @@ class BnOrder():
                         quantity=amt_str,
                         price=round(float(price) * 1.03, 2),
                         stopPrice=round(float(price) * 0.99, 2),
-                        stopLimitPrice=round(float(price) * 0.989, 2),
                         stopLimitTimeInForce='GTC')
                 
                 oco_text = order_oco["listOrderStatus"] + " " + self.format_orders(order_oco["orderReports"])
