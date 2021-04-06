@@ -157,8 +157,10 @@ class BnOrder():
                         symbol=symbol,
                         side='SELL',
                         quantity=amt_str,
-                        price=round(float(price) * 1.03, 2),
-                        stopPrice=round(float(price) * 0.99, 2))
+                        price=round(float(price) * 1.03, 3),
+                        stopPrice=round(float(price) * 0.99, 3),
+                        stopLimitPrice=round(float(price) * 0.989, 3),
+                        stopLimitTimeInForce='GTC')
                 
                 oco_text = order_oco["listOrderStatus"] + " " + self.format_orders(order_oco["orderReports"])
                 self.send_chat_message(oco_text)
