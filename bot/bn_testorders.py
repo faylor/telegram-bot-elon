@@ -96,24 +96,29 @@ class BnOrder():
                 return step_size
         return step_size
 
-    def create_market_conversion(self, chat_id, sell_coin, amount, buy_coin):
+    def create_market_conversion(self, chat_id, sell_coin, total_spend, buy_coin):
         try:
             if self.is_authorized(chat_id):
                 symbol, sale_type, price, info, step_size = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
-                amt_str = "{:0.0{}f}".format(amount, precision)
-                logging.error("AMOUNT:" + str(amount))
+                
+                logging.error("AMOUNT:" + str(total_spend))
                 logging.error("step_size:" + str(step_size))
                 logging.error("precision:" + str(precision))
-                logging.error("QUANTITY:" + str(amt_str))
-                logging.error("SALE TYPE:" + str(sale_type))    
+                
+                logging.error("SALE TYPE:" + str(sale_type))
                 if sale_type == "SELL":
+                    amt_str = "{:0.0{}f}".format(total_spend, precision)
+                    logging.error("QUANTITY:" + str(amt_str))
                     order = self.client.order_market_sell(
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 
                 else:
+                    amount = total_spend / price
+                    amt_str = "{:0.0{}f}".format(amount, precision)
+                    logging.error("QUANTITY:" + str(amt_str))
                     order = self.client.order_market_buy(
                                 symbol=symbol,
                                 quantity=amt_str)
