@@ -101,7 +101,8 @@ class BnOrder():
                 symbol, sale_type, price, info, step_size = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 amt_str = "{:0.0{}f}".format(amount, precision)
-                    
+                logging.error("QUANTITY:" + str(amt_str))
+                logging.error("SALE TYPE:" + str(sale_type))    
                 if sale_type == "SELL":
                     order = self.client.order_market_sell(
                                 symbol=symbol,
@@ -126,7 +127,7 @@ class BnOrder():
                 symbol, sale_type, price, info, step_size  = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 amt_str = "{:0.0{}f}".format(amount, precision)
-                    
+                logging.error("QUANTITY:" + str(amt_str))    
                 if sale_type == "SELL":
                     # BUY Orders: Limit Price < Last Price < Stop Price
                     order_oco = self.client.create_oco_order(
