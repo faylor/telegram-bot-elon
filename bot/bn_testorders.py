@@ -116,7 +116,7 @@ class BnOrder():
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 
                 else:
-                    amount = total_spend / price
+                    amount = total_spend / float(price)
                     amt_str = "{:0.0{}f}".format(amount, precision)
                     logging.error("QUANTITY:" + str(amt_str))
                     order = self.client.order_market_buy(
