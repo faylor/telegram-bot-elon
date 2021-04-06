@@ -114,7 +114,7 @@ class BnOrder():
                                 symbol=symbol,
                                 quantity=amt_str)
                     text = "SELL " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
-                
+
                 else:
                     amount = total_spend / float(price)
                     amt_str = "{:0.0{}f}".format(amount, precision)
@@ -124,7 +124,7 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 self.send_chat_message(text)
-                    
+                return amt_str
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))

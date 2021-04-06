@@ -180,10 +180,10 @@ async def process_spend(message: types.Message, state: FSMContext):
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
             
-            bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
+            received = bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             bn_order.get_wallet(message.chat.id)
             if data["oco"] == True:
-                bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
+                bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], received, data['buying_coin'])
             
         await state.finish()
         return await message.reply("Done.", reply_markup=markup)
