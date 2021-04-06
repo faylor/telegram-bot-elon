@@ -89,6 +89,7 @@ class BnOrder():
 
     def get_step_size(self, info):
         step_size = 0.0
+        logging.error("INFO:" + json.dumps(info))
         for f in info['filters']:
             if f['filterType'] == 'LOT_SIZE':
                 step_size = float(f['stepSize'])
