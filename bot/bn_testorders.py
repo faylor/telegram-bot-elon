@@ -153,9 +153,10 @@ class BnOrder():
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
                     # SELL Orders: Limit Price > Last Price > Stop Price
-                    sell_price = round(float(price) * 1.03, 3)
-                    stop_price = round(float(price) * 0.99, 3)
-                    stop_limit_price = round(float(price) * 0.989, 3)
+                    quoteAssetPrecision = info["quoteAssetPrecision"]
+                    sell_price = round(float(price) * 1.03, quoteAssetPrecision)
+                    stop_price = round(float(price) * 0.99, quoteAssetPrecision)
+                    stop_limit_price = round(float(price) * 0.989, quoteAssetPrecision)
                     logging.error("CURRENT PRICE: " + str(price) + "   SELL PRICE: " + str(sell_price) + "  STOP PRICE:" + str(stop_price) + "  STOP LIMIT PRICE:" + str(stop_limit_price))
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
