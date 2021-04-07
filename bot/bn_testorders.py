@@ -315,20 +315,21 @@ class BnOrder():
                 for b in balances:
                     quantity = float(b["free"]) + float(b["locked"])
                     if quantity > 0:
+                        usd_price = float(self.get_usd_price(b["asset"]))
+                        btc_price = float(self.get_btc_price(b["asset"]))
                         if b["asset"].upper() in ["BUSD", "USDT"]:
-                            usd_price = float(b["free"]) + float(b["locked"])
-                            btc_price = usd_price/float(self.get_usd_price("BTC"))
+                            usd_value = float(b["free"]) + float(b["locked"])
+                            btc_value = usd_value/btc_price
                         else:
-                            
-                            usd_price = float(self.get_usd_price(b["asset"])) * quantity
+                            usd_value = usd_price * quantity
                             if b["asset"].upper() == "BTC":
-                                btc_price = float(b["free"]) + float(b["locked"])   
+                                btc_value = float(b["free"]) + float(b["locked"])   
                             else:
-                                btc_price = float(self.get_btc_price(b["asset"])) * quantity
-                        val = val + usd_price
-                        btc_val = btc_val + btc_price
-                        out = out + b["asset"].ljust(6,' ') + str(self.round_sense(b["free"])).ljust(9,' ') + " " + str(self.round_sense(b["locked"])).ljust(8,' ') + " " + str(self.round_sense(btc_price)).ljust(8,' ') + " " + str(self.round_sense(usd_price)) + "\n"
-                out = out + "</pre>\nUSD VALUE: " + str(round(val, 2)) + "\nBTC VALUE: " + str(round(btc_val, 6))
+                                btc_value = btc_price * quantity
+                        val = val + usd_value
+                        btc_val = btc_val + btc_value
+                        out = out + b["asset"].ljust(6,' ') + " @ $" + str(round(usd_price, 2)) + " ₿" + str(btc_price) + "\n" +str(self.round_sense(b["free"])).ljust(9,' ') + " " + str(self.round_sense(b["locked"])).ljust(8,' ') + " " + str(self.round_sense(btc_price)).ljust(8,' ') + " " + str(self.round_sense(usd_price)) + "\n"
+                out = out + "</pre>\n$" + str(round(val, 2)) + "\n₿" + str(round(btc_val, 6))
                 self.send_chat_message(out)
 
                
