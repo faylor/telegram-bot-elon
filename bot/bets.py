@@ -155,33 +155,37 @@ def set_bets_totes(chat_id, config):
 
 @dp.message_handler(commands=['leader', 'leaderboard', 'winning', 'totes'])
 async def total_weekly(message: types.Message):
-    config = get_bets_totes(message.chat.id)
-    if "winners_list" in config:
-        scores = [0]
-        out = ["<pre>Who?            Wins"]
-        for k, v in config["winners_list"].items():
-            key = str(k)
-            if key.isdigit():
-                chat_member = await bot.get_chat_member(message.chat.id, key)
-                name = chat_member.user.mention
-            else:
-                name = key
-            name = name.ljust(15,' ')
-            if len(scores) == 1:
-                scores.append(float(v))
-                out.append(f"{name} {v}")
-            else:
-                i = 1
-                score = float(v)
-                while i < len(scores) and score < scores[i]:
-                    i = i + 1
-                out.insert(i, f"{name} {v}")
-                scores.insert(i, score)
-        out.append("</pre>")
-        s = "\n".join(out)
-        await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
-    else:
-        await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
+    try:
+        config = get_bets_totes(message.chat.id)
+        
+        if "winners_list" in config:
+            scores = [0]
+            out = ["<pre>Who?            Wins"]
+            for k, v in config["winners_list"].items():
+                key = str(k)
+                if key.isdigit():
+                    chat_member = await bot.get_chat_member(message.chat.id, key)
+                    name = chat_member.user.mention
+                else:
+                    name = key
+                name = name.ljust(15,' ')
+                if len(scores) == 1:
+                    scores.append(float(v))
+                    out.append(f"{name} {v}")
+                else:
+                    i = 1
+                    score = float(v)
+                    while i < len(scores) and score < scores[i]:
+                        i = i + 1
+                    out.insert(i, f"{name} {v}")
+                    scores.insert(i, score)
+            out.append("</pre>")
+            s = "\n".join(out)
+            await bot.send_message(chat_id=message.chat.id, text=s, parse_mode='HTML')
+        else:
+            await bot.send_message(chat_id=message.chat.id, text="No Winners Yet, bet first then stopbets... clown.")
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="Error wrong chat maybe, failed to find bets leaders?")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
