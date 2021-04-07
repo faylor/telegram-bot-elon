@@ -144,9 +144,9 @@ class BnOrder():
                 logging.error("QUANTITY:" + str(amt_str))    
                 if sale_type == "SELL":
                     # BUY Orders: Limit Price < Last Price < Stop Price
-                    sell_price = round(float(price) * 0.97, price_precision)
-                    stop_price = round(float(price) * 1.01, price_precision)
-                    stop_limit_price = round(float(price) * 1.01, price_precision)
+                    sell_price = "{:0.0{}f}".format(float(price) * 0.97, price_precision)
+                    stop_price = "{:0.0{}f}".format(float(price) * 1.01, price_precision)
+                    stop_limit_price = "{:0.0{}f}".format(float(price) * 1.01, price_precision)
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
@@ -161,9 +161,9 @@ class BnOrder():
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
                     # SELL Orders: Limit Price > Last Price > Stop Price
-                    sell_price = round(float(price) * 1.03, price_precision)
-                    stop_price = round(float(price) * 0.99, price_precision)
-                    stop_limit_price = round(float(price) * 0.989, price_precision)
+                    sell_price = "{:0.0{}f}".format(float(price) * 1.03, price_precision)
+                    stop_price = "{:0.0{}f}".format(float(price) * 0.99, price_precision)
+                    stop_limit_price = "{:0.0{}f}".format(float(price) * 0.989, price_precision)
                     logging.error("CURRENT PRICE: " + str(price) + "   SELL PRICE: " + str(sell_price) + "  STOP PRICE:" + str(stop_price) + "  STOP LIMIT PRICE:" + str(stop_limit_price))
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
