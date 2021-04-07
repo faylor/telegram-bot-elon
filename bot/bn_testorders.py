@@ -9,6 +9,7 @@ from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_CH
 from binance.websockets import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
+from .bn_userSocket import bn_UserSocket
 import redis
 from .settings import (REDIS_URL)
 r = redis.from_url(REDIS_URL)
@@ -24,7 +25,7 @@ class BnOrder():
         self.client = Client(BN_API_KEY, BN_API_SECRET)
         # self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
         # self.client.API_URL = 'https://testnet.binance.vision/api'
-        self.bm = BinanceSocketManager(self.client)        
+        self.bm = bn_UserSocket(self.client)   
         
     def process_message(self, msg):
         try:
@@ -309,7 +310,7 @@ class BnOrder():
                 info = self.client.get_account()
                 balances = info["balances"]
                 # "balances": [{"asset": "BNB", "free": "1014.21000000", "locked": "0.00000000"}, {"asset": "BTC", "free": "0.92797152", "locked": "0.00000000"}, {"asset": "BUSD", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "ETH", "free": "100.00000000", "locked": "0.00000000"}, {"asset": "LTC", "free": "500.00000000", "locked": "0.00000000"}, {"asset": "TRX", "free": "500000.00000000", "locked": "0.00000000"}, {"asset": "USDT", "free": "10000.00000000", "locked": "0.00000000"}, {"asset": "XRP", "free": "50000.00000000", "locked": "0.00000000"}]
-                out = "<pre>COIN  FREE      LOCKED    BTC      USD\n"
+                out = "<pre>FREE       LOCKED      BTC      USD\n"
                 val = 0
                 btc_val = 0
                 for b in balances:
@@ -323,12 +324,14 @@ class BnOrder():
                         else:
                             usd_value = usd_price * quantity
                             if b["asset"].upper() == "BTC":
+                                btc_price = 1
                                 btc_value = float(b["free"]) + float(b["locked"])   
                             else:
                                 btc_value = btc_price * quantity
                         val = val + usd_value
                         btc_val = btc_val + btc_value
-                        out = out + b["asset"].ljust(6,' ') + " @ $" + str(round(usd_price, 2)) + " ₿" + str(btc_price) + "\n" +str(self.round_sense(b["free"])).ljust(9,' ') + " " + str(self.round_sense(b["locked"])).ljust(8,' ') + " " + str(self.round_sense(btc_price)).ljust(8,' ') + " " + str(self.round_sense(usd_price)) + "\n"
+                        out = out + "\n" + b["asset"] + " @ $" + str(round(usd_price, 2)) + " BTC" + str(btc_price) + "\n" 
+                        out = out + str(self.round_sense(b["free"])).ljust(10,' ') + " " + str(self.round_sense(b["locked"])).ljust(8,' ') + " " + str(self.round_sense(btc_value)).ljust(8,' ') + " " + str(self.round_sense(usd_value)) + "\n"
                 out = out + "</pre>\n$" + str(round(val, 2)) + "\n₿" + str(round(btc_val, 6))
                 self.send_chat_message(out)
 
