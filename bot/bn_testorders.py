@@ -73,7 +73,8 @@ class BnOrder():
             info = self.client.get_symbol_info(symbol)
             if info is not None:
                 result = self.client.get_symbol_ticker(symbol=symbol)
-                return symbol, "BUY", result["price"], info, self.get_step_size(info)
+                s, t = self.get_step_size(info)
+                return symbol, "BUY", result["price"], info, s, t
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
 
@@ -82,24 +83,27 @@ class BnOrder():
             info = self.client.get_symbol_info(symbol)
             if info is not None:
                 result = self.client.get_symbol_ticker(symbol=symbol)
-                return symbol, "SELL", result["price"], info, self.get_step_size(info)
+                s, t = self.get_step_size(info)
+                return symbol, "SELL", result["price"], info, s, t
         except Exception as e:
             logging.error("Symbol fail:" + str(e))
             raise e
 
     def get_step_size(self, info):
         step_size = 0.0
+        tick_size = 0.0
         logging.error("INFO:" + json.dumps(info))
         for f in info['filters']:
             if f['filterType'] == 'LOT_SIZE':
                 step_size = float(f['stepSize'])
-                return step_size
-        return step_size
+            if f['filterType'] == 'PRICE_FILTER':
+                tick_size = float(f['tickSize'])
+        return step_size, tick_size
 
     def create_market_conversion(self, chat_id, sell_coin, total_spend, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type, price, info, step_size = self.get_exchange_symbol(sell_coin, buy_coin)
+                symbol, sale_type, price, _, step_size, _ = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 
                 logging.error("AMOUNT:" + str(total_spend))
@@ -133,19 +137,23 @@ class BnOrder():
     def create_oco_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
-                symbol, sale_type, price, info, step_size  = self.get_exchange_symbol(sell_coin, buy_coin)
+                symbol, sale_type, price, info, step_size, price_tick_size  = self.get_exchange_symbol(sell_coin, buy_coin)
                 precision = int(round(-math.log(step_size, 10), 0))
                 amt_str = "{:0.0{}f}".format(float(amount), precision)
+                price_precision = int(round(-math.log(price_tick_size, 10), 0))
                 logging.error("QUANTITY:" + str(amt_str))    
                 if sale_type == "SELL":
                     # BUY Orders: Limit Price < Last Price < Stop Price
+                    sell_price = round(float(price) * 0.97, price_precision)
+                    stop_price = round(float(price) * 1.01, price_precision)
+                    stop_limit_price = round(float(price) * 1.01, price_precision)
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
                         side='BUY',
                         quantity=amt_str,
-                        price=round(float(price) * 0.97, 3),
-                        stopPrice=round(float(price) * 1.01, 3),
-                        stopLimitPrice=round(float(price) * 1.01, 3),
+                        price=sell_price,
+                        stopPrice=stop_price,
+                        stopLimitPrice=stop_limit_price,
                         stopLimitTimeInForce='GTC')
                 else:
                     # TODO check filters
@@ -153,10 +161,9 @@ class BnOrder():
                     # quantity <= maxQty
                     # (quantity-minQty) % stepSize == 0
                     # SELL Orders: Limit Price > Last Price > Stop Price
-                    quoteAssetPrecision = info["quoteAssetPrecision"]
-                    sell_price = round(float(price) * 1.03, quoteAssetPrecision)
-                    stop_price = round(float(price) * 0.99, quoteAssetPrecision)
-                    stop_limit_price = round(float(price) * 0.989, quoteAssetPrecision)
+                    sell_price = round(float(price) * 1.03, price_precision)
+                    stop_price = round(float(price) * 0.99, price_precision)
+                    stop_limit_price = round(float(price) * 0.989, price_precision)
                     logging.error("CURRENT PRICE: " + str(price) + "   SELL PRICE: " + str(sell_price) + "  STOP PRICE:" + str(stop_price) + "  STOP LIMIT PRICE:" + str(stop_limit_price))
                     order_oco = self.client.create_oco_order(
                         symbol=symbol,
