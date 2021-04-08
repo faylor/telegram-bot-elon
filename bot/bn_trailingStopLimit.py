@@ -4,6 +4,13 @@ import time
 import logging
 import json
 import requests
+import asyncio
+
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+    return wrapped
+
 
 class TrailingStopLimit():
 
@@ -18,7 +25,8 @@ class TrailingStopLimit():
         self.interval = interval
         self.running = False
         self.stoploss = self.initialize_stop()
-        
+    
+    @fire_and_forget
     def run(self):
         self.running = True
         while (self.running):
