@@ -10,6 +10,7 @@ from binance.websockets import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
 from .bn_userSocket import bn_UserSocket
+from .bn_trailingStopLimit import TrailingStopLimit
 import redis
 from .settings import (REDIS_URL)
 r = redis.from_url(REDIS_URL)
@@ -20,13 +21,14 @@ LIVE_ORDER_KEY = "LIVE_{}"
 class BnOrder():
 
     def __init__(self) -> None:
-        # self.chat_id = BN_CHAT_ID 
         self.chat_id = BN_CHAT_ID_GROUP
+        self.chat_id = BN_CHAT_ID 
         self.client = Client(BN_API_KEY, BN_API_SECRET)
-        # self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
-        # self.client.API_URL = 'https://testnet.binance.vision/api'
+        self.client = Client(BN_TEST_API_KEY, BN_TEST_API_SECRET)
+        self.client.API_URL = 'https://testnet.binance.vision/api'
         self.client.PUBLIC_API_VERSION = "v3"
-        self.bm = bn_UserSocket(self.client)   
+        self.bm = bn_UserSocket(self.client)
+        self.tso = None
         
     def process_message(self, msg):
         try:
@@ -130,12 +132,23 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 self.send_chat_message(text)
-                return amt_str
+                return amt_str, sale_type, symbol
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
             raise e
 
+    def create_trailing_stop_limit(self, market, type, stopsize, interval):
+        try:
+            if self.tso is not None and self.tso.running is False:
+                self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, type=type, stopsize=stopsize, interval=interval)
+            else:
+                self.send_chat_message("OPEN Trailing Stop Limit, Cancel First. ")
+        except Exception as e:
+            logging.error("Order Failed error:" + str(e))
+            self.send_chat_message("CREATE ORDER FAILED: " + str(e))
+            raise e
+                
     def create_oco_conversion(self, chat_id, sell_coin, amount, buy_coin):
         try:
             if self.is_authorized(chat_id):
@@ -249,11 +262,14 @@ class BnOrder():
     def cancel_open_orders(self, chat_id):
         try:
             if self.is_authorized(chat_id):
+                if self.tso is not None:
+                    self.tso = None
                 orders = self.client.get_open_orders()
                 for order in orders:
                     result = self.client.cancel_order(symbol=order['symbol'], orderId=order["orderId"])
                     text = "CANCEL RESULT:\n" + json.dumps(result)
                     self.send_chat_message(text)
+                
         except Exception as e:
             logging.error("Cancel Order Failed error:" + str(e))
             orders = self.client.get_open_orders()

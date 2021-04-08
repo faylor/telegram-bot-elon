@@ -36,6 +36,7 @@ class MarketForm(StatesGroup):
     selling_price_usd = State()
     selling_price_btc = State()
     oco = State()
+    tsl = State()
     balance = State()
     spent = State()  # Will be represented in storage as 'Form:spent'
 
@@ -86,13 +87,18 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         first_coin = splits[1].upper()
         second_coin = "BTC"
         oco = False
+        tsl = False
         if len(splits) > 2:
             if "OCO" in splits[2].upper():
                 oco = True
+            elif "TSL" in splits[2].upper():
+                tsl = True
             else:
                 second_coin = splits[2].upper()
             if len(splits) > 3 and "OCO" in splits[3].upper():
                 oco = True
+            elif len(splits) > 3 and "TSL" in splits[3].upper():
+                tsl = True
         if buy_or_sell == "BUY":
             buying_coin = first_coin
             selling_coin = second_coin
@@ -118,6 +124,7 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
             proxy['balance'] = purchase_coin_balance
             proxy['buy_or_sell'] = buy_or_sell
             proxy['oco'] = oco
+            proxy['tsl'] = tsl
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
         markup.add("25%", "50%", "75%", "100%")
         markup.add("Cancel")
@@ -126,11 +133,18 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         if oco:
             oco_text = oco_text + "ON. 3% Profit or 1% Loss will trigger a Swap Back to Original."
         else:
-            oco_text = oco_text + "OFF. No stop limits or profit limits are raised. Use oco instead if required eg: /market buy bnb usdt oco"
+            oco_text = oco_text + "OFF. No stop limits or profit limits are raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
+        tsl_text = "Trailing Stop Limit (TSL) is set to "
+        if tsl:
+            tsl_text = tsl_text + "ON. Tailing 1% Loss will move up."
+        else:
+            tsl_text = tsl_text + "OFF. No stop limits raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
         text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_usd_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
 SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
 
-NOTE: {oco_text}
+{oco_text}
+
+{tsl_text}
 
 Available {selling_coin} balance is {purchase_coin_balance}. Use How Many {selling_coin}?
         """
@@ -163,7 +177,7 @@ async def process_spend(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardRemove()
             spent_response = message.text.lower().strip()
             if spent_response == "100%":
-                spend = float(data['balance'])
+                spend = float(data['balance']) * 0.999
             elif spent_response == "75%":
                 spend = float(data['balance']) * 0.75
             elif spent_response == "50%":
@@ -180,9 +194,13 @@ async def process_spend(message: types.Message, state: FSMContext):
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
             
-            received = bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
+            received, sale_type, symbol = bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             if data["oco"] == True:
                 bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], received, data['buying_coin'])
+            elif data["tsl"] == True:
+                limit_type = "sell" if sale_type.upper() == "BUY" else "buy"
+                bn_order.create_trailing_stop_limit(market=symbol, type=limit_type, stopsize=received * 0.0192, interval=10)
+                
             bn_order.get_wallet(message.chat.id)
             
         await state.finish()
