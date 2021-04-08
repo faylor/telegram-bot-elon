@@ -25,12 +25,7 @@ class TrailingStopLimit():
             time.sleep(self.interval)
 
     def get_price(self, market):
-        logging.error("a")
-        
         result = self.client.get_symbol_ticker(symbol=market)
-
-        logging.error("b" + json.dumps(result))
-        
         return float(result['price'])
 
     def get_balance(self, coin):
@@ -46,23 +41,30 @@ class TrailingStopLimit():
     def update_stop(self):
         price = self.get_price(self.market)
         if self.type == "sell":
+            logging.error("a")
             if (price - self.stopsize) > self.stoploss:
+                logging.error("a")
                 self.stoploss = price - self.stopsize
                 self.send_chat_message("New high observed: Updating stop loss to %.8f" % self.stoploss)
             elif price <= self.stoploss:
+                logging.error("b")
                 self.running = False
                 amount = self.get_balance(self.market.split("/")[0])
                 price = self.get_price(self.market)
+                logging.error("c")
                 order = self.client.order_limit_sell(
                             symbol=self.market,
                             quantity=amount,
                             price=price)
                 self.send_chat_message("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
         elif self.type == "buy":
+            logging.error("e")
             if (price + self.stopsize) < self.stoploss:
+                logging.error("f")
                 self.stoploss = price + self.stopsize
                 self.send_chat_message("New low observed: Updating stop loss to %.8f" % self.stoploss)
             elif price >= self.stoploss:
+                logging.error("g")
                 self.running = False
                 balance = self.get_balance(self.market.split("/")[1])
                 price = self.get_price(self.market)
