@@ -6,18 +6,6 @@ import json
 import requests
 import asyncio
 
-def fire_and_forget(f):
-    def wrapped(*args, **kwargs):
-        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
-    return wrapped
-
-@fire_and_forget
-def run(tsl: TrailingStopLimit):
-    tsl.running = True
-    while (tsl.running):
-        tsl.print_status()
-        tsl.update_stop()
-        time.sleep(tsl.interval)
 
 class TrailingStopLimit():
 
