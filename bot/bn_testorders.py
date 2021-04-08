@@ -140,10 +140,10 @@ class BnOrder():
 
     def create_trailing_stop_limit(self, market, type, stopsize, interval):
         try:
-            if self.tso is not None and self.tso.running is False:
-                self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, type=type, stopsize=stopsize, interval=interval)
-            else:
+            if self.tso is not None and self.tso.running is True:
                 self.send_chat_message("OPEN Trailing Stop Limit, Cancel First. ")
+            else:
+                self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, type=type, stopsize=stopsize, interval=interval)
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
