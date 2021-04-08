@@ -10,13 +10,27 @@ from binance.websockets import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
 from .bn_userSocket import bn_UserSocket
-from .bn_trailingStopLimit import TrailingStopLimit, run
+from .bn_trailingStopLimit import TrailingStopLimit
 import redis
+import time
 from .settings import (REDIS_URL)
 r = redis.from_url(REDIS_URL)
 
 COIN_DATA_KEY = "STREAM_{}"
 LIVE_ORDER_KEY = "LIVE_{}"
+
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+    return wrapped
+
+@fire_and_forget
+def run(tsl: TrailingStopLimit):
+    tsl.running = True
+    while (tsl.running):
+        tsl.print_status()
+        tsl.update_stop()
+        time.sleep(tsl.interval)
 
 class BnOrder():
 
