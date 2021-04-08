@@ -278,7 +278,7 @@ class BnOrder():
         try:
             if self.is_authorized(chat_id):
                 if self.tso is not None:
-                    self.tso = None
+                    self.tso.running = False
                 orders = self.client.get_open_orders()
                 for order in orders:
                     result = self.client.cancel_order(symbol=order['symbol'], orderId=order["orderId"])
