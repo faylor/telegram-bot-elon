@@ -2,6 +2,7 @@ from binance.client import Client
 from .settings import TELEGRAM_BOT
 import time
 import logging
+import json
 import requests
 
 class TrailingStopLimit():
@@ -24,7 +25,12 @@ class TrailingStopLimit():
             time.sleep(self.interval)
 
     def get_price(self, market):
+        logging.error("a")
+        
         result = self.client.get_symbol_ticker(symbol=market)
+
+        logging.error("b" + json.dumps(result))
+        
         return float(result['price'])
 
     def get_balance(self, coin):
@@ -42,7 +48,7 @@ class TrailingStopLimit():
         if self.type == "sell":
             if (price - self.stopsize) > self.stoploss:
                 self.stoploss = price - self.stopsize
-                print("New high observed: Updating stop loss to %.8f" % self.stoploss)
+                self.send_chat_message("New high observed: Updating stop loss to %.8f" % self.stoploss)
             elif price <= self.stoploss:
                 self.running = False
                 amount = self.get_balance(self.market.split("/")[0])
@@ -51,11 +57,11 @@ class TrailingStopLimit():
                             symbol=self.market,
                             quantity=amount,
                             price=price)
-                print("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
+                self.send_chat_message("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
         elif self.type == "buy":
             if (price + self.stopsize) < self.stoploss:
                 self.stoploss = price + self.stopsize
-                print("New low observed: Updating stop loss to %.8f" % self.stoploss)
+                self.send_chat_message("New low observed: Updating stop loss to %.8f" % self.stoploss)
             elif price >= self.stoploss:
                 self.running = False
                 balance = self.get_balance(self.market.split("/")[1])
@@ -65,7 +71,7 @@ class TrailingStopLimit():
                             symbol=self.market,
                             quantity=amount,
                             price=price)
-                print("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
+                self.send_chat_message("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
 
     def send_chat_message(self, text):
         try:
