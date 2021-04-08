@@ -30,7 +30,7 @@ class TrailingStopLimit():
 
     def get_balance(self, coin):
         bal = self.client.get_asset_balance(coin)
-        return float(bal['free'])
+        return float(bal[0]['free'])
 
     def initialize_stop(self):
         if self.type == "buy":
