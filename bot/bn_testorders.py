@@ -10,7 +10,7 @@ from binance.websockets import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
 from .bn_userSocket import bn_UserSocket
-from .bn_trailingStopLimit import TrailingStopLimit
+from .bn_trailingStopLimit import TrailingStopLimit, run
 import redis
 from .settings import (REDIS_URL)
 r = redis.from_url(REDIS_URL)
@@ -144,7 +144,7 @@ class BnOrder():
                 self.send_chat_message("OPEN Trailing Stop Limit, Cancel First. ")
             else:
                 self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, buy_coin=buy_coin, sell_coin=sell_coin, type=type, stopsize=stopsize, interval=interval)
-                self.tso.run()
+                run(self.tso)
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))

@@ -11,6 +11,13 @@ def fire_and_forget(f):
         return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
     return wrapped
 
+@fire_and_forget
+def run(tsl: TrailingStopLimit):
+    tsl.running = True
+    while (tsl.running):
+        tsl.print_status()
+        tsl.update_stop()
+        time.sleep(tsl.interval)
 
 class TrailingStopLimit():
 
@@ -26,13 +33,7 @@ class TrailingStopLimit():
         self.running = False
         self.stoploss = self.initialize_stop()
     
-    @fire_and_forget
-    def run(self):
-        self.running = True
-        while (self.running):
-            self.print_status()
-            self.update_stop()
-            time.sleep(self.interval)
+    
 
     def get_price(self, market):
         result = self.client.get_symbol_ticker(symbol=market)
