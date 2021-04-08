@@ -8,6 +8,7 @@ class TrailingStopLimit():
 
     def __init__(self, chat_id, client: Client, market, type, stopsize, interval):
         self.client = client
+        self.chat_id = chat_id
         self.market = market
         self.type = type
         self.stopsize = stopsize
