@@ -31,10 +31,8 @@ class TrailingStopLimit():
         return float(result['price'])
 
     def get_balance(self, coin):
-        logging.error("d" + coin)
         bal = self.client.get_asset_balance(coin.upper())
-        logging.error("e" + json.dumps(bal))
-        return float(bal[0]['free'])
+        return float(bal['free'])
 
     def initialize_stop(self):
         if self.type == "buy":
@@ -52,7 +50,6 @@ class TrailingStopLimit():
                 self.running = False
                 amount = self.get_balance(self.buy_coin)
                 price = self.get_price(self.market)
-                logging.error("c")
                 order = self.client.order_limit_sell(
                             symbol=self.market,
                             quantity=amount,
