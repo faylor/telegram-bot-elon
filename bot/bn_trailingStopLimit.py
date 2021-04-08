@@ -7,10 +7,12 @@ import requests
 
 class TrailingStopLimit():
 
-    def __init__(self, chat_id, client: Client, market, type, stopsize, interval):
+    def __init__(self, chat_id, client: Client, market, buy_coin, sell_coin, type, stopsize, interval):
         self.client = client
         self.chat_id = chat_id
         self.market = market
+        self.buy_coin = buy_coin
+        self.sell_coin = sell_coin
         self.type = type
         self.stopsize = stopsize
         self.interval = interval
@@ -43,15 +45,12 @@ class TrailingStopLimit():
     def update_stop(self):
         price = self.get_price(self.market)
         if self.type == "sell":
-            logging.error("a")
             if (price - self.stopsize) > self.stoploss:
-                logging.error("a")
                 self.stoploss = price - self.stopsize
                 self.send_chat_message("New high observed: Updating stop loss to %.8f" % self.stoploss)
             elif price <= self.stoploss:
-                logging.error("b")
                 self.running = False
-                amount = self.get_balance(self.market.split("/")[0])
+                amount = self.get_balance(self.buy_coin)
                 price = self.get_price(self.market)
                 logging.error("c")
                 order = self.client.order_limit_sell(
@@ -66,9 +65,8 @@ class TrailingStopLimit():
                 self.stoploss = price + self.stopsize
                 self.send_chat_message("New low observed: Updating stop loss to %.8f" % self.stoploss)
             elif price >= self.stoploss:
-                logging.error("g")
                 self.running = False
-                balance = self.get_balance(self.market.split("/")[1])
+                balance = self.get_balance(self.sell_coin)
                 price = self.get_price(self.market)
                 amount = (balance / price) * 0.999 # 0.10% maker/taker fee without BNB
                 order = self.client.order_limit_buy(

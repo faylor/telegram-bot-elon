@@ -194,13 +194,13 @@ async def process_spend(message: types.Message, state: FSMContext):
                 await state.finish()
                 return await message.reply("Coin error, <= 0.")
             
-            received, sale_type, symbol = bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
+            received, sale_type, symbol, buy_coin, sell_coin = bn_order.create_market_conversion(message.chat.id, data['selling_coin'], spend, data['buying_coin'])
             if data["oco"] == True:
                 bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], received, data['buying_coin'])
             elif data["tsl"] == True:
                 limit_type = "sell" if sale_type.upper() == "BUY" else "buy"
                 await message.reply("Creating Trailing Stop Loss...", reply_markup=markup)
-                bn_order.create_trailing_stop_limit(market=symbol, type=limit_type, stopsize=float(received) * 0.0192, interval=10)
+                bn_order.create_trailing_stop_limit(market=symbol, buy_coin=buy_coin, sell_coin=sell_coin, type=limit_type, stopsize=float(received) * 0.0192, interval=10)
                 
             bn_order.get_wallet(message.chat.id)
             
