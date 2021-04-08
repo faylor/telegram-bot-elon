@@ -199,7 +199,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 bn_order.create_oco_conversion(message.chat.id, data['selling_coin'], received, data['buying_coin'])
             elif data["tsl"] == True:
                 limit_type = "sell" if sale_type.upper() == "BUY" else "buy"
-                bn_order.create_trailing_stop_limit(market=symbol, type=limit_type, stopsize=received * 0.0192, interval=10)
+                bn_order.create_trailing_stop_limit(market=symbol, type=limit_type, stopsize=float(received) * 0.0192, interval=10)
                 
             bn_order.get_wallet(message.chat.id)
             
