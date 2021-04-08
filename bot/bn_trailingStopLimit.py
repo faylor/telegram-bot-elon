@@ -29,7 +29,9 @@ class TrailingStopLimit():
         return float(result['price'])
 
     def get_balance(self, coin):
+        logging.error("d")
         bal = self.client.get_asset_balance(coin)
+        logging.error("e" + json.dumps(bal))
         return float(bal[0]['free'])
 
     def initialize_stop(self):
