@@ -337,7 +337,10 @@ class BnOrder():
                         btc_price = float(self.get_btc_price(b["asset"]))
                         if b["asset"].upper() in ["BUSD", "USDT"]:
                             usd_value = float(b["free"]) + float(b["locked"])
-                            btc_value = usd_value/btc_price
+                            if btc_price > 0:
+                                btc_value = usd_value/btc_price
+                            else:
+                                btc_value = 0
                         else:
                             usd_value = usd_price * quantity
                             if b["asset"].upper() == "BTC":
