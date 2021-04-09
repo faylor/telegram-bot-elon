@@ -80,13 +80,13 @@ async def bn_tsl_start(message: types.Message, regexp_command):
         buy_or_sell, first_coin, second_coin = all.strip().upper().split()
         if buy_or_sell not in ["BUY", "SELL"]:
             return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
-        if buy_or_sell == "BUY":
+        if buy_or_sell == "SELL":
             buying_coin = first_coin
             selling_coin = second_coin
         else:
             buying_coin = second_coin
             selling_coin = first_coin
-        bn_order.create_trailing_stop_limit(market=buying_coin + selling_coin, buy_coin=buying_coin, sell_coin=selling_coin, type=buy_or_sell.lower(), stop_percentage=0.0099, interval=10)
+        bn_order.create_trailing_stop_limit(market=buying_coin.upper() + selling_coin.upper(), buy_coin=buying_coin, sell_coin=selling_coin, type=buy_or_sell.lower(), stop_percentage=0.0099, interval=10)
         
     except Exception as e:
         logging.error("START UP TSL ERROR:" + str(e))
