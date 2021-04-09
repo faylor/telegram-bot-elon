@@ -39,7 +39,7 @@ class TrailingStopLimit():
 
     def initialize_stop(self):
         price = self.get_price(self.market)
-        self.breakeven = price * 1.01
+        self.breakeven = price * 1.0025
         delta = self.stop_percentage * price
         if self.type == "sell":
             delta = -1 * delta
@@ -48,7 +48,7 @@ class TrailingStopLimit():
     def update_stop(self):
         price = self.get_price(self.market)
         if self.breakeven is None:
-            self.breakeven = price * 1.01
+            self.breakeven = price * 1.0025
         delta = self.stop_percentage * price
         if self.type == "sell":
             if price < self.breakeven and (price - delta) > self.stoploss:
