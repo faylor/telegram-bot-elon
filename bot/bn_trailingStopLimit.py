@@ -61,11 +61,12 @@ class TrailingStopLimit():
                 self.running = False
                 balance = self.get_balance(self.sell_coin)
                 price = self.get_price(self.market)
+                price_str = "{:0.0{}f}".format(price, 8)
                 amount = (balance / price) * 0.999 # 0.10% maker/taker fee without BNB
                 order = self.client.order_limit_buy(
                             symbol=self.market,
                             quantity=amount,
-                            price=price)
+                            price=price_str)
                 self.send_chat_message("Buy triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
 
     def send_chat_message(self, text):
@@ -78,10 +79,11 @@ class TrailingStopLimit():
 
     def print_status(self):
         last = self.get_price(self.market)
+        price_str = "{:0.0{}f}".format(last, 8)
         self.send_chat_message(f"""---------------------
 Trail type: {self.type}
 Market: {self.market}
 Stop loss: {self.stoploss}
-Last price: {last}
+Last price: {price_str}
 Stop percentage: {self.stop_percentage}
 ---------------------""")
