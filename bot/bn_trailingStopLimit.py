@@ -83,5 +83,5 @@ Trail type: {self.type}
 Market: {self.market}
 Stop loss: {self.stoploss}
 Last price: {last}
-Stop size: {self.stopsize}
+Stop percentage: {self.stop_percentage}
 ---------------------""")
