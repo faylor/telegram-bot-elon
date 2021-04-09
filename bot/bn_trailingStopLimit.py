@@ -48,10 +48,11 @@ class TrailingStopLimit():
                 self.running = False
                 amount = self.get_balance(self.buy_coin)
                 price = self.get_price(self.market)
+                price_str = "{:0.0{}f}".format(price, 8)
                 order = self.client.order_limit_sell(
                             symbol=self.market,
                             quantity=amount,
-                            price=price)
+                            price=price_str)
                 self.send_chat_message("Sell triggered | Price: %.8f | Stop loss: %.8f" % (price, self.stoploss))
         elif self.type == "buy":
             if (price + delta) < self.stoploss:
