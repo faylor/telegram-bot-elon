@@ -9,18 +9,17 @@ import asyncio
 
 class TrailingStopLimit():
 
-    def __init__(self, chat_id, client: Client, market, buy_coin, sell_coin, type, stopsize, interval):
+    def __init__(self, chat_id, client: Client, market, buy_coin, sell_coin, type, stop_percentage, interval):
         self.client = client
         self.chat_id = chat_id
         self.market = market
         self.buy_coin = buy_coin
         self.sell_coin = sell_coin
         self.type = type
-        self.stopsize = stopsize
+        self.stop_percentage = stop_percentage
         self.interval = interval
         self.running = False
         self.stoploss = self.initialize_stop()
-    
     
 
     def get_price(self, market):
@@ -32,10 +31,11 @@ class TrailingStopLimit():
         return float(bal['free'])
 
     def initialize_stop(self):
-        if self.type == "buy":
-            return (self.get_price(self.market) + self.stopsize)
-        else:
-            return (self.get_price(self.market) - self.stopsize)
+        price = self.get_price(self.market)
+        delta = self.stop_percentage * price
+        if self.type == "sell":
+            delta = -1 * delta
+        return price + delta
 
     def update_stop(self):
         price = self.get_price(self.market)

@@ -146,18 +146,18 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 self.send_chat_message(text)
-                return amt_str, sale_type, symbol, buy_coin, sell_coin
+                return amt_str, sale_type, symbol, buy_coin, sell_coin, price
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
             raise e
 
-    def create_trailing_stop_limit(self, market, buy_coin, sell_coin, type, stopsize, interval):
+    def create_trailing_stop_limit(self, market, buy_coin, sell_coin, type, stop_percentage, interval):
         try:
             if self.tso is not None and self.tso.running is True:
                 self.send_chat_message("OPEN Trailing Stop Limit, Cancel First. ")
             else:
-                self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, buy_coin=buy_coin, sell_coin=sell_coin, type=type, stopsize=stopsize, interval=interval)
+                self.tso = TrailingStopLimit(chat_id=self.chat_id, client=self.client, market=market, buy_coin=buy_coin, sell_coin=sell_coin, type=type, stop_percentage=stop_percentage, interval=interval)
                 run(self.tso)
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
