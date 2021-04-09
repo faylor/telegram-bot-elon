@@ -22,6 +22,7 @@ class TrailingStopLimit():
         self.stoploss = self.initialize_stop()
         self.verbose = False
         self.last_message_count = 0
+        self.breakeven = None
     
 
     def get_price(self, market):
@@ -38,6 +39,7 @@ class TrailingStopLimit():
 
     def initialize_stop(self):
         price = self.get_price(self.market)
+        self.breakeven = price * 1.01
         delta = self.stop_percentage * price
         if self.type == "sell":
             delta = -1 * delta
@@ -47,7 +49,7 @@ class TrailingStopLimit():
         price = self.get_price(self.market)
         delta = self.stop_percentage * price
         if self.type == "sell":
-            if (price - delta) > self.stoploss:
+            if (price - delta) > self.stoploss and price > self.breakeven:
                 self.stoploss = price - delta
                 self.send_chat_message("New high observed: Updating stop loss to %.8f" % self.stoploss)
             elif price <= self.stoploss:
@@ -62,7 +64,7 @@ class TrailingStopLimit():
                 order = self.client.order_market_sell(symbol=self.market, quantity=amount)
                 self.send_chat_message("Sell triggered | Price: %.8f  | Stop loss: %.8f" % (price, self.stoploss))
         elif self.type == "buy":
-            if (price + delta) < self.stoploss:
+            if (price + delta) < self.stoploss and price < self.breakeven:
                 self.stoploss = price + delta
                 self.send_chat_message("New low observed: Updating stop loss to %.8f" % self.stoploss)
             elif price >= self.stoploss:
