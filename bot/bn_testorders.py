@@ -146,7 +146,7 @@ class BnOrder():
                                 quantity=amt_str)
                     text = "BUY " + str(amt_str)+ " of " + symbol + "\nOrderId:" + str(order["orderId"]) + " STATUS:" + str(order["status"])  + "\nFILLS:\n" + json.dumps(order["fills"])
                 self.send_chat_message(text)
-                return amt_str, sale_type, symbol, buy_coin, sell_coin, price
+                return amt_str, sale_type, symbol, buy_coin, sell_coin
         except Exception as e:
             logging.error("Order Failed error:" + str(e))
             self.send_chat_message("CREATE ORDER FAILED: " + str(e))
