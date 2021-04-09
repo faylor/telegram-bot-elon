@@ -24,10 +24,13 @@ def fire_and_forget(f):
         return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
     return wrapped
 
+FORCE_STOP = False
+
 @fire_and_forget
 def run(tsl: TrailingStopLimit):
+    FORCE_STOP = False
     tsl.running = True
-    while (tsl.running):
+    while (tsl.running and FORCE_STOP == False):
         tsl.print_status()
         tsl.update_stop()
         time.sleep(tsl.interval)
@@ -279,6 +282,7 @@ class BnOrder():
             if self.is_authorized(chat_id):
                 if self.tso is not None:
                     self.tso.running = False
+                    FORCE_STOP = True
                 orders = self.client.get_open_orders()
                 for order in orders:
                     result = self.client.cancel_order(symbol=order['symbol'], orderId=order["orderId"])
