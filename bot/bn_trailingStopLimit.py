@@ -51,9 +51,12 @@ class TrailingStopLimit():
             self.breakeven = price * 1.01
         delta = self.stop_percentage * price
         if self.type == "sell":
-            if (price - delta) > self.stoploss and price > self.breakeven:
+            if price < self.breakeven and (price - delta) > self.stoploss:
                 self.stoploss = price - delta
-                self.send_chat_message("New high observed: Updating stop loss to %.8f" % self.stoploss)
+                self.send_chat_message("Below breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
+            elif price >= self.breakeven and (price - delta/10) > self.stoploss:
+                self.stoploss = price - delta/10
+                self.send_chat_message("Above Breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
             elif price <= self.stoploss:
                 self.running = False
                 amount = self.get_balance(self.buy_coin)
