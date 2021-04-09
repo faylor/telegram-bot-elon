@@ -259,7 +259,7 @@ async def bn_check_symbol_trades(message: types.Message, regexp_command):
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
 
 
-@dp.message_handler(commands=['cancelorders'])
+@dp.message_handler(commands=['cancelorders', 'stoporders'])
 async def cancel_open_orders(message: types.Message):
     try:
         bn_order.cancel_open_orders(message.chat.id)
