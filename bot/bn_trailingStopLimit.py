@@ -25,8 +25,12 @@ class TrailingStopLimit():
     
 
     def get_price(self, market):
-        result = self.client.get_symbol_ticker(symbol=market)
-        return float(result['price'])
+        try:
+            result = self.client.get_symbol_ticker(symbol=market)
+            return float(result['price'])
+        except Exception as e:
+            logging.error("Symbol ticker failed:" + str(e))
+            return None
 
     def get_balance(self, coin):
         bal = self.client.get_asset_balance(coin.upper())
@@ -49,8 +53,8 @@ class TrailingStopLimit():
             elif price <= self.stoploss:
                 self.running = False
                 amount = self.get_balance(self.buy_coin)
-                price = self.get_price(self.market)
-                price_str = "{:0.0{}f}".format(price * 0.9999, 8)
+                # price = self.get_price(self.market)
+                # price_str = "{:0.0{}f}".format(price * 0.9999, 8)
                 # order = self.client.order_limit_sell(
                 #             symbol=self.market,
                 #             quantity=amount,
@@ -64,8 +68,8 @@ class TrailingStopLimit():
             elif price >= self.stoploss:
                 self.running = False
                 balance = self.get_balance(self.sell_coin)
-                price = self.get_price(self.market)
-                price_str = "{:0.0{}f}".format(price, 8)
+                # price = self.get_price(self.market)
+                # price_str = "{:0.0{}f}".format(price, 8)
                 amount = (balance / price) * 0.999 # 0.10% maker/taker fee without BNB
                 # order = self.client.order_limit_buy(
                 #             symbol=self.market,
@@ -83,18 +87,18 @@ class TrailingStopLimit():
             logging.error("Failed to send chat message:" + str(e))
 
     def print_status(self):
-        last = self.get_price(self.market)
-        price_str = "{:0.0{}f}".format(last, 8)
-        text = f"""---------------------
+        self.last_message_count = self.last_message_count + 1
+        if self.verbose or self.last_message_count > 14:
+            last = self.get_price(self.market)
+            price_str = "{:0.0{}f}".format(last, 8)
+            text = f"""---------------------
 Trail type: {self.type}
 Market: {self.market}
 Stop loss: {self.stoploss}
 Last price: {price_str}
 Stop percentage: {self.stop_percentage}
-    ---------------------"""
-        self.last_message_count = self.last_message_count + 1
-        if self.verbose or self.last_message_count > 14:
+---------------------"""
             self.send_chat_message(text)
             self.last_message_count = 0
         else:
-            logging.info(text)
+            logging.info("Still running TSL for " + self.market)
