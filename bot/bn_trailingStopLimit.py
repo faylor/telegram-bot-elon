@@ -104,7 +104,7 @@ class TrailingStopLimit():
         if self.verbose or self.last_message_count > 14:
             last = self.get_price(self.market)
             if self.first_price is not None and self.first_price > 0:
-                diff = round((last - self.first_price)/self.first_price, 2)
+                diff = round(100 * (last - self.first_price)/self.first_price, 2)
             else:
                 diff = 0
             price_str = "{:0.0{}f}".format(last, 8)
