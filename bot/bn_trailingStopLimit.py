@@ -40,7 +40,7 @@ class TrailingStopLimit():
 
     def initialize_stop(self):
         price = self.get_price(self.market)
-        self.breakeven = price * 1.0025
+        self.breakeven = price * 1.003
         self.first_price = price
         delta = self.stop_percentage * price
         if self.type == "sell":
@@ -53,11 +53,11 @@ class TrailingStopLimit():
             logging.error("Price empty, need to cool off maybe.")
             return
         if self.breakeven is None:
-            self.breakeven = price * 1.0025
+            self.breakeven = price * 1.003
             self.first_price = price
         delta = self.stop_percentage * price
         if self.type == "sell":
-            if price >= self.breakeven and self.breakeven > self.stoploss:
+            if price >= (self.breakeven * 1.005) and self.breakeven > self.stoploss:
                 self.stoploss = self.breakeven
                 self.send_chat_message("%.8f  First time above breakeven. Updating stop loss to %.8f - breakeven %.8f" % (price, self.stoploss, self.breakeven))
             elif price >= self.breakeven and  price < (self.breakeven + self.breakeven * self.stop_percentage) and (price - delta/5) > self.stoploss:
