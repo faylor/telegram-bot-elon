@@ -60,10 +60,10 @@ class TrailingStopLimit():
             if price < self.breakeven and (price - delta) > self.stoploss:
                 self.stoploss = price - delta
                 self.send_chat_message("Below breakeven (tight). New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
-            elif price >= self.breakeven and (price - delta/10) > self.stoploss:
-                self.stoploss = price - delta/4
-                self.send_chat_message("Above Breakeven (loose). New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
             elif price >= self.breakeven and (price - delta/5) > self.stoploss:
+                self.stoploss = price - delta/5
+                self.send_chat_message("Above Breakeven (loose). New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
+            elif price >= self.breakeven and (price - delta/2) > self.stoploss:
                 self.stoploss = price - delta/2
                 self.send_chat_message("Above Breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
             elif price <= self.stoploss:
