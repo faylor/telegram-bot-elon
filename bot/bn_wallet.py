@@ -93,7 +93,7 @@ async def bn_tsl_start(message: types.Message, regexp_command):
                 buying_coin = second_coin
                 selling_coin = first_coin
             bn_order.create_trailing_stop_limit(market=buying_coin.upper() + selling_coin.upper(), buy_coin=buying_coin, sell_coin=selling_coin, type=buy_or_sell.lower(), stop_percentage=0.03, interval=10)
-        
+            await bot.send_message(chat_id=message.chat.id, text="Started Trailing Stop Limit...")
     except Exception as e:
         logging.error("START UP TSL ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")

@@ -22,6 +22,7 @@ class TrailingStopLimit():
         self.stoploss = self.initialize_stop()
         self.verbose = False
         self.last_message_count = 0
+        self.first_price = None
         self.breakeven = None
     
 
@@ -40,6 +41,7 @@ class TrailingStopLimit():
     def initialize_stop(self):
         price = self.get_price(self.market)
         self.breakeven = price * 1.0025
+        self.first_price = price
         delta = self.stop_percentage * price
         if self.type == "sell":
             delta = -1 * delta
@@ -52,6 +54,7 @@ class TrailingStopLimit():
             return
         if self.breakeven is None:
             self.breakeven = price * 1.0025
+            self.first_price = price
         delta = self.stop_percentage * price
         if self.type == "sell":
             if price < self.breakeven and (price - delta) > self.stoploss:
@@ -100,14 +103,12 @@ class TrailingStopLimit():
         self.last_message_count = self.last_message_count + 1
         if self.verbose or self.last_message_count > 14:
             last = self.get_price(self.market)
+            if self.first_price is not None and self.first_price > 0:
+                diff = round((last - self.first_price)/self.first_price, 2)
+            else:
+                diff = 0
             price_str = "{:0.0{}f}".format(last, 8)
-            text = f"""---------------------
-Trail type: {self.type}
-Market: {self.market}
-Stop loss: {self.stoploss}
-Last price: {price_str}
-Stop percentage: {self.stop_percentage}
----------------------"""
+            text = f"{self.type} {self.market} @ BTC{price_str}. Change: {diff}%  Limit: {self.stoploss}"
             self.send_chat_message(text)
             self.last_message_count = 0
         else:
