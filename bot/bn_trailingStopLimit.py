@@ -59,9 +59,12 @@ class TrailingStopLimit():
         if self.type == "sell":
             if price < self.breakeven and (price - delta) > self.stoploss:
                 self.stoploss = price - delta
-                self.send_chat_message("Below breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
+                self.send_chat_message("Below breakeven (tight). New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
             elif price >= self.breakeven and (price - delta/10) > self.stoploss:
-                self.stoploss = price - delta/10
+                self.stoploss = price - delta/4
+                self.send_chat_message("Above Breakeven (loose). New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
+            elif price >= self.breakeven and (price - delta/5) > self.stoploss:
+                self.stoploss = price - delta/2
                 self.send_chat_message("Above Breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (self.stoploss, self.breakeven))
             elif price <= self.stoploss:
                 self.running = False
@@ -108,7 +111,7 @@ class TrailingStopLimit():
             else:
                 diff = 0
             price_str = "{:0.0{}f}".format(last, 8)
-            text = f"{self.type} {self.market} @ BTC{price_str}. Change: {diff}%  Limit: {self.stoploss}"
+            text = f"Elon's Running a TSL- {self.type} {self.market} @ BTC{price_str}. Change: {diff}%  Limit: {self.stoploss}"
             self.send_chat_message(text)
             self.last_message_count = 0
         else:
