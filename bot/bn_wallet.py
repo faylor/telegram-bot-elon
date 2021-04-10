@@ -58,16 +58,19 @@ async def bn_order_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
         buy_or_sell, first_coin, second_coin, price, amount = all.strip().upper().split()
-        if buy_or_sell not in ["BUY", "SELL"]:
-            return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
-        if buy_or_sell == "BUY":
-            buying_coin = first_coin
-            selling_coin = second_coin
+        if first_coin == "BETH" or second_coin == "BETH":
+            await bot.send_message(chat_id=message.chat.id, text="No BETH Trading allowed.")
         else:
-            buying_coin = second_coin
-            selling_coin = first_coin
-        bn_order.create_order(message.chat.id, selling_coin, buying_coin, price, amount)
-        bn_order.get_wallet(message.chat.id)
+            if buy_or_sell not in ["BUY", "SELL"]:
+                return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
+            if buy_or_sell == "BUY":
+                buying_coin = first_coin
+                selling_coin = second_coin
+            else:
+                buying_coin = second_coin
+                selling_coin = first_coin
+            bn_order.create_order(message.chat.id, selling_coin, buying_coin, price, amount)
+            bn_order.get_wallet(message.chat.id)
         
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
@@ -78,15 +81,18 @@ async def bn_tsl_start(message: types.Message, regexp_command):
     try:
         all = regexp_command.group(1)
         buy_or_sell, first_coin, second_coin = all.strip().upper().split()
-        if buy_or_sell not in ["BUY", "SELL"]:
-            return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
-        if buy_or_sell == "SELL":
-            buying_coin = first_coin
-            selling_coin = second_coin
+        if first_coin == "BETH" or second_coin == "BETH":
+            await bot.send_message(chat_id=message.chat.id, text="No BETH Trading allowed.")
         else:
-            buying_coin = second_coin
-            selling_coin = first_coin
-        bn_order.create_trailing_stop_limit(market=buying_coin.upper() + selling_coin.upper(), buy_coin=buying_coin, sell_coin=selling_coin, type=buy_or_sell.lower(), stop_percentage=0.03, interval=10)
+            if buy_or_sell not in ["BUY", "SELL"]:
+                return await bot.send_message(chat_id=message.chat.id, text="Failed to Market Buy or Sell, must enter buy or sell first and then Coin given, eg: /market buy eth")
+            if buy_or_sell == "SELL":
+                buying_coin = first_coin
+                selling_coin = second_coin
+            else:
+                buying_coin = second_coin
+                selling_coin = first_coin
+            bn_order.create_trailing_stop_limit(market=buying_coin.upper() + selling_coin.upper(), buy_coin=buying_coin, sell_coin=selling_coin, type=buy_or_sell.lower(), stop_percentage=0.03, interval=10)
         
     except Exception as e:
         logging.error("START UP TSL ERROR:" + str(e))
@@ -124,41 +130,43 @@ async def bn_order_market_buy(message: types.Message, regexp_command, state: FSM
         else:
             buying_coin = second_coin
             selling_coin = first_coin
-        
-        purchase_coin_balance = bn_order.get_user_balance(selling_coin)
-        selling_price_usd_tmp = bn_order.get_usd_price(selling_coin)
-        selling_price_btc_tmp = bn_order.get_btc_price(selling_coin)
-        buying_price_usd_tmp = bn_order.get_usd_price(buying_coin)
-        buying_price_btc_tmp = bn_order.get_btc_price(buying_coin)
-        if purchase_coin_balance <= 0:
-            return await message.reply(f"You have no balance in {selling_coin}, you fool.")
-        await MarketForm.spent.set()
-        async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-            proxy['selling_price_usd'] = selling_price_usd_tmp
-            proxy['selling_price_btc'] = selling_price_btc_tmp
-            proxy['buying_price_usd'] = buying_price_usd_tmp
-            proxy['buying_price_btc'] = buying_price_btc_tmp
-            proxy['buying_coin'] = buying_coin
-            proxy['selling_coin'] = selling_coin
-            proxy['balance'] = purchase_coin_balance
-            proxy['buy_or_sell'] = buy_or_sell
-            proxy['oco'] = oco
-            proxy['tsl'] = tsl
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-        markup.add("25%", "50%", "75%", "100%")
-        markup.add("Cancel")
-        name = message.from_user.mention
-        oco_text = "OCO is set to "
-        if oco:
-            oco_text = oco_text + "ON. 3% Profit or 1% Loss will trigger a Swap Back to Original."
+        if first_coin == "BETH" or second_coin == "BETH":
+            await bot.send_message(chat_id=message.chat.id, text="No BETH Trading allowed.")
         else:
-            oco_text = oco_text + "OFF. No stop limits or profit limits are raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
-        tsl_text = "Trailing Stop Limit (TSL) is set to "
-        if tsl:
-            tsl_text = tsl_text + "ON. Tailing 1% Loss will move up."
-        else:
-            tsl_text = tsl_text + "OFF. No stop limits raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
-        text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_usd_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
+            purchase_coin_balance = bn_order.get_user_balance(selling_coin)
+            selling_price_usd_tmp = bn_order.get_usd_price(selling_coin)
+            selling_price_btc_tmp = bn_order.get_btc_price(selling_coin)
+            buying_price_usd_tmp = bn_order.get_usd_price(buying_coin)
+            buying_price_btc_tmp = bn_order.get_btc_price(buying_coin)
+            if purchase_coin_balance <= 0:
+                return await message.reply(f"You have no balance in {selling_coin}, you fool.")
+            await MarketForm.spent.set()
+            async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
+                proxy['selling_price_usd'] = selling_price_usd_tmp
+                proxy['selling_price_btc'] = selling_price_btc_tmp
+                proxy['buying_price_usd'] = buying_price_usd_tmp
+                proxy['buying_price_btc'] = buying_price_btc_tmp
+                proxy['buying_coin'] = buying_coin
+                proxy['selling_coin'] = selling_coin
+                proxy['balance'] = purchase_coin_balance
+                proxy['buy_or_sell'] = buy_or_sell
+                proxy['oco'] = oco
+                proxy['tsl'] = tsl
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+            markup.add("25%", "50%", "75%", "100%")
+            markup.add("Cancel")
+            name = message.from_user.mention
+            oco_text = "OCO is set to "
+            if oco:
+                oco_text = oco_text + "ON. 3% Profit or 1% Loss will trigger a Swap Back to Original."
+            else:
+                oco_text = oco_text + "OFF. No stop limits or profit limits are raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
+            tsl_text = "Trailing Stop Limit (TSL) is set to "
+            if tsl:
+                tsl_text = tsl_text + "ON. Tailing 1% Loss will move up."
+            else:
+                tsl_text = tsl_text + "OFF. No stop limits raised. Use oco or tsl instead if required eg: /market buy bnb usdt oco"
+            text = f"""{name}: BUY {buying_coin} @ ~${bn_order.round_sense(buying_price_usd_tmp)} and ~BTC {bn_order.round_sense(buying_price_btc_tmp)}
 SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {bn_order.round_sense(selling_price_btc_tmp)}
 
 {oco_text}
@@ -166,8 +174,8 @@ SELL {selling_coin} @ ~${bn_order.round_sense(selling_price_usd_tmp)} and ~BTC {
 {tsl_text}
 
 Available {selling_coin} balance is {purchase_coin_balance}. Use How Many {selling_coin}?
-        """
-        await message.reply(text, reply_markup=markup)
+            """
+            await message.reply(text, reply_markup=markup)
 
     except Exception as e:
         logging.error("bn order market buy - MARKET BUY OR SELL ERROR:" + str(e))
@@ -253,7 +261,10 @@ async def check_open_orders(message: types.Message):
 async def bn_check_symbol_trades(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1)
-        bn_order.get_symbol_trades(message.chat.id, symbol)
+        if symbol.upper() == "BETH":
+            await bot.send_message(chat_id=message.chat.id, text="No BETH Trading allowed.")
+        else:
+            bn_order.get_symbol_trades(message.chat.id, symbol)
     except Exception as e:
         logging.error("START UP ERROR:" + str(e))
         await bot.send_message(chat_id=message.chat.id, text="Failed to Start Stream")
