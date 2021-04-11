@@ -659,15 +659,12 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         if len(symbol_split) > 0:
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
-            p, _, _, btc_price = get_price(symbol)
-            data = coin_price_realtime(symbol)
-            usd_data = data[symbol.upper()]["quote"]["USD"]
-            if usd_data["price"] > 0:
-                p = usd_data["price"]
-            sale_price_usd_tmp = get_bn_price(symbol) 
-            if sale_price_usd_tmp > 0:
-                p = sale_price_usd_tmp
-
+            _, _, _, btc_price = get_price(symbol)
+            # data = coin_price_realtime(symbol)
+            # usd_data = data[symbol.upper()]["quote"]["USD"]
+            # if usd_data["price"] > 0:
+            #     p = usd_data["price"]
+            p = get_bn_price(symbol) 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
             
@@ -872,15 +869,14 @@ async def set_panic_point(message: types.Message, regexp_command):
             js = r.get(key).decode('utf-8')
             symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
             logging.error("COIN: " + symbol)
-            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            _, _, _, sale_price_btc = get_price(symbol)
+            
+            # data = coin_price_realtime(symbol)
+            # usd_data = data[symbol.upper()]["quote"]["USD"]
+            # sale_price_usd = usd_data["price"]
+            sale_price_usd = get_bn_price(symbol)
             if sale_price_usd <= 0:
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api returning 0 for this coin. Needs attention.')
-
-            data = coin_price_realtime(symbol)
-            usd_data = data[symbol.upper()]["quote"]["USD"]
-            sale_price_usd = usd_data["price"]
-
-            sale_price_usd = get_bn_price(symbol)
 
             if js is not None:
                 js = json.loads(js)
