@@ -873,6 +873,9 @@ async def set_panic_point(message: types.Message, regexp_command):
             symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
             logging.error("COIN: " + symbol)
             sale_price_usd, _, _, sale_price_btc = get_price(symbol)
+            if sale_price_usd <= 0:
+                return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api returning 0 for this coin. Needs attention.')
+
             data = coin_price_realtime(symbol)
             usd_data = data[symbol.upper()]["quote"]["USD"]
             sale_price_usd = usd_data["price"]
