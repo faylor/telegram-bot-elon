@@ -63,8 +63,8 @@ class TrailingStopLimit():
             elif price >= (self.breakeven * 1.0065) and  price < (self.breakeven + self.breakeven * self.stop_percentage) and (price - delta/5) > self.stoploss:
                 self.stoploss = price - delta/5
                 self.send_chat_message("%.8f Above Breakeven. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (price, self.stoploss, self.breakeven))
-            elif price >= (self.breakeven * 1.0065) and (price - delta/8) > self.stoploss:
-                self.stoploss = price - delta/8
+            elif price >= (self.breakeven * 1.0065) and (price - delta/12) > self.stoploss:
+                self.stoploss = price - delta/12
                 self.send_chat_message("%.8f Pump. New high observed: Updating stop loss to %.8f - breakeven %.8f" % (price, self.stoploss, self.breakeven))
             elif price <= self.stoploss:
                 self.running = False
