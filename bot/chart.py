@@ -215,11 +215,20 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
                 period_counts = int(period_counts)
             else:
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
-
+    except Exception as e:
+            logging.error("ERROR Making chart:" + str(e))
+            await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+    
+    try:
         await send_image(chat_id, coin, "usdt", period_seconds, period_counts)
+    except Exception as e:
+        logging.error("ERROR Making USDT chart:" + str(e))
+        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+    
+    try:
         await send_image(chat_id, coin, "btc", period_seconds, period_counts)
     except Exception as e:
-        logging.error("ERROR Making chart:" + str(e))
+        logging.error("ERROR BTC Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
 
