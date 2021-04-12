@@ -501,6 +501,22 @@ def round_sense(price):
         return round(price, 5)
     return round(price, 8)
 
+def round_sense_str(price):
+    if price is None:
+        return "0"
+    if price > 100:
+        return str(int(price))
+    if price > 10:
+        precision = 1
+    elif price > 1:
+        precision = 2
+    elif price > 0.01:
+        precision = 4
+    elif price > 0.001:
+        precision = 5
+    else:
+        precision = 8
+    return "{:0.0{}f}".format(float(price), precision)
 
 def get_change_label(c, lpad=None):
     label_on_change = "🔻"
