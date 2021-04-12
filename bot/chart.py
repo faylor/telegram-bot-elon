@@ -223,13 +223,13 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
         await send_image(chat_id, coin, "usdt", period_seconds, period_counts)
     except Exception as e:
         logging.error("ERROR Making USDT chart:" + str(e))
-        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="USDT chart not available", parse_mode="HTML")
     
     try:
         await send_image(chat_id, coin, "btc", period_seconds, period_counts)
     except Exception as e:
         logging.error("ERROR BTC Making chart:" + str(e))
-        await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="BTC chat not available", parse_mode="HTML")
 
 
 async def send_image(chat_id, coin, convert, period_seconds, period_counts):
