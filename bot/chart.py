@@ -261,11 +261,11 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     if rsi_df is not None:
         apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI'))
 
-    kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
+    kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in ' + convert.upper(),volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
     
     mpf.plot(df,**kwargs,style='nightclouds')
     mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
-    s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc, title=coin.upper() + "/" + convert.upper())
+    s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
     mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + convert + '-mplfiance.png', hlines=h_lines)
     await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + convert + '-mplfiance.png'))
 
