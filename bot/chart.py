@@ -254,7 +254,7 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
 
     kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
     
-    mpf.plot(df,**kwargs,style='nightclouds')
+    mpf.plot(df,**kwargs,style='nightclouds', title=coin.upper() + "/" + convert.upper())
     mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
     s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
     mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + convert + '-mplfiance.png', hlines=h_lines)
