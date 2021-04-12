@@ -26,7 +26,7 @@ async def send_price_of(message: types.Message, regexp_command):
         price_bn_btc = get_bn_price(symbol, "BTC")
         data = coin_price_realtime(symbol, "USDT,BTC")
         logging.error("Hjabfjas:" + json.dumps(data))
-        usd_data = data[symbol.upper()]["quote"]["USD"]
+        usd_data = data[symbol.upper()]["quote"]["USDT"]
         usd_data = data[symbol.upper()]["quote"]["BTC"]
         p = usd_data["price"]
         c = usd_data["percent_change_1h"]
