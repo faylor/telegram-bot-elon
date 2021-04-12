@@ -24,7 +24,7 @@ async def send_price_of(message: types.Message, regexp_command):
         price_gecko, btc_price = get_simple_price_gecko(symbol)
         price_bn = get_bn_price(symbol)
         price_bn_btc = get_bn_price(symbol, "BTC")
-        data = coin_price_realtime(symbol, "BTC")
+        data = coin_price_realtime(symbol, "USDT,BTC")
         logging.error("Hjabfjas:" + json.dumps(data))
         usd_data = data[symbol.upper()]["quote"]["USD"]
         usd_data = data[symbol.upper()]["quote"]["BTC"]
