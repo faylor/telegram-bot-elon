@@ -216,45 +216,49 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
             else:
                 return await bot.send_message(chat_id=chat_id, text="Failed to create chart, your range is not a number, try 60 etc", parse_mode="HTML")
 
-        trades = get_ohcl_trades(coin, period_seconds)
-        if trades is None:
-            logging.error("Trades is empty")
-            raise Exception("No data found for coin: " + coin)
-        ranger = -2 * period_counts
-        trades = trades[ranger:]
-        df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
-        df['time'] = pd.DatetimeIndex(df['time']*10**9)
-        df.set_index('time', inplace=True)
-        
-        df['MA20'] = df['close'].rolling(window=20).mean()
-        df['20dSTD'] = df['close'].rolling(window=20).std() 
-
-        df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
-        df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
-        
-        rsi_df = get_rsi_df(df)
-        rsi_df = rsi_df.tail(int(period_counts))
-        df = df.tail(int(period_counts))
-        h_lines, y_min, y_max = fibs(df, extend=True)
-
-        apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
-                mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
-                mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
-        
-        if rsi_df is not None:
-            apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI'))
-
-        kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
-        
-        mpf.plot(df,**kwargs,style='nightclouds')
-        mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
-        s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
-        mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + '-mplfiance.png', hlines=h_lines)
-        await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + '-mplfiance.png'))
+        await send_image(chat_id, coin, "usdt", period_seconds, period_counts)
+        await send_image(chat_id, coin, "btc", period_seconds, period_counts)
     except Exception as e:
         logging.error("ERROR Making chart:" + str(e))
         await bot.send_message(chat_id=chat_id, text="Failed to create chart", parse_mode="HTML")
 
+
+async def send_image(chat_id, coin, convert, period_seconds, period_counts):
+    trades = get_ohcl_trades(coin, period_seconds, "binance", convert)
+    if trades is None:
+        logging.error("Trades is empty")
+        raise Exception("No data found for coin: " + coin)
+    ranger = -2 * period_counts
+    trades = trades[ranger:]
+    df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
+    df['time'] = pd.DatetimeIndex(df['time']*10**9)
+    df.set_index('time', inplace=True)
+    
+    df['MA20'] = df['close'].rolling(window=20).mean()
+    df['20dSTD'] = df['close'].rolling(window=20).std() 
+
+    df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
+    df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
+    
+    rsi_df = get_rsi_df(df)
+    rsi_df = rsi_df.tail(int(period_counts))
+    df = df.tail(int(period_counts))
+    h_lines, y_min, y_max = fibs(df, extend=True)
+
+    apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
+            mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
+            mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
+    
+    if rsi_df is not None:
+        apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI'))
+
+    kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in $',volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
+    
+    mpf.plot(df,**kwargs,style='nightclouds')
+    mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
+    s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
+    mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + convert + '-mplfiance.png', hlines=h_lines)
+    await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + convert + '-mplfiance.png'))
 
 
 def fibs(df, extend=False):

@@ -23,13 +23,21 @@ async def send_price_of(message: types.Message, regexp_command):
         # _, c, c24, _ = get_price(symbol)
         price_gecko, btc_price = get_simple_price_gecko(symbol)
         price_bn = get_bn_price(symbol)
-        data = coin_price_realtime(symbol)
+        price_bn_btc = get_bn_price(symbol, "BTC")
+        data = coin_price_realtime(symbol, "BTC")
         usd_data = data[symbol.upper()]["quote"]["USD"]
+        usd_data = data[symbol.upper()]["quote"]["BTC"]
         p = usd_data["price"]
         c = usd_data["percent_change_1h"]
         c24 = usd_data["percent_change_24h"]
+        p_btc = usd_data["price"]
+        c_btc = usd_data["percent_change_1h"]
+        c24_btc = usd_data["percent_change_24h"]
         await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>Binance - {symbol}: ${round_sense(price_bn)}\nCoinMarketCap - {symbol}: ${round_sense(p)}\nGecko API - {symbol}: ${round_sense(price_gecko)} {round(btc_price,8)}BTC  \nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
+                                text=f"<pre>USDT\nBinance - {symbol}: ${round_sense(price_bn)}\nCoinMarketCap - {symbol}: ${round_sense(p)}\nGecko API - {symbol}: ${round_sense(price_gecko)}\nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
+        parse_mode="HTML")
+        await bot.send_message(chat_id=message.chat.id, 
+                                text=f"<pre>BTC\nBinance - {symbol}: ${round_sense(price_bn_btc)}\nCoinMarketCap - {symbol}: ${round_sense(p_btc)}\nGecko API - {symbol}: {round(btc_price,8)}BTC  \nChange: {round(c_btc,2)}% 1hr    {round(c24_btc,2)}% 24hr</pre>", 
         parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:

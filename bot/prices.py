@@ -275,12 +275,12 @@ def get_simple_prices_gecko(labels):
         logging.error("get_simple_prices_gecko ERROR:" + str(e))
         return {}
 
-def get_bn_price(label):
+def get_bn_price(label, convert="USDT"):
     price_usd = 0
     try:
         http.headers.clear()
         label = label.upper().strip()
-        url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}USDT"
+        url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}{convert}"
         resp = http.get(url, timeout=(1, 1))
         if resp.status_code == 200:
             js = resp.json()
@@ -356,14 +356,20 @@ def get_price(label):
         price_btc = 0
     return price, change_1hr, change_24hr, price_btc
 
-def coin_price_realtime(label):
+def coin_price_realtime(label, convert=None):
     try:
         http.headers.clear()
         http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
-        parameters = {
-            'symbol': label
-        }
+        if convert is None:
+            parameters = {
+                'symbol': label
+            }
+        else:
+            parameters = {
+                'symbol': label,
+                'convert': convert
+            }
         response = http.get(url, params=parameters)
         if response.status_code == 429:
             logging.error("HIT LIMIT")
