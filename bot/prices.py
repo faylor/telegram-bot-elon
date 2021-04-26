@@ -280,16 +280,19 @@ def get_bn_price(label, convert="USDT"):
     try:
         http.headers.clear()
         label = label.upper().strip()
-        url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}{convert}"
-        resp = http.get(url, timeout=(1, 1))
-        if resp.status_code == 200:
-            js = resp.json()
-            headers = resp.headers
-            logging.error(headers)
-            price_usd = float(js["price"])
+        if label.upper() != convert.upper():
+            url = f"https://api.binance.com/api/v3/ticker/price?symbol={label}{convert}"
+            resp = http.get(url, timeout=(1, 1))
+            if resp.status_code == 200:
+                js = resp.json()
+                headers = resp.headers
+                logging.error(headers)
+                price_usd = float(js["price"])
+            else:
+                logging.error("Response Failed..." + str(resp.status_code))
+                logging.error("Response Test..." + str(resp.text))
+                return 0
         else:
-            logging.error("Response Failed..." + str(resp.status_code))
-            logging.error("Response Test..." + str(resp.text))
             return 0
     except Exception as e:
         logging.error(e)
@@ -375,8 +378,11 @@ def coin_price_realtime(label, convert=None):
             logging.error("HIT LIMIT")
         else:
             data = response.json()
-            data_arr = data["data"]
-            return data_arr
+            if "data" in data:
+                data_arr = data["data"]
+                return data_arr
+            else:
+                return None
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("COIN_PRICE Error: " + str(e))
 

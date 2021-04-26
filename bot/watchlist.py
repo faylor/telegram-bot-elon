@@ -25,14 +25,22 @@ async def send_price_of(message: types.Message, regexp_command):
         price_bn = get_bn_price(symbol)
         price_bn_btc = get_bn_price(symbol, "BTC")
         data = coin_price_realtime(symbol, "USDT,BTC")
-        usd_data = data[symbol.upper()]["quote"]["USDT"]
-        usd_data = data[symbol.upper()]["quote"]["BTC"]
-        p = usd_data["price"]
-        c = usd_data["percent_change_1h"]
-        c24 = usd_data["percent_change_24h"]
-        p_btc = usd_data["price"]
-        c_btc = usd_data["percent_change_1h"]
-        c24_btc = usd_data["percent_change_24h"]
+        if data is None:
+            usd_data = data[symbol.upper()]["quote"]["USDT"]
+            btc_data = data[symbol.upper()]["quote"]["BTC"]
+            p = usd_data["price"]
+            c = usd_data["percent_change_1h"]
+            c24 = usd_data["percent_change_24h"]
+            p_btc = btc_data["price"]
+            c_btc = btc_data["percent_change_1h"]
+            c24_btc = btc_data["percent_change_24h"]
+        else:
+            p = 0
+            c = 0
+            c24 = 0
+            p_btc = 0
+            c_btc = 0
+            c24_btc = 0
         await bot.send_message(chat_id=message.chat.id, 
                                 text=f"<pre>USDT\nBinance - {symbol}: ${round_sense_str(price_bn)}\nCoinMarketCap - {symbol}: ${round_sense_str(p)}\nGecko API - {symbol}: ${round_sense_str(price_gecko)}\nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
         parse_mode="HTML")
