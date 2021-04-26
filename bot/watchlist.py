@@ -25,7 +25,7 @@ async def send_price_of(message: types.Message, regexp_command):
         price_bn = get_bn_price(symbol)
         price_bn_btc = get_bn_price(symbol, "BTC")
         data = coin_price_realtime(symbol, "USDT,BTC")
-        if data is None:
+        if data is not None:
             usd_data = data[symbol.upper()]["quote"]["USDT"]
             btc_data = data[symbol.upper()]["quote"]["BTC"]
             p = usd_data["price"]
