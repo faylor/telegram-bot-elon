@@ -24,7 +24,7 @@ from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
-
+PRICES_IN = "BTC"
 # States
 class Form(StatesGroup):
     coin = State()
@@ -89,11 +89,11 @@ async def add_bag_usd(message: types.Message, regexp_command):
             current_amount = 0
             if saved is not None:
                 js = json.loads(saved.decode("utf-8"))
-                if "usd" in js:
-                    current_amount = float(js["usd"])
-            js = {"live": 0, "usd": amount + current_amount}
+                if PRICES_IN.lower() in js:
+                    current_amount = float(js[PRICES_IN.lower()])
+            js = {"live": 0, PRICES_IN.lower(): amount + current_amount}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO JELLYS CANDLE CLUB \n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island \n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -111,12 +111,12 @@ async def add_bag_usd(message: types.Message, regexp_command):
         current_amount = 0  
         if save is not None:
             js = json.loads(save.decode("utf-8"))
-            if "usd" in js:
-                current_amount = float(js["usd"])
-        js = {"live": 0, "usd": amount + current_amount}
+            if PRICES_IN.lower() in js:
+                current_amount = float(js[PRICES_IN.lower()])
+        js = {"live": 0, PRICES_IN.lower(): amount + current_amount}
         r.set(key, json.dumps(js))
 
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO JELLYS CANDLE CLUB \n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -156,11 +156,15 @@ def get_user_bag_score(chat_id, user_id):
         if js is not None:
             js = js.decode('utf-8')
             js = json.loads(js)
-            return float(js["live"]), float(js["usd"])
+            return float(js["live"]), float(js[PRICES_IN.lower()])
         else:
-            js = {"live": 0, "usd": 10000}
+            if PRICES_IN.lower() is "btc":
+                amount = 1
+            else:
+                amount = 1000
+            js = {"live": 0, PRICES_IN.lower(): amount}
             r.set(key, json.dumps(js))
-            return 0, 10000
+            return 0, amount
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
@@ -172,9 +176,9 @@ def user_spent_usd(chat_id, user_id, usd, coin):
         new_account_usd = account_usd - usd
         if new_account_usd < 0:
             return None
-        new_account_usd = round(new_account_usd, 2)    
+        new_account_usd = round(new_account_usd, 8)    
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
-        js = {"live": 0, "usd": new_account_usd}
+        js = {"live": 0, PRICES_IN.lower(): new_account_usd}
         r.set(key, json.dumps(js))
         log_key =  SCORE_LOG_KEY.format(chat_id=str(chat_id), user_id=user_id)
         current_log = r.get(log_key)
@@ -182,7 +186,7 @@ def user_spent_usd(chat_id, user_id, usd, coin):
             current_log = []
         else:
             current_log = json.loads(current_log.decode("utf-8"))
-        current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, "usd": new_account_usd}})
+        current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, PRICES_IN.lower(): new_account_usd}})
         r.set(log_key, json.dumps(current_log))
         return new_account_usd
     except Exception as e:
@@ -236,8 +240,8 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
         this_chat_id = str(message.chat.id)
         saves = r.scan_iter("At_*_" + str(message.from_user.id))
         out = ""
-        in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
+        # in_prices = get_user_price_config(message.from_user.id) GAME IS NOW SAME FOR ALL
+        out = out + "<pre>Buy At   |  +/-   | Coins  | Val " + PRICES_IN + "\n"
         total_change = float(0.00)
         counter = 0
         total_value = 0
@@ -261,18 +265,16 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
 
         try:
             coin_prices = None
-            coin_prices = coin_price(symbols)
+            coin_prices = coin_price_realtime(symbols, PRICES_IN)
         except:
             logging.error("FAILED TO GET COIN PRICES")
         i = 0
         for key in keys:
             symbol = symbols[i]
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
-                btc_price = 0
-                # btc_price = 0 coin_prices[symbol.upper()]["quote"]["BTC"]["price"]
+                p = coin_prices[symbol.upper()]["quote"][PRICES_IN]["price"]
             else:
-                p, _, _, btc_price = get_price(symbol)  
+                p = get_bn_price(symbol, PRICES_IN)  
 
             chat_id = chat_ids[i]
             if float(p) > 0:
@@ -281,29 +283,18 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                     value = value.decode('utf-8')
                     if "{" in value:
                         js = json.loads(value)
-                        usd_price = float(js["usd"])
-                        buy_btc_price = float(js["btc"])
+                        usd_price = float(js[PRICES_IN.lower()])
                         coins = float(js["coins"])
                     else:
                         usd_price = float(value)
-                        buy_btc_price = "UNKNOWN"
                         coins = "UNKNOWN"
                     
-                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                        price = str(round(btc_price,8))
-                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                            buy_price = buy_btc_price.ljust(8,' ')
-                            change = 0
-                        else:
-                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
-                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
+                    buy_price = str(round_sense(usd_price)).ljust(8,' ')
+                    price = str(round_sense(p))
+                    if usd_price == 0:
+                        change = 0
                     else:
-                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p))
-                        if usd_price == 0:
-                            change = 0
-                        else:
-                            change = round(100 * (p - usd_price) / usd_price, 2)
+                        change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
                     counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
@@ -316,17 +307,17 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
                     if last_the_chat_title != the_chat_title:
                         out = out + f"{the_chat_title}\n"
                         last_the_chat_title = the_chat_title
-                    out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+                    out = out + f"{symbol} @ {price}{PRICES_IN}:\n{buy_price} | {change} | {coins} | {round_sense(usd_value)}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
             i = i + 1
             
         if chat_id is not None:
             _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-            out = out + "\n             UNUSED USD = " + str(round(usd,2))
-            out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+            out = out + "\n             UNUSED " + PRICES_IN + " = " + str(round(usd,2))
+            out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value + usd,2)) + "\n"
         else:
-            out = out + "\n        TOTAL USD VALUE = " + str(round(total_value,2)) + "\n"
+            out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
@@ -336,97 +327,6 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
     except Exception as e:
         logging.warn("Couldnt get hodl data:" + str(e))
 
-
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckobag([\sa-zA-Z]*)']))
-async def send_user_balance(message: types.Message, regexp_command):
-    try:
-        if regexp_command is not None:
-            bysymbol = regexp_command.group(1)
-        else: 
-            bysymbol = None
-        chat_id = str(message.chat.id)
-        saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
-        out = ""
-        in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
-        total_change = float(0.00)
-        counter = 0
-        total_value = 0
-
-        symbols = []
-        keys = []
-        for key in saves:
-            symbols.append(key.decode('utf-8').replace("At_" + chat_id + "_" , "").replace("_" + str(message.from_user.id),""))
-            keys.append(key.decode('utf-8'))
-        
-        try:
-            coin_prices = None
-            coin_prices = get_simple_prices_gecko(symbols)
-            logging.error("COIN PRICES:" + json.dumps(coin_prices))
-        except:
-            logging.error("FAILED TO GET COIN PRICES")
-        i = 0
-        for key in keys:
-            symbol = symbols[i]
-            if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["usd"]
-                btc_price = coin_prices[symbol.upper()]["btc"]
-            else:
-                p, c, c24, btc_price = get_price(symbol)                
-            
-            if float(p) > 0:
-                value = r.get(key)
-                if value is not None:
-                    value = value.decode('utf-8')
-                    if "{" in value:
-                        js = json.loads(value)
-                        usd_price = float(js["usd"])
-                        buy_btc_price = float(js["btc"])
-                        coins = float(js["coins"])
-                    else:
-                        usd_price = float(value)
-                        buy_btc_price = "UNKNOWN"
-                        coins = "UNKNOWN"
-                    
-                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                        price = str(round(btc_price,8))
-                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                            buy_price = buy_btc_price.ljust(8,' ')
-                            change = 0
-                        else:
-                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
-                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
-                    else:
-                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p))
-                        if usd_price == 0:
-                            change = 0
-                        else:
-                            change = round(100 * (p - usd_price) / usd_price, 2)
-                    total_change = total_change + change
-                    counter = counter + 1
-                    change = get_change_label(change).ljust(5,' ')
-                    symbol = symbol.upper()
-                    usd_value = coins * p
-                    total_value = total_value + usd_value
-                    coins = str(round_sense(coins)).ljust(6,' ')
-                    out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
-            else:
-                out = out + f"| {symbol} | NA | NA | NA | NA\n"
-            i = i + 1
-        
-        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-        out = out + "\n             UNUSED USD = " + str(round(usd,2))
-        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
-        total_change = round(total_change, 2)
-        out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
-        if counter > 0:
-            out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        if message.from_user.id == 1597217560:
-            out = '👑 Reigning Champ\n' + out
-        await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
-    except Exception as e:
-        logging.warn("Couldnt get hodl data:" + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bag([\sa-zA-Z]*)']))
 async def send_user_balance(message: types.Message, regexp_command):
@@ -438,7 +338,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         chat_id = str(message.chat.id)
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = ""
-        in_prices = get_user_price_config(message.from_user.id)
+        # in_prices = get_user_price_config(message.from_user.id)
         out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
         total_change = float(0.00)
         counter = 0
@@ -452,19 +352,18 @@ async def send_user_balance(message: types.Message, regexp_command):
         
         try:
             coin_prices = None
-            coin_prices = coin_price(symbols)
+            coin_prices = coin_price_realtime(symbols, PRICES_IN)
         except:
             logging.error("FAILED TO GET COIN PRICES")
         i = 0
         for key in keys:
             symbol = symbols[i]
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
-                c = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_1h"]
-                c24 = coin_prices[symbol.upper()]["quote"]["USD"]["percent_change_24h"]
-                btc_price = 1
+                p = coin_prices[symbol.upper()]["quote"][PRICES_IN]["price"]
+                c = coin_prices[symbol.upper()]["quote"][PRICES_IN]["percent_change_1h"]
+                c24 = coin_prices[symbol.upper()]["quote"][PRICES_IN]["percent_change_24h"]
             else:
-                p, c, c24, btc_price = get_price(symbol)                
+                p = get_bn_price(symbol, PRICES_IN)                
             
             if float(p) > 0:
                 value = r.get(key)
@@ -472,29 +371,18 @@ async def send_user_balance(message: types.Message, regexp_command):
                     value = value.decode('utf-8')
                     if "{" in value:
                         js = json.loads(value)
-                        usd_price = float(js["usd"])
-                        buy_btc_price = float(js["btc"])
+                        usd_price = float(js[PRICES_IN.lower()])
                         coins = float(js["coins"])
                     else:
                         usd_price = float(value)
-                        buy_btc_price = "UNKNOWN"
                         coins = "UNKNOWN"
                     
-                    if symbol.lower() != "btc" and ((bysymbol is not None and "btc" in bysymbol.lower()) or in_prices == "btc"):
-                        price = str(round(btc_price,8))
-                        if buy_btc_price == "UNKNOWN" or buy_btc_price == 0:
-                            buy_price = buy_btc_price.ljust(8,' ')
-                            change = 0
-                        else:
-                            buy_price = str(round(buy_btc_price, 6)).ljust(8,' ')
-                            change = round(100 * (btc_price - buy_btc_price) / buy_btc_price, 2)
+                    buy_price = str(round_sense(usd_price)).ljust(8,' ')
+                    price = str(round_sense(p))
+                    if usd_price == 0:
+                        change = 0
                     else:
-                        buy_price = str(round_sense(usd_price)).ljust(8,' ')
-                        price = str(round_sense(p))
-                        if usd_price == 0:
-                            change = 0
-                        else:
-                            change = round(100 * (p - usd_price) / usd_price, 2)
+                        change = round(100 * (p - usd_price) / usd_price, 2)
                     total_change = total_change + change
                     counter = counter + 1
                     change = get_change_label(change).ljust(5,' ')
@@ -502,14 +390,14 @@ async def send_user_balance(message: types.Message, regexp_command):
                     usd_value = coins * p
                     total_value = total_value + usd_value
                     coins = str(round_sense(coins)).ljust(6,' ')
-                    out = out + f"{symbol} @ ${price}:\n{buy_price} | {change} | {coins} | {round(usd_value,2)}\n"
+                    out = out + f"{symbol} @ {price}{PRICES_IN}:\n{buy_price} | {change} | {coins} | {round_sense(usd_value)}\n"
             else:
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
             i = i + 1
         
         _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
-        out = out + "\n             UNUSED USD = " + str(round(usd,2))
-        out = out + "\n        TOTAL USD VALUE = " + str(round(total_value + usd,2)) + "\n"
+        out = out + "\n             UNUSED " + PRICES_IN + " = " + str(round(usd,2))
+        out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value + usd,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
@@ -532,7 +420,7 @@ def get_users_live_value(chat_id, user_id):
         
         try:
             coin_prices = None
-            coin_prices = coin_price(symbols)
+            coin_prices = coin_price_realtime(symbols, PRICES_IN)
         except:
             logging.error("FAILED TO GET COIN PRICES")
 
@@ -542,9 +430,9 @@ def get_users_live_value(chat_id, user_id):
             symbol = symbols[i]
 
             if coin_prices is not None and symbol.upper() in coin_prices:
-                p = coin_prices[symbol.upper()]["quote"]["USD"]["price"]
+                p = coin_prices[symbol.upper()]["quote"][PRICES_IN]["price"]
             else:
-                p, _, _, _ = get_price(symbol)
+                p = get_bn_price(symbol, PRICES_IN)
             if float(p) > 0:
                 value = r.get(key)
                 if value is not None:
@@ -581,20 +469,20 @@ async def totals_user_scores2(message: types.Message):
                 user = user_member.user.mention.ljust(14, ' ')
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id)
-                score_usd = float(js["usd"])
+                score_usd = float(js[PRICES_IN.lower()])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 1
                     while i < len(scores) and score_total < scores[i]:
                         i = i + 1
-                    score_live = str(round(score_live,2)).ljust(10, ' ')
+                    score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.insert(i, f"🔸 {user} {score_live} {score_usd}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
-                    score_live = str(round(score_live,2)).ljust(10, ' ')
+                    score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd}")
-        out.append("</pre>Season ends 30th May 10am GMT.")
+        out.append("</pre>\nRACE TO 2BTC!!")
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
@@ -604,48 +492,6 @@ async def totals_user_scores2(message: types.Message):
         logging.error("ERROR: " + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to get scores. Contact... meh')
 
-
-
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckograb ([0-9a-zA-Z]*)']))
-async def grab_point_gecko(message: types.Message, regexp_command, state: FSMContext):
-    try:
-        symbols = regexp_command.group(1)
-        symbol_split = get_symbol_list2(symbols)
-        
-        out = ""
-        if len(symbol_split) > 1:
-            await bot.send_message(chat_id=message.chat.id, text='Only 1 coin allowed at the moment, using first value')
-        if len(symbol_split) > 0:
-            symbol = symbol_split[0]
-            symbol = symbol.strip().lower()
-            p, btc_price = get_simple_price_gecko(symbol)
-
-            if p == 0:
-                return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
-            
-            _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
-            if usd <= 0:
-                return await message.reply(f"You have no USD, you fool.")
-            
-            chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-            name = chat_member.user.mention
-            await Form.spent.set()
-            async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-                proxy['price_usd'] = p
-                proxy['price_btc'] = btc_price
-                proxy['coin'] = symbol
-                proxy['balance'] = usd
-            
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-            markup.add("25%", "50%", "75%", "100%")
-            markup.add("Cancel")
-
-            await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
-        else:
-            await message.reply(f"Add the Coin after grab, eg: /grab btc")
-    except Exception as e:
-        logging.error("BUY ERROR:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
 async def grab_point(message: types.Message, regexp_command, state: FSMContext):
@@ -659,25 +505,19 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         if len(symbol_split) > 0:
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
-            _, _, _, btc_price = get_price(symbol)
-            # data = coin_price_realtime(symbol)
-            # usd_data = data[symbol.upper()]["quote"]["USD"]
-            # if usd_data["price"] > 0:
-            #     p = usd_data["price"]
-            p = get_bn_price(symbol) 
+            p = get_bn_price(symbol, PRICES_IN) 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
             
             _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
             if usd <= 0:
-                return await message.reply(f"You have no USD, you fool.")
+                return await message.reply(f"You have no {PRICES_IN}, you fool.")
             
             chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
             name = chat_member.user.mention
             await Form.spent.set()
             async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
                 proxy['price_usd'] = p
-                proxy['price_btc'] = btc_price
                 proxy['coin'] = symbol
                 proxy['balance'] = usd
             
@@ -685,7 +525,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             markup.add("25%", "50%", "75%", "100%")
             markup.add("Cancel")
 
-            await message.reply(f"{name}: {symbol} @ ${round_sense(p)}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
+            await message.reply(f"{name}: {symbol} @ {round_sense(p)}{PRICES_IN}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
         else:
             await message.reply(f"Add the Coin after grab, eg: /grab btc")
     except Exception as e:
@@ -698,7 +538,6 @@ async def process_spent_invalid(message: types.Message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     markup.add("25%", "50%", "75%", "100%")
     markup.add("Cancel")
-    logging.error("HERE1:" + message.text.lower().strip())
     return await message.reply("Total Spend has gotta be a number.\nSelect percentage or write a number in box.", reply_markup=markup)
 
 
@@ -760,8 +599,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                 coins = coins + float(current_coins)
 
             js = {}
-            js["usd"] = data['price_usd']
-            js["btc"] = data['price_btc']
+            js[PRICES_IN.lower()] = data['price_usd']
             js["coins"] = coins 
             
             r.set("At_" + chat_id + "_" + data['coin'] + "_" + user_id, json.dumps(js))
@@ -771,11 +609,10 @@ async def process_spend(message: types.Message, state: FSMContext):
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
-                    md.text('Price USD:', md.text(round_sense(data['price_usd']))),
-                    md.text('Price BTC:', md.text(round(data['price_btc'], 6))),
-                    md.text('Total Spent USD:', md.text(message.text)),
+                    md.text('Price ' + PRICES_IN + ':', md.text(round_sense(data['price_usd']))),
+                    md.text('Total Spent ' + PRICES_IN + ':', md.text(message.text)),
                     md.text('Total Coins:', md.text(str(round(coins, 4)))),
-                    md.text('Remaining Balance USD:', md.text(str(round(remaining_balance, 2)))),
+                    md.text('Remaining Balance ' + PRICES_IN + ':', md.text(str(round_sense(remaining_balance)))),
                     sep='\n',
                 ),
                 reply_markup=markup,
@@ -789,74 +626,12 @@ async def process_spend(message: types.Message, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
 
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckopanic([\s0-9.,a-zA-Z]*)']))
-async def set_panic_point(message: types.Message, regexp_command):
-    try:
-        to_symbol = regexp_command.group(1)
-    except:
-        to_symbol = "usd"
-    try:
-        if 'btc' in to_symbol.lower():
-            return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
-
-        user_id = str(message.from_user.id)
-        chat_id = str(message.chat.id)
-        
-        keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
-        for key in keys:
-            js = r.get(key).decode('utf-8')
-            symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
-            logging.error("COIN: " + symbol)
-            sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
-            if js is not None:
-                js = json.loads(js)
-                price_usd = js["usd"]
-                if price_usd == sale_price_usd:
-                    logging.error("Prices are the same checking again...")
-                    sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
-                    logging.error("Prices are the same checking again..." + str(price_usd) + " and " + str(sale_price_usd))
-                price_btc = js["btc"]
-                available_coins = js["coins"]
-            else:
-                return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
-
-            sale_usd = available_coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
-            
-            r.delete(key)
-            profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
-            if profit_or_loss > 0:
-                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
-            else:
-                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
-            # And send message
-            await bot.send_message(
-                message.chat.id,
-                md.text(
-                    md.text('User:', md.code(message.from_user.mention)),
-                    md.text('Coin:', md.code(symbol.upper())),
-                    md.text('Buy Price USD:', md.text(round_sense(price_usd))),
-                    md.text('Buy Price BTC:', md.text(round(price_btc, 6))),
-                    md.text('Sale Price USD:', md.text(round_sense(sale_price_usd))),
-                    md.text('Sale Price BTC:', md.text(round(sale_price_btc, 6))),
-                    md.text('Total Coins Sold:', md.text(str(available_coins))),
-                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
-                    profit_or_loss_md,
-                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
-                    sep='\n',
-                ),
-                parse_mode=ParseMode.MARKDOWN,
-            )
-        await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
-    except Exception as e:
-        logging.error("Panic error: " + str(e))
-
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
     try:
         to_symbol = regexp_command.group(1)
     except:
-        to_symbol = "usd"
+        to_symbol = PRICES_IN.lower()
     try:
         if 'btc' in to_symbol.lower():
             return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
@@ -869,19 +644,13 @@ async def set_panic_point(message: types.Message, regexp_command):
             js = r.get(key).decode('utf-8')
             symbol = str(key.decode('utf-8')).replace(f"At_{chat_id}_","").replace(f"_{user_id}","")
             logging.error("COIN: " + symbol)
-            _, _, _, sale_price_btc = get_price(symbol)
-            
-            # data = coin_price_realtime(symbol)
-            # usd_data = data[symbol.upper()]["quote"]["USD"]
-            # sale_price_usd = usd_data["price"]
-            sale_price_usd = get_bn_price(symbol)
+            sale_price_usd = get_bn_price(symbol, PRICES_IN)
             if sale_price_usd <= 0:
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api returning 0 for this coin. Needs attention.')
 
             if js is not None:
                 js = json.loads(js)
-                price_usd = js["usd"]
-                price_btc = js["btc"]
+                price_usd = js[PRICES_IN.lower()]
                 available_coins = js["coins"]
             else:
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
@@ -892,23 +661,21 @@ async def set_panic_point(message: types.Message, regexp_command):
             r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
             if profit_or_loss > 0:
-                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Profit ' + PRICES_IN + ':', '🚀', md.text(str(round_sense(profit_or_loss))))
             else:
-                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Loss ' + PRICES_IN + ':', '🔻', md.text(str(round_sense(profit_or_loss))))
             # And send message
             await bot.send_message(
                 message.chat.id,
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(symbol.upper())),
-                    md.text('Buy Price USD:', md.text(round_sense(price_usd))),
-                    md.text('Buy Price BTC:', md.text(round(price_btc, 6))),
-                    md.text('Sale Price USD:', md.text(round_sense(sale_price_usd))),
-                    md.text('Sale Price BTC:', md.text(round(sale_price_btc, 6))),
+                    md.text('Buy Price ' + PRICES_IN + ':', md.text(round_sense(price_usd))),
+                    md.text('Sale Price ' + PRICES_IN + ':', md.text(round_sense(sale_price_usd))),
                     md.text('Total Coins Sold:', md.text(str(available_coins))),
-                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
                     profit_or_loss_md,
-                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
                     sep='\n',
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -916,8 +683,6 @@ async def set_panic_point(message: types.Message, regexp_command):
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
     except Exception as e:
         logging.error("Panic error: " + str(e))
-
-
 
 
 @dp.message_handler(commands=['feelinglucky'])
@@ -933,12 +698,11 @@ async def set_panic_point(message: types.Message):
             logging.error("COIN: " + symbol)
             sale_price_usd, _, _, sale_price_btc = get_price(symbol)
             data = coin_price_realtime(symbol)
-            usd_data = data[symbol.upper()]["quote"]["USD"]
+            usd_data = data[symbol.upper()]["quote"][PRICES_IN]
             sale_price_usd = usd_data["price"]
             if js is not None:
                 js = json.loads(js)
-                price_usd = js["usd"]
-                price_btc = js["btc"]
+                price_usd = js[PRICES_IN.lower()]
                 available_coins = js["coins"]
             else:
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
@@ -959,7 +723,6 @@ async def set_panic_point(message: types.Message):
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(symbol.upper())),
                     md.text('Buy Price USD:', md.text(round_sense(price_usd))),
-                    md.text('Buy Price BTC:', md.text(round(price_btc, 6))),
                     md.text('Sale Price USD:', md.text(round_sense(sale_price_usd))),
                     md.text('Sale Price BTC:', md.text(round(sale_price_btc, 6))),
                     md.text('Total Coins Sold:', md.text(str(available_coins))),
@@ -973,63 +736,6 @@ async def set_panic_point(message: types.Message):
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
     except Exception as e:
         logging.error("Panic error: " + str(e))
-
-
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['geckodump ([\s0-9.,a-zA-Z]*)']))
-async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
-    try:
-        symbols = regexp_command.group(1)
-        symbol_split = get_symbol_list2(symbols)
-        user_id = str(message.from_user.id)
-        chat_id = str(message.chat.id)
-        
-        out = ""
-        if len(symbol_split) > 1:
-            await bot.send_message(chat_id=message.chat.id, text='Only 1 coin allowed at the moment, using first value')
-        if len(symbol_split) > 0:
-            symbol = symbol_split[0]
-            symbol = symbol.strip().lower()
-            sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
-            if sale_price_usd == 0:
-                await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
-            else:
-                js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
-                if js is not None:
-                    js = json.loads(js)
-                    price_usd = js["usd"]
-                    if price_usd == sale_price_usd:
-                        logging.error("Prices are the same checking again...")
-                        sale_price_usd, sale_price_btc = get_simple_price_gecko(symbol)
-                        logging.error("Prices are the same checking again..." + str(price_usd) + " and " + str(sale_price_usd))
-                    price_btc = js["btc"]
-                    available_coins = js["coins"]
-                else:
-                    price_btc = 0
-                    price_btc = 0
-                    available_coins = 0
-                chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-                name = chat_member.user.mention
-                await SaleFormPercentage.coins.set()
-                async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
-                    proxy['coin'] = symbol
-                    proxy['price_usd'] = price_usd
-                    proxy['price_btc'] = price_btc
-                    proxy['sale_price_usd'] = sale_price_usd
-                    proxy['sale_price_btc'] = sale_price_btc
-                    proxy['available_coins'] = available_coins
-                
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-                markup.add("25%", "50%", "75%", "100%")
-                markup.add("Cancel")
-
-                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. \nEither enter number of coins from availble {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
-        else:
-            await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
-        # out = out + f'\nFINAL BALANCE: ${new_balance}'        
-        # await message.reply(out)
-    except Exception as e:
-        logging.error("Sell Percentage Error:" + str(e))
-        await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /dumper btc')
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
@@ -1046,27 +752,17 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
         if len(symbol_split) > 0:
             symbol = symbol_split[0]
             symbol = symbol.strip().lower()
-            sale_price_usd, _, _, sale_price_btc = get_price(symbol)
-            data = coin_price_realtime(symbol)
-            usd_data = data[symbol.upper()]["quote"]["USD"]
-            if usd_data["price"] > 0:
-                sale_price_usd = usd_data["price"]
-            sale_price_usd_tmp = get_bn_price(symbol) 
-            if sale_price_usd_tmp > 0:
-                sale_price_usd = sale_price_usd_tmp
-
+            sale_price_usd = get_bn_price(symbol, PRICES_IN) 
             if sale_price_usd == 0:
                 await message.reply("Sorry the API did not return a price for " + symbol + " try again in a minute.")
             else:
                 js = r.get("At_" + chat_id + "_" + symbol + "_" + user_id).decode('utf-8')
                 if js is not None:
                     js = json.loads(js)
-                    price_usd = js["usd"]
-                    price_btc = js["btc"]
+                    price_usd = js[PRICES_IN.lower()]
                     available_coins = js["coins"]
                 else:
-                    price_btc = 0
-                    price_btc = 0
+                    price_usd = 0
                     available_coins = 0
                 chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
                 name = chat_member.user.mention
@@ -1074,16 +770,14 @@ async def set_dump_point(message: types.Message, regexp_command, state: FSMConte
                 async with state.proxy() as proxy:  # proxy = FSMContextProxy(state); await proxy.load()
                     proxy['coin'] = symbol
                     proxy['price_usd'] = price_usd
-                    proxy['price_btc'] = price_btc
                     proxy['sale_price_usd'] = sale_price_usd
-                    proxy['sale_price_btc'] = sale_price_btc
                     proxy['available_coins'] = available_coins
                 
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 markup.add("25%", "50%", "75%", "100%")
                 markup.add("Cancel")
 
-                await message.reply(f"{name}: {symbol} @ ${round_sense(sale_price_usd)}. \nEither enter number of coins from availble {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
+                await message.reply(f"{name}: {symbol} @ {round_sense(sale_price_usd)}{PRICES_IN}. \nEither enter number of coins from availble {available_coins}, or selected percentage.\n Sell how many coins?", reply_markup=markup)
         else:
             await bot.send_message(chat_id=message.chat.id, text='Missing coin in sale, try /dump grt for example.')
         # out = out + f'\nFINAL BALANCE: ${new_balance}'        
@@ -1152,24 +846,22 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             
             profit_or_loss = (data["sale_price_usd"] * coins) - (data["price_usd"] * coins)
             if profit_or_loss > 0:
-                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Profit USD:', '🚀', md.text(str(round_sense(profit_or_loss))))
             else:
-                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round(profit_or_loss, 2))))
+                profit_or_loss_md = md.text('Loss USD:', '🔻', md.text(str(round_sense(profit_or_loss))))
             # And send message
             await bot.send_message(
                 message.chat.id,
                 md.text(
                     md.text('User:', md.code(message.from_user.mention)),
                     md.text('Coin:', md.code(data['coin'].upper())),
-                    md.text('Buy Price USD:', md.text(round_sense(data['price_usd']))),
-                    md.text('Buy Price BTC:', md.text(round(data['price_btc'], 6))),
-                    md.text('Sale Price USD:', md.text(round_sense(data['sale_price_usd']))),
-                    md.text('Sale Price BTC:', md.text(round(data['sale_price_btc'], 6))),
+                    md.text('Buy Price ' + PRICES_IN + ':', md.text(round_sense(data['price_usd']))),
+                    md.text('Sale Price ' + PRICES_IN + ':', md.text(round_sense(data['sale_price_usd']))),
                     md.text('Total Coins Sold:', md.text(str(coins))),
                     md.text('Remaining Coins:', md.text(str(round(remaining_balance, 4)))),
-                    md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
+                    md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
                     profit_or_loss_md,
-                    md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
                     sep='\n',
                 ),
                 reply_markup=markup,

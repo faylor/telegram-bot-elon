@@ -362,7 +362,7 @@ def get_price(label):
 def coin_price_realtime(label, convert=None):
     try:
         http.headers.clear()
-        http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
+        # http.headers.update({"X-CMC_PRO_API_KEY": os.environ["COIN_API"]})
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
         if convert is None:
             parameters = {
