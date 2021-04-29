@@ -343,7 +343,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         saves = r.scan_iter("At_" + chat_id + "_*_" + str(message.from_user.id))
         out = ""
         # in_prices = get_user_price_config(message.from_user.id)
-        out = out + "<pre>Buy At   |  +/-   | Coins  | $Value\n"
+        out = out + "<pre>Buy At   |  +/-   | Coins  | Val " + PRICES_IN + "\n"
         total_change = float(0.00)
         counter = 0
         total_value = 0
@@ -529,7 +529,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             markup.add("25%", "50%", "75%", "100%")
             markup.add("Cancel")
 
-            await message.reply(f"{name}: {symbol} @ {round_sense(p)}{PRICES_IN}. \nBalance = ${usd} available. Buy $? worth?", reply_markup=markup)
+            await message.reply(f"{name}: {symbol} @ {round_sense(p)}{PRICES_IN}. \nBalance = {usd} {PRICES_IN} available. Buy?", reply_markup=markup)
         else:
             await message.reply(f"Add the Coin after grab, eg: /grab btc")
     except Exception as e:
