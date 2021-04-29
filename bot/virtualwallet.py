@@ -74,7 +74,8 @@ async def reset_bags(message: types.Message):
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
-            r.delete(key)
+            js = {"live": 0, PRICES_IN.lower(): 0}
+            r.set(key, json.dumps(js))
         await message.reply(f'Ok emptied all bags, enjoy. Reset funds with /gimme')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
