@@ -93,7 +93,7 @@ async def remove_from_shop_list(message: types.Message,  state: FSMContext):
                 
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 markup.add(*config["shop_list"])
-                markup.add("Cancel")
+                markup.add("-- Done --")
                     
                 await message.reply(f"Buying:\n", reply_markup=markup)
    
@@ -103,10 +103,11 @@ async def remove_from_shop_list(message: types.Message,  state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
 
-@dp.message_handler(lambda message: message.text in ["cancel", "Cancel"], state=ShopForm.item)
+@dp.message_handler(lambda message: message.text in ["cancel", "Cancel", "-- Done --"], state=ShopForm.item)
 async def cancel_spent(message: types.Message, state: FSMContext):
     await state.finish()
-    return await message.reply("Cancelled Shopping.")
+    markup = types.ReplyKeyboardRemove()
+    return await message.reply("Done Shopping.")
 
 @dp.message_handler(state=ShopForm.item)
 async def process_shop_list(message: types.Message, state: FSMContext):
@@ -120,6 +121,7 @@ async def process_shop_list(message: types.Message, state: FSMContext):
                 if "shop_list" in config:
                     if item_bought_response in config["shop_list"]:
                         config["shop_list"].remove(item_bought_response)
+                        logging.info(json.dumps(config))
                         r.set(message.chat.id, json.dumps(config))
                         await message.reply(f'{message.from_user.first_name}, done. You bought ' + str(item_bought_response))
                     else:
