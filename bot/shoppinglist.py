@@ -107,7 +107,7 @@ async def remove_from_shop_list(message: types.Message,  state: FSMContext):
 async def cancel_spent(message: types.Message, state: FSMContext):
     await state.finish()
     markup = types.ReplyKeyboardRemove()
-    return await message.reply("Done Shopping.", markup=markup)
+    return await message.reply("Done Shopping.", reply_markup=markup)
 
 @dp.message_handler(state=ShopForm.item)
 async def process_shop_list(message: types.Message, state: FSMContext):
