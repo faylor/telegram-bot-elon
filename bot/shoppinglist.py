@@ -113,7 +113,6 @@ async def cancel_spent(message: types.Message, state: FSMContext):
 async def process_shop_list(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            markup = types.ReplyKeyboardRemove()
             item_bought_response = message.text.lower().strip()
             config = r.get(message.chat.id)
             if config is not None:
@@ -121,9 +120,13 @@ async def process_shop_list(message: types.Message, state: FSMContext):
                 if "shop_list" in config:
                     if item_bought_response in config["shop_list"]:
                         config["shop_list"].remove(item_bought_response)
-                        logging.info(json.dumps(config))
                         r.set(message.chat.id, json.dumps(config))
-                        return await message.reply(f'{message.from_user.first_name}, done. You bought ' + str(item_bought_response))
+
+                        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                        markup.add(*config["shop_list"])
+                        markup.add("-- Done --")
+                            
+                        return await message.reply(f"Updated " + str(item_bought_response) + ":\n", reply_markup=markup)
                     else:
                         return await message.reply(f'{message.from_user.first_name}, not found.. ' + str(item_bought_response))
         # Finish conversation
