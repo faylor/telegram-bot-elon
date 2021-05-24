@@ -95,7 +95,7 @@ async def remove_from_shop_list(message: types.Message,  state: FSMContext):
                 markup.add(*config["shop_list"])
                 markup.add("-- Done --")
                     
-                await message.reply(f"Buying:\n", reply_markup=markup)
+                return await message.reply(f"Buying:\n", reply_markup=markup)
    
         await message.reply(f'{message.from_user.first_name} No shopping found, try /+bananas etc..')
     except Exception as e:
@@ -123,9 +123,9 @@ async def process_shop_list(message: types.Message, state: FSMContext):
                         config["shop_list"].remove(item_bought_response)
                         logging.info(json.dumps(config))
                         r.set(message.chat.id, json.dumps(config))
-                        await message.reply(f'{message.from_user.first_name}, done. You bought ' + str(item_bought_response))
+                        return await message.reply(f'{message.from_user.first_name}, done. You bought ' + str(item_bought_response))
                     else:
-                        await message.reply(f'{message.from_user.first_name}, not found.. ' + str(item_bought_response))
+                        return await message.reply(f'{message.from_user.first_name}, not found.. ' + str(item_bought_response))
         # Finish conversation
         await state.finish()
     except Exception as e:
