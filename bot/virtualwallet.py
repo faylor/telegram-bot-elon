@@ -119,7 +119,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
             js = json.loads(save.decode("utf-8"))
             if PRICES_IN.lower() in js:
                 current_amount = float(js[PRICES_IN.lower()])
-        js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": float(js["trades"])}
+        js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": int(js["trades"])}
         r.set(key, json.dumps(js))
 
         await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island\n')
@@ -162,7 +162,7 @@ def get_user_bag_score(chat_id, user_id):
         if js is not None:
             js = js.decode('utf-8')
             js = json.loads(js)
-            return float(js["live"]), float(js[PRICES_IN.lower()]), float(js["trades"])
+            return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
         else:
             if PRICES_IN.lower() == "btc":
                 amount = 1
@@ -410,7 +410,7 @@ async def send_user_balance(message: types.Message, regexp_command):
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        out = out + "\n        TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
+        out = out + "\n       TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
         
         if "022" in message.from_user.mention:
             out = '👑 Reigning Champ\n' + out
@@ -480,7 +480,7 @@ async def totals_user_scores2(message: types.Message):
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id)
                 score_usd = float(js[PRICES_IN.lower()])
-                trades_used = float(js["trades"])
+                trades_used = int(js["trades"])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 1
