@@ -25,7 +25,7 @@ from .user import get_user_price_config
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
 PRICES_IN = "USDT"
-MAX_TRADES = 3
+MAX_TRADES = 60
 # States
 class Form(StatesGroup):
     coin = State()
