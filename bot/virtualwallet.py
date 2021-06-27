@@ -24,7 +24,8 @@ from .user import get_user_price_config
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
-PRICES_IN = "BTC"
+PRICES_IN = "USDT"
+MAX_TRADES = 60
 # States
 class Form(StatesGroup):
     coin = State()
@@ -74,7 +75,7 @@ async def reset_bags(message: types.Message):
         saves = r.scan_iter(SCORE_KEY.format(chat_id=str(message.chat.id), user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
-            js = {"live": 0, PRICES_IN.lower(): 0}
+            js = {"live": 0, PRICES_IN.lower(): 0, "trades": 0}
             r.set(key, json.dumps(js))
         await message.reply(f'Ok emptied all bags, enjoy. Reset funds with /gimme')
     except Exception as e:
@@ -96,9 +97,9 @@ async def add_bag_usd(message: types.Message, regexp_command):
                 js = json.loads(saved.decode("utf-8"))
                 if PRICES_IN.lower() in js:
                     current_amount = float(js[PRICES_IN.lower()])
-            js = {"live": 0, PRICES_IN.lower(): amount + current_amount}
+            js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": 0}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island \n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO <NEW NAME> \n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -118,7 +119,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
             js = json.loads(save.decode("utf-8"))
             if PRICES_IN.lower() in js:
                 current_amount = float(js[PRICES_IN.lower()])
-        js = {"live": 0, PRICES_IN.lower(): amount + current_amount}
+        js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": float(js["trades"])}
         r.set(key, json.dumps(js))
 
         await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island\n')
@@ -161,29 +162,30 @@ def get_user_bag_score(chat_id, user_id):
         if js is not None:
             js = js.decode('utf-8')
             js = json.loads(js)
-            return float(js["live"]), float(js[PRICES_IN.lower()])
+            return float(js["live"]), float(js[PRICES_IN.lower()]), float(js["trades"])
         else:
             if PRICES_IN.lower() is "btc":
                 amount = 1
             else:
                 amount = 1000
-            js = {"live": 0, PRICES_IN.lower(): amount}
+            js = {"live": 0, PRICES_IN.lower(): amount, "trades": 0}
             r.set(key, json.dumps(js))
-            return 0, amount
+            return 0, amount, 0
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
 def user_spent_usd(chat_id, user_id, usd, coin):
     try:
-        _, account_usd = get_user_bag_score(chat_id, user_id)
+        _, account_usd, trade_count = get_user_bag_score(chat_id, user_id)
         if account_usd is None:
             account_usd = 0
         new_account_usd = account_usd - usd
         if new_account_usd < 0:
             return None
-        new_account_usd = round(new_account_usd, 8)    
+        new_account_usd = round(new_account_usd, 8)
+        new_trades_count = trade_count + 1
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
-        js = {"live": 0, PRICES_IN.lower(): new_account_usd}
+        js = {"live": 0, PRICES_IN.lower(): new_account_usd, "trades": new_trades_count}
         r.set(key, json.dumps(js))
         log_key =  SCORE_LOG_KEY.format(chat_id=str(chat_id), user_id=user_id)
         current_log = r.get(log_key)
@@ -193,7 +195,7 @@ def user_spent_usd(chat_id, user_id, usd, coin):
             current_log = json.loads(current_log.decode("utf-8"))
         current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, PRICES_IN.lower(): new_account_usd}})
         r.set(log_key, json.dumps(current_log))
-        return new_account_usd
+        return new_account_usd, new_trades_count
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
         return None
@@ -318,9 +320,10 @@ async def send_user_balance_from_other_chat(message: types.Message, regexp_comma
             i = i + 1
             
         if chat_id is not None:
-            _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+            _, usd, trades = get_user_bag_score(chat_id, str(message.from_user.id))
             out = out + "\n             UNUSED " + PRICES_IN + " = " + str(round(usd,2))
             out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value + usd,2)) + "\n"
+            out = out + "\n        TRADE COUNT = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
         else:
             out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value,2)) + "\n"
         total_change = round(total_change, 2)
@@ -400,14 +403,16 @@ async def send_user_balance(message: types.Message, regexp_command):
                 out = out + f"| {symbol} | NA | NA | NA | NA\n"
             i = i + 1
         
-        _, usd = get_user_bag_score(chat_id, str(message.from_user.id))
+        _, usd, trades = get_user_bag_score(chat_id, str(message.from_user.id))
         out = out + "\n             UNUSED " + PRICES_IN + " = " + str(round(usd,2))
         out = out + "\n        TOTAL " + PRICES_IN + " VALUE = " + str(round(total_value + usd,2)) + "\n"
         total_change = round(total_change, 2)
         out = out + "</pre>\n     SUMMED CHANGE = " + str(total_change) + "%"
         if counter > 0:
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
-        if message.from_user.id == 1597217560:
+        out = out + "\n        TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
+        
+        if "022" in message.from_user.mention:
             out = '👑 Reigning Champ\n' + out
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
@@ -460,7 +465,7 @@ async def totals_user_scores2(message: types.Message):
         chat_id = str(message.chat.id)
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-        out = ["<pre>Who?              Live Val    " + PRICES_IN]
+        out = ["<pre>Who?              Live Val    " + PRICES_IN + " Trades"]
         scores = [0]
         for key in saves:
             key = key.decode('utf-8')
@@ -475,19 +480,20 @@ async def totals_user_scores2(message: types.Message):
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id)
                 score_usd = float(js[PRICES_IN.lower()])
+                trades_used = float(js["trades"])
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 1
                     while i < len(scores) and score_total < scores[i]:
                         i = i + 1
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
-                    out.insert(i, f"🔸 {user} {score_live} {score_usd}")
+                    out.insert(i, f"🔸 {user} {score_live} {score_usd} {trades_used}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
-                    out.append(f"🔸 {user} {score_live} {score_usd}")
-        out.append("</pre>\nRACE TO 2BTC!!")
+                    out.append(f"🔸 {user} {score_live} {score_usd} {trades_used}")
+        out.append("</pre>\nEnds Sunday 1st July, MAXIMUM TRADES = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
@@ -514,9 +520,11 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
             
-            _, usd = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+            _, usd, trades = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
             if usd <= 0:
                 return await message.reply(f"You have no {PRICES_IN}, you fool.")
+            if trades >= MAX_TRADES:
+                return await message.reply(f"You have run out of TRADES! {MAX_TRADES}, you fool.")
             
             chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
             name = chat_member.user.mention
