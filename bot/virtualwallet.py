@@ -494,7 +494,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd_str} {trades_used}")
-        out.append("</pre>\nEnds Sunday 1st July, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Sunday 1st August, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
