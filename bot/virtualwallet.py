@@ -161,7 +161,9 @@ def get_user_bag_score(chat_id, user_id):
         js = r.get(key)
         if js is not None:
             js = js.decode('utf-8')
+            logging.error("JS OUT:" + str(js))
             js = json.loads(js)
+            
             return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
         else:
             if PRICES_IN.lower() == "btc":
