@@ -493,7 +493,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd} {trades_used}")
-        out.append("</pre>\nEnds Sunday 1st July, MAXIMUM TRADES = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Sunday 1st July, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
@@ -519,15 +519,11 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             p = get_bn_price(symbol, PRICES_IN) 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
-            logging.error("BUY 1:")
             _, usd, trades = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
-            logging.error("BUY 2:" + str(trades))
             if usd <= 0:
                 return await message.reply(f"You have no {PRICES_IN}, you fool.")
             if trades >= MAX_TRADES:
-                logging.error("BUY 3:")
                 return await message.reply(f"You have run out of TRADES! {MAX_TRADES}, you fool.")
-            logging.error("BUY 4:")
             chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
             name = chat_member.user.mention
             await Form.spent.set()
@@ -606,10 +602,10 @@ async def process_spend(message: types.Message, state: FSMContext):
             if spend <= 0 or price == 0:
                 return await message.reply("Total Spend or price has gotta be a more than 0.\nHow old are you? (digits only)")
 
-            remaining_balance = user_spent_usd(chat_id, user_id, spend, data['coin'])
+            remaining_balance, trades_count = user_spent_usd(chat_id, user_id, spend, data['coin'])
             if remaining_balance is None:
                 return await message.reply("Total Spend is more than Account Balance\nHow old are you? (digits only)")
-
+                
             coins = spend/price
             
             js = r.get("At_" + chat_id + "_" + data['coin'] + "_" + user_id)
@@ -633,6 +629,7 @@ async def process_spend(message: types.Message, state: FSMContext):
                     md.text('Total Spent ' + PRICES_IN + ':', md.text(message.text)),
                     md.text('Total Coins:', md.text(str(round(coins, 4)))),
                     md.text('Remaining Balance ' + PRICES_IN + ':', md.text(str(round_sense(remaining_balance)))),
+                    md.text('Trades Used:', md.text(str(trades_count))),
                     sep='\n',
                 ),
                 reply_markup=markup,
@@ -676,7 +673,7 @@ async def set_panic_point(message: types.Message, regexp_command):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
             
             r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
@@ -696,6 +693,7 @@ async def set_panic_point(message: types.Message, regexp_command):
                     md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
                     profit_or_loss_md,
                     md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
+                    md.text('Trades Used:', md.text(str(trades_count))),
                     sep='\n',
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -728,7 +726,7 @@ async def set_panic_point(message: types.Message):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
             
             r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
@@ -749,6 +747,7 @@ async def set_panic_point(message: types.Message):
                     md.text('Total From Sale USD:', md.text(str(round(sale_usd, 2)))),
                     profit_or_loss_md,
                     md.text('New Bag Balance USD:', md.text(str(new_balance))),
+                    md.text('Trades Used:', md.text(str(trades_count))),
                     sep='\n',
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -850,7 +849,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
             sale_usd = coins * sale_price_usd
-            new_balance = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
             remaining_balance = available_coins - coins
             if remaining_balance == 0:
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
@@ -882,6 +881,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
                     profit_or_loss_md,
                     md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
+                    md.text('Trades Used:', md.text(str(trades_count))),
                     sep='\n',
                 ),
                 reply_markup=markup,
