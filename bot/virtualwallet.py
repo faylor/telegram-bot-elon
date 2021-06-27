@@ -164,7 +164,7 @@ def get_user_bag_score(chat_id, user_id):
             js = json.loads(js)
             return float(js["live"]), float(js[PRICES_IN.lower()]), float(js["trades"])
         else:
-            if PRICES_IN.lower() is "btc":
+            if PRICES_IN.lower() == "btc":
                 amount = 1
             else:
                 amount = 1000
