@@ -565,7 +565,8 @@ async def cancel_spent(message: types.Message, state: FSMContext):
 @dp.message_handler(lambda message: message.text in ["cancel", "Cancel"], state=Form.spent)
 async def cancel_spent(message: types.Message, state: FSMContext):
     await state.finish()
-    return await message.reply("Cancelled.")
+    markup = types.ReplyKeyboardRemove()
+    return await message.reply("Cancelled.", reply_markup=markup)
 
 @dp.message_handler(state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
