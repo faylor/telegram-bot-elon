@@ -161,9 +161,7 @@ def get_user_bag_score(chat_id, user_id):
         js = r.get(key)
         if js is not None:
             js = js.decode('utf-8')
-            logging.error("JS OUT:" + str(js))
             js = json.loads(js)
-            
             return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
         else:
             if PRICES_IN.lower() == "btc":
@@ -521,13 +519,15 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             p = get_bn_price(symbol, PRICES_IN) 
             if p == 0:
                 return await message.reply(f"Hmmmm {symbol} is at not returning a price from API. Please try again.")
-            
+            logging.error("BUY 1:")
             _, usd, trades = get_user_bag_score(chat_id=str(message.chat.id), user_id=str(message.from_user.id))
+            logging.error("BUY 2:" + str(trades))
             if usd <= 0:
                 return await message.reply(f"You have no {PRICES_IN}, you fool.")
             if trades >= MAX_TRADES:
+                logging.error("BUY 3:")
                 return await message.reply(f"You have run out of TRADES! {MAX_TRADES}, you fool.")
-            
+            logging.error("BUY 4:")
             chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
             name = chat_member.user.mention
             await Form.spent.set()
