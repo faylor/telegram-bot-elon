@@ -535,6 +535,7 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
             
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
             markup.add("25%", "50%", "75%", "100%")
+            markup.add("Manual Entry")
             markup.add("Cancel")
 
             await message.reply(f"{name}: {symbol} @ {round_sense(p)}{PRICES_IN}. \nBalance = {usd} {PRICES_IN} available. Buy?", reply_markup=markup)
@@ -544,6 +545,11 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /buy btc')
 
+
+@dp.message_handler(lambda message: message.text in ["Manual Entry"], state=Form.spent)
+async def process_spent_invalid(message: types.Message):
+    markup = types.ForceReply(force_reply=True, selective=True)
+    return await message.reply("Enter Amount:", reply_markup=markup)
 
 @dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel", "cancel"], state=Form.spent)
 async def process_spent_invalid(message: types.Message):
