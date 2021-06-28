@@ -99,7 +99,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
                     current_amount = float(js[PRICES_IN.lower()])
             js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": 0}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO <NEW NAME> \n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Settlers of CRYPTAN\nTrade, Build & Settle as we build our empires together.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -122,7 +122,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": int(js["trades"])}
         r.set(key, json.dumps(js))
 
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Satoshis Island\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Settlers of CRYPTAN\nTrade, Build & Settle as we build our empires together.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
