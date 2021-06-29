@@ -465,7 +465,7 @@ async def totals_user_scores2(message: types.Message):
         chat_id = str(message.chat.id)
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-        out = ["<pre>Who?              Live Val    " + PRICES_IN + "     Trades"]
+        out = ["<pre>Who [Trades]       Live Val    " + PRICES_IN]
         scores = [0]
         for key in saves:
             key = key.decode('utf-8')
@@ -476,24 +476,25 @@ async def totals_user_scores2(message: types.Message):
                 value = value.decode('utf-8')
                 user_id = key.replace(chat_id + "_bagscore_", "")
                 user_member = await bot.get_chat_member(chat_id, user_id)
-                user = user_member.user.mention.ljust(14, ' ')
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id)
                 score_usd = float(js[PRICES_IN.lower()])
                 score_usd_str = str(round_sense(score_usd)).ljust(10, ' ')
                 trades_used = int(js["trades"])
+                user = user_member.user.mention + " [" + str(trades_used + "]")
+                user = user.ljust(14, ' ')
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 1
                     while i < len(scores) and score_total < scores[i]:
                         i = i + 1
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
-                    out.insert(i, f"🔸 {user} {score_live} {score_usd_str} {trades_used}")
+                    out.insert(i, f"🔸 {user} {score_live} {score_usd_str}")
                     scores.insert(i, score_total)
                 else:
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
-                    out.append(f"🔸 {user} {score_live} {score_usd_str} {trades_used}")
+                    out.append(f"🔸 {user} {score_live} {score_usd_str}")
         out.append("</pre>\nEnds Sunday 1st August, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
