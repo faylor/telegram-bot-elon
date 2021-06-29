@@ -481,9 +481,9 @@ async def totals_user_scores2(message: types.Message):
                 score_usd = float(js[PRICES_IN.lower()])
                 score_usd_str = str(round_sense(score_usd)).ljust(10, ' ')
                 trades_used = int(js["trades"])
-                
-                user = user_member.user.mention + " [" + str(trades_used) + "]"
-                user = user.ljust(14, ' ')
+
+                user = user_member.user.mention + "[" + str(trades_used) + "]"
+                user = user.ljust(20, ' ')
                 score_total = score_live + score_usd
                 if len(scores) > 1:
                     i = 1
