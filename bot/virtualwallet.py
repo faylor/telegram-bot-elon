@@ -465,7 +465,7 @@ async def totals_user_scores2(message: types.Message):
         chat_id = str(message.chat.id)
         
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-        out = ["<pre>Who [Trades]           Live Val    " + PRICES_IN]
+        out = ["<pre>Who [Trades]           Live Val  " + PRICES_IN]
         scores = [0]
         for key in saves:
             key = key.decode('utf-8')
@@ -479,7 +479,7 @@ async def totals_user_scores2(message: types.Message):
                 js = json.loads(value)
                 score_live = get_users_live_value(chat_id, user_id)
                 score_usd = float(js[PRICES_IN.lower()])
-                score_usd_str = str(round_sense(score_usd)).ljust(10, ' ')
+                score_usd_str = str(round_sense(score_usd)).ljust(8, ' ')
                 trades_used = int(js["trades"])
 
                 user = user_member.user.mention + "[" + str(trades_used) + "]"
