@@ -70,7 +70,7 @@ def add_random_prize_for_user(user_id, chat_id):
 def get_user_prizes(user_id, chat_id):
     cards = []
     if len(user_id.strip()) > 0:
-        config = r.get("cards_" + user)
+        config = r.get("cards_" + str(user_id))
         if config is not None:
             cards = json.loads(config)
     return cards
