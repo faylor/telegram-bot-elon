@@ -64,7 +64,7 @@ def add_random_prize_for_user(user_id, chat_id):
             print("Checking Loaded Add Prize Card.." + json.dumps(cards))
             if chat_id in cards and cards[chat_id] is not None:
                 print("Checking Loaded Add Prize Card..11")
-                cards[chat_id] = cards[chat_id] + choice
+                cards[chat_id] = cards[chat_id] + [choice]
             else:
                 print("Checking Loaded Add Prize Card..22")
                 cards[chat_id] = [choice]
