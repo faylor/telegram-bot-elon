@@ -69,6 +69,16 @@ def get_symbol_list2(symbols):
         symbol_split = [symbols]
     return symbol_split
 
+@dp.message_handler(state='*', commands=['cancel', 'Cancel'])
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    logging.info('Cancelling state %r', current_state)
+    await state.finish()
+    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
+
 @dp.message_handler(commands=['clearbags'])
 async def reset_bags(message: types.Message):
     try:
@@ -640,18 +650,7 @@ async def process_spent_invalid(message: types.Message):
     markup = types.ForceReply(force_reply=True, selective=True)
     return await message.reply("Enter Amount:", reply_markup=markup)
 
-@dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
-async def cancel_handler(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    if current_state is None:
-        return
 
-    logging.info('Cancelling state %r', current_state)
-    # Cancel state and inform user about it
-    await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 @dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel", "cancel"], state=Form.spent)
 async def process_spent_invalid(message: types.Message):
@@ -660,22 +659,6 @@ async def process_spent_invalid(message: types.Message):
     markup.add("Cancel")
     return await message.reply("Total Spend has gotta be a number.\nSelect percentage or write a number in box.", reply_markup=markup)
 
-@dp.message_handler(commands=["cancel", "Cancel"])
-async def cancel_main(message: types.Message):
-    markup = types.ReplyKeyboardRemove()
-    return await message.reply("Cancel All.", reply_markup=markup)
-
-@dp.message_handler(commands=["cancel", "Cancel"])
-async def cancel_spent(message: types.Message, state: FSMContext):
-    await state.finish()
-    markup = types.ReplyKeyboardRemove()
-    return await message.reply("Cancelled.", reply_markup=markup)
-
-@dp.message_handler(lambda message: message.text in ["cancel", "Cancel"], state=Form.spent)
-async def cancel_spent(message: types.Message, state: FSMContext):
-    await state.finish()
-    markup = types.ReplyKeyboardRemove()
-    return await message.reply("Cancelled.", reply_markup=markup)
 
 @dp.message_handler(state=Form.spent)
 async def process_spend(message: types.Message, state: FSMContext):
