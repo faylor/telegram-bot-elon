@@ -144,7 +144,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         user_member = await bot.get_chat_member(chat_id, user_id)
                         markup.add(user_member)
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
-            elif card_response == "trade_tokens":
+            elif card_response == "trade_token":
                 # Add to users trade total
                 print("not yet implemented")
                 markup = types.ReplyKeyboardRemove()
