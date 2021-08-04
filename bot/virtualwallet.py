@@ -602,6 +602,17 @@ def get_users_live_value(chat_id, user_id):
 
 def swap_users_bags(chat_id, user_id_one, user_id_two):
     try:
+        score_one = r.get(SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id_one)))
+        score_two = r.get(SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id_two)))
+        js_one = json.loads(score_one)
+        js_two = json.loads(score_two)
+        score_usd_one = js_one[PRICES_IN.lower()]
+        score_usd_two = js_two[PRICES_IN.lower()]
+        js_one[PRICES_IN.lower()] = score_usd_two
+        js_two[PRICES_IN.lower()] = score_usd_one
+        r.set(SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id_one)), json.dumps(js_one))
+        r.set(SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id_two)), json.dumps(js_two))
+
         saves_one = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_one))
         saves_two = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_two))
         keys_one = []
