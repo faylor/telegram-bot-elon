@@ -100,14 +100,15 @@ async def use_card(message: types.Message, state: FSMContext):
                 proxy['chat_id'] = chat_id
             
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-            for c in set(cards[cid]):
+            for c in set(cards[chat_id]):
                 markup.add(c)
 
             await message.reply(f"Use Which Card?", reply_markup=markup)
         else:
             await message.reply(f'No POW cards... Win some bets')
     except Exception as e:
-        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+        await message.reply(f'{message.from_user.first_name} Failed to run POW Card. ' + str(e))
+
 
 @dp.message_handler(state=POWCard.card)
 async def use_card_specific(message: types.Message, state: FSMContext):
