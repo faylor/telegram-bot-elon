@@ -91,7 +91,7 @@ async def reset_bags(message: types.Message):
 async def use_card(message: types.Message, state: FSMContext):
     try:
         uid = str(message.from_user.id)
-        chat_id = ""
+        chat_id = "-375104421"
         cards = get_user_prizes(uid, chat_id)
         if chat_id in cards:
             await POWCard.card.set()
