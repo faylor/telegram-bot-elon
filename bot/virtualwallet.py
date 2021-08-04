@@ -114,8 +114,8 @@ async def use_card(message: types.Message, state: FSMContext):
 async def use_card_specific(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            data['card'] = message.text
             card_response = message.text.lower().strip()
+            data['card'] = card_response
             if card_response == "red_shell":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -166,7 +166,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
             await message.reply(f"Running {card_response} on {to_user}?", reply_markup=markup)
         await state.finish()
     except Exception as e:
-        print("use_card_specific: " + str(e))
+        print("use_card_to_user: " + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
