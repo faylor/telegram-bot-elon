@@ -87,8 +87,8 @@ async def reset_bags(message: types.Message):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['pow']))
-async def use_card(message: types.Message, regexp_command, state: FSMContext):
+@dp.message_handler(commands=['pow'])
+async def use_card(message: types.Message, state: FSMContext):
     try:
         uid = str(message.from_user.id)
         chat_id = ""
