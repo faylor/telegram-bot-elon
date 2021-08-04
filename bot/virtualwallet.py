@@ -20,7 +20,7 @@ import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
-from .user import get_user_price_config
+from .user import get_user_price_config, get_user_prizes
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
@@ -42,6 +42,12 @@ class SaleFormPercentage(StatesGroup):
     sale_price_btc = State()
     available_coins = State()  # Will be represented in storage as 'Form:available_coins'
     coins = State()  # Will be represented in storage as 'Form:coins'
+
+class POWCard(StatesGroup):
+    card = State()
+    user_id = State()
+    chat_id = State()
+    to_user = State()
 
 
 def get_open_trades2(user, chat_id):
@@ -80,6 +86,67 @@ async def reset_bags(message: types.Message):
         await message.reply(f'Ok emptied all bags, enjoy. Reset funds with /gimme')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['pow']))
+async def use_card(message: types.Message, regexp_command, state: FSMContext):
+    try:
+        uid = str(message.from_user.id)
+        chat_id = ""
+        cards = get_user_prizes(uid, chat_id)
+        if chat_id in cards:
+            await POWCard.card.set()
+            async with state.proxy() as proxy: 
+                proxy['user_id'] = uid
+                proxy['chat_id'] = chat_id
+            
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+            for c in set(cards[cid]):
+                markup.add(c)
+
+            await message.reply(f"Use Which Card?", reply_markup=markup)
+        else:
+            await message.reply(f'No POW cards... Win some bets')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+@dp.message_handler(state=POWCard.card)
+async def use_card_specific(message: types.Message, state: FSMContext):
+    try:
+        async with state.proxy() as data:
+            markup = types.ReplyKeyboardRemove()
+            card_response = message.text.lower().strip()
+            await POWCard.to_user.set()
+            if spent_response == "red_shell":
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                chat_id = str(message.chat.id)
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        user_id = key.replace(chat_id + "_bagscore_", "")
+                        user_member = await bot.get_chat_member(chat_id, user_id)
+                        markup.add(user_member)
+                await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
+            elif spent_response == "ghost":
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                chat_id = str(message.chat.id)
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        user_id = key.replace(chat_id + "_bagscore_", "")
+                        user_member = await bot.get_chat_member(chat_id, user_id)
+                        markup.add(user_member)
+                await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
+            elif spent_response == "trade_tokens":
+                # Add to users trade total
+    except Exception as e:
+        print("use_card_specific: " + str(e))
+       
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
