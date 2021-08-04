@@ -72,6 +72,7 @@ def add_random_prize_for_user(user_id, chat_id):
                 cards[chat_id] = [choice]
             print("Checking Loaded Add Prize Card..44" + json.dumps(cards))
             r.set("cards_" + str(user_id), json.dumps(cards))
+        return "OK"
 
 def get_user_prizes(user_id, chat_id):
     cards = []
