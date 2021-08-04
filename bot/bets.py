@@ -15,7 +15,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from .bot import dp, bot, r
-from .user import add_win_for_user, add_random_prize_for_user, get_user_prizes, clear_users_cards, clear_cards
+from .user import add_win_for_user, add_random_prize_for_user, get_cards_remaining, get_user_prizes, clear_users_cards, clear_cards
 from .prices import get_abs_difference, get_price
 
 BETS_KEY = "{chat_id}_bets"
@@ -129,7 +129,9 @@ async def give_prize(message: types.Message):
             for c in cards[cid]:
                 media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS')
             await message.reply_media_group(media=media)
-
+            remaining = get_cards_remaining(cid)
+            await bot.send_message(chat_id=message.chat.id, text=f'Remaining Cards = {remaining}')
+    
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
 

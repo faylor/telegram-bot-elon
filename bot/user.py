@@ -102,6 +102,12 @@ def select_card(chat_id):
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
     return choice
 
+def get_cards_remaining(chat_id):
+    cards = r.get("chat_cards_" + str(chat_id))
+    if cards is None:
+        return []
+    cards = json.loads(cards)
+    return cards
 
 def clear_cards(chat_id):
     r.delete("chat_cards_" + str(chat_id))
