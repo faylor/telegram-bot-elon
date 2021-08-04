@@ -166,7 +166,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 # Add to users trade total
                 add_tokens_to_user(message.chat.id, message.from_user.id, 2)
                 markup = types.ReplyKeyboardRemove()
-                await message.reply("Added 2 Trades to your total!", reply_markup=markup)
+                await message.reply("Gave you 2 Trades back to your total!", reply_markup=markup)
                 await state.finish()
     except Exception as e:
         print("use_card_specific: " + str(e))
@@ -217,7 +217,7 @@ def add_tokens_to_user(chat_id, user_id, tokens):
         save = r.get(key)
         if save is not None:
             js = json.loads(save.decode("utf-8"))
-            js["trades"] = int(js["trades"]) + tokens
+            js["trades"] = int(js["trades"]) - tokens
             r.set(key, json.dumps(js))
     except Exception as e:
         print("add_tokens_to_user: " + str(e))
