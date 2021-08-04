@@ -86,7 +86,7 @@ def setup_cards(chat_id, red_shells = 6, ghost_cards = 3, trade_tokens = 23):
     cards = cards + (['ghost'] * ghost_cards)
     cards = cards + (['trade_token'] * trade_tokens)
     print(str(cards))
-    config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
+    config = r.set("chat_cards_" + str(chat_id), json.dumps({"cards": cards}))
 
 def select_card(chat_id):
     print("Select Card..")
@@ -98,8 +98,11 @@ def select_card(chat_id):
             raise Exception("Cannot create card set...")
     print("Select Cards from..")
     cards = json.loads(cards)
-    choice = random.choice(cards)
-    cards.remove(choice)
+    print("Select Cards from..1")
+    choice = random.choice(cards["cards"])
+    print("Select Cards from..2")
+    cards["cards"].remove(choice)
+    print("Select Cards from..3")
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
     return choice
 
