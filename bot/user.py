@@ -3,6 +3,7 @@ import json
 import requests
 import redis
 import asyncio
+import random
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -40,11 +41,55 @@ def get_user_price_config(user):
     except Exception as e:
         return "usd"
 
-def add_win_for_user(config, user_id):
+def add_win_for_user(config, user_id, chat_id):
     if len(user_id.strip()) > 0:
         user_id = str(user_id)
         if user_id not in config["winners_list"]:
             config["winners_list"][user_id] = 1
         else:
             config["winners_list"][user_id] = int(config["winners_list"][user_id]) + 1
+        #add_random_prize_for_user(user_id, chat_id)
+
+def add_random_prize_for_user(user_id, chat_id):
+    if len(user_id.strip()) > 0:
+        config = r.get("cards_" + user)
+        choice = select_card(chat_id)
+        if config is None:
+            r.set("cards_" + user, json.dumps({chat_id: [choice]}))
+        else:
+            cards = json.loads(config)
+            if chat_id in cards:
+                cards[chat_id] = cards.append(choice)
+            else:
+                cards.append({chat_id: [choice]})
+            r.set("cards_" + user, json.dumps(cards))
+
+def get_user_prizes(user_id, chat_id):
+    cards = []
+    if len(user_id.strip()) > 0:
+        config = r.get("cards_" + user)
+        if config is not None:
+            cards = json.loads(config)
+    return cards
+
+def setup_cards(chat_id, red_shells = 6, ghost_cards = 3, trade_tokens = 23):
+    cards = ['red_shell'] * red_shells
+    cards = cards.extend(['ghost'] * ghost_cards)
+    cards = cards.extend(['trade_token'] * trade_tokens)
+    config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
+
+def select_card(chat_id):
+    cards = json.loads(r.get("chat_cards_" + str(chat_id)))
+    if cards is None:
+        setup_cards()
+        cards = json.loads(r.get("chat_cards_" + str(chat_id)))
+        if cards is None:
+            raise Exception("Cannot create card set...")
+    choice = random.choice(cards)
+    cards.remove(choice)
+    config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
+    return choice
+
+    
+    
     

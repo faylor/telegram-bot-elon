@@ -15,7 +15,7 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from .bot import dp, bot, r
-from .user import add_win_for_user
+from .user import add_win_for_user, add_random_prize_for_user, get_user_prizes
 from .prices import get_abs_difference, get_price
 
 BETS_KEY = "{chat_id}_bets"
@@ -115,6 +115,16 @@ async def get_weekly(message: types.Message):
     out, _, _, _, _ = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
+@dp.message_handler(commands=['prize'])
+async def start_weekly(message: types.Message):
+    try:
+        cid = str(message.chat.id)
+        uid = str(message.from_user.id)
+        add_random_prize_for_user(uid, cid)
+        cards = get_user_prizes(uid, cid)
+        await bot.send_message(chat_id=message.chat.id, text="CARDS:" + json.dumps(cards))
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
