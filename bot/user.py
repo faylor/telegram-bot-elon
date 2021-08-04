@@ -52,11 +52,14 @@ def add_win_for_user(config, user_id, chat_id):
 
 def add_random_prize_for_user(user_id, chat_id):
     if len(user_id.strip()) > 0:
+        print("Add Prize Card..")
         config = r.get("cards_" + str(user_id))
         choice = select_card(chat_id)
         if config is None:
+            print("Add Basic Card..")
             r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
         else:
+            print("Checking Loaded Add Prize Card..")
             cards = json.loads(config)
             if chat_id in cards:
                 cards[chat_id] = cards.append(choice)
@@ -73,12 +76,15 @@ def get_user_prizes(user_id, chat_id):
     return cards
 
 def setup_cards(chat_id, red_shells = 6, ghost_cards = 3, trade_tokens = 23):
+    print("Setup Deck of Cards..")
     cards = ['red_shell'] * red_shells
     cards = cards.extend(['ghost'] * ghost_cards)
     cards = cards.extend(['trade_token'] * trade_tokens)
+    print(str(cards))
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
 
 def select_card(chat_id):
+    print("Select Card..")
     cards = json.loads(r.get("chat_cards_" + str(chat_id)))
     if cards is None:
         setup_cards()
