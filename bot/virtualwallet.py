@@ -139,7 +139,8 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
                         user_member = await bot.get_chat_member(chat_id, user_id)
-                        markup.add(user_member)
+                        mention_name = member.user.mention
+                        markup.add(str(mention_name))
                 markup.add("Cancel")
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
             elif card_response == "ghost":
@@ -157,7 +158,8 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
                         user_member = await bot.get_chat_member(chat_id, user_id)
-                        markup.add(str(user_member))
+                        mention_name = member.user.mention
+                        markup.add(str(mention_name))
                         print("i")
                 print("hhh")
                 markup.add("Cancel")
