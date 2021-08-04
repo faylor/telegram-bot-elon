@@ -213,7 +213,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
 
 def add_tokens_to_user(chat_id, user_id, tokens):
     try:
-        key = SCORE_KEY.format(chat_id=str(message.chat.id), user_id=str(user_id))
+        key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
         save = r.get(key)
         if save is not None:
             js = json.loads(save.decode("utf-8"))
