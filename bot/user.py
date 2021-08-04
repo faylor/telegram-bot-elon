@@ -87,7 +87,7 @@ def select_card(chat_id):
     print("Select Card..")
     cards = r.get("chat_cards_" + str(chat_id))
     if cards is None:
-        setup_cards()
+        setup_cards(chat_id)
         cards = json.loads(r.get("chat_cards_" + str(chat_id)))
         if cards is None:
             raise Exception("Cannot create card set...")
