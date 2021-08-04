@@ -15,8 +15,8 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from .bot import dp, bot, r
-from .user import add_win_for_user, add_random_prize_for_user, get_user_prizes
-from .prices import get_abs_difference, get_price, clear_users_cards, clear_cards
+from .user import add_win_for_user, add_random_prize_for_user, get_user_prizes, clear_users_cards, clear_cards
+from .prices import get_abs_difference, get_price
 
 BETS_KEY = "{chat_id}_bets"
   
