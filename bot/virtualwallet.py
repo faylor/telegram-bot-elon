@@ -144,6 +144,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
             elif spent_response == "trade_tokens":
                 # Add to users trade total
+                print("not yet")
     except Exception as e:
         print("use_card_specific: " + str(e))
        
