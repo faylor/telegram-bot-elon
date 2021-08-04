@@ -59,16 +59,16 @@ def add_random_prize_for_user(user_id, chat_id):
             print("Add Basic Card..")
             r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
         else:
-            print("Checking Loaded Add Prize Card..")
+            print("Checking Loaded Add Prize Card.." + str(choice))
             cards = json.loads(config)
             print("Checking Loaded Add Prize Card.." + json.dumps(cards))
             if chat_id in cards and cards[chat_id] is not None:
                 print("Checking Loaded Add Prize Card..11")
-                cards[chat_id] = cards[chat_id].append(choice)
+                cards[chat_id] = cards[chat_id] + choice
             else:
                 print("Checking Loaded Add Prize Card..22")
                 cards[chat_id] = [choice]
-            print("Checking Loaded Add Prize Card..44")
+            print("Checking Loaded Add Prize Card..44" + json.dumps(cards))
             r.set("cards_" + str(user_id), json.dumps(cards))
 
 def get_user_prizes(user_id, chat_id):
