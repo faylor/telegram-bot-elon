@@ -99,6 +99,13 @@ def select_card(chat_id):
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
     return choice
 
+
+def clear_cards(chat_id):
+    r.set("chat_cards_" + str(chat_id), json.dumps([]))
+
+def clear_users_cards(user_id):
+    r.set("cards_" + str(user_id), json.dumps({}))
+    
     
     
     
