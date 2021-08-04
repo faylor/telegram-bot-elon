@@ -74,6 +74,7 @@ def get_symbol_list2(symbols):
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
+        await message.reply('Done.', reply_markup=types.ReplyKeyboardRemove())
         return
     logging.info('Cancelling state %r', current_state)
     await state.finish()
