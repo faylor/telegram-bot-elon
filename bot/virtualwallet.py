@@ -189,8 +189,11 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     user_member = await bot.get_chat_member(chat_id, to_user_id)
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
-                        swap_users_bags(chat_id, message.from_user.id, to_user_id)
-                        await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}?", reply_markup=markup)
+                        ok = swap_users_bags(chat_id, message.from_user.id, to_user_id)
+                        if ok == 1:
+                            await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}?", reply_markup=markup)
+                        else:
+                            await message.reply(f"FAILED TO GHOST SWAP! {message.from_user.mention} to {mention_name}?", reply_markup=markup)
                         break
             elif card_response == "red_shell":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
@@ -599,23 +602,23 @@ def get_users_live_value(chat_id, user_id):
 
 def swap_users_bags(chat_id, user_id_one, user_id_two):
     try:
-        saves_one = r.scan_iter("At_" + chat_id + "_*_" + user_id_one)
-        saves_two = r.scan_iter("At_" + chat_id + "_*_" + user_id_two)
+        saves_one = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_one))
+        saves_two = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_two))
         keys_one = []
         keys_two = []
         for key in saves_one:
             k_one = key.decode('utf-8')
-            k_two = k.replace(user_id_one, user_id_two)
+            k_two = k.replace(str(user_id_one), str(user_id_two))
             r.set(k_two, r.get(k_one))
             r.delete(k_one)
         for key in saves_two:
             k_two = key.decode('utf-8')
-            k_one = k.replace(user_id_two, user_id_one)
+            k_one = k.replace(str(user_id_two), str(user_id_one))
             r.set(k_one, r.get(k_two))
             r.delete(k_two)   
         return 1     
     except Exception as e:
-        logging.warn("Couldnt get live values data:" + str(e))
+        logging.warn("Couldnt swap bags:" + str(e))
         return 0
 
 @dp.message_handler(commands=['ladder'])
