@@ -99,7 +99,7 @@ async def reset_bags(message: types.Message):
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
 @dp.message_handler(commands=['pow'])
-async def use_card(message: types.Message, state: FSMContext):
+async def use_card(message: types.Message):
     try:
         uid = str(message.from_user.id)
         chat_id = "-375104421"
