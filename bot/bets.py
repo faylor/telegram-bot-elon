@@ -124,13 +124,11 @@ async def give_prize(message: types.Message):
         clear_users_cards(uid)
         add_random_prize_for_user(uid, cid)
         cards = get_user_prizes(uid, cid)
-        await bot.send_message(chat_id=message.chat.id, text="CARDS:" + json.dumps(cards))
-
-        media = types.MediaGroup()
-        media.attach_photo(types.InputFile('assets/ghost.jpg'), 'GHOST!')
-        media.attach_photo(types.InputFile('assets/red_shell.jpg'), 'RED SHELL!')
-        media.attach_photo(types.InputFile('assets/trade_token.jpg'), 'TRADE TOKENS!')
-        await message.reply_media_group(media=media)
+        if cid in cards:
+            media = types.MediaGroup()
+            for c in cards[cid]:
+                media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS')
+            await message.reply_media_group(media=media)
 
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))

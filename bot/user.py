@@ -96,13 +96,9 @@ def select_card(chat_id):
         cards = r.get("chat_cards_" + str(chat_id))
         if cards is None:
             raise Exception("Cannot create card set...")
-    print("Select Cards from..")
     cards = json.loads(cards)
-    print("Select Cards from..1")
     choice = random.choice(cards["cards"])
-    print("Select Cards from..2")
     cards["cards"].remove(choice)
-    print("Select Cards from..3")
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
     return choice
 
