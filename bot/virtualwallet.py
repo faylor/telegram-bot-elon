@@ -139,7 +139,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
                         user_member = await bot.get_chat_member(chat_id, user_id)
-                        mention_name = member.user.mention
+                        mention_name = user_member.user.mention
                         markup.add(str(mention_name))
                 markup.add("Cancel")
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
@@ -149,22 +149,16 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 chat_id = str(message.chat.id)
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
                 for key in saves:
-                    print("f")
                     key = key.decode('utf-8')
                     value = r.get(key)
-                    print("g")
                     if value is not None:
-                        print("h")
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
                         user_member = await bot.get_chat_member(chat_id, user_id)
-                        mention_name = member.user.mention
+                        mention_name = user_member.user.mention
                         markup.add(str(mention_name))
-                        print("i")
-                print("hhh")
                 markup.add("Cancel")
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
-                print("fddd")
             elif card_response == "trade_token":
                 # Add to users trade total
                 print("not yet implemented")
