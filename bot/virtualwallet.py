@@ -99,7 +99,7 @@ async def reset_bags(message: types.Message):
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
 @dp.message_handler(commands=['pow'])
-async def use_card(message: types.Message):
+async def use_card(message: types.Message, state: FSMContext):
     try:
         uid = str(message.from_user.id)
         chat_id = "-375104421"
@@ -126,7 +126,9 @@ async def use_card_specific(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             card_response = message.text.lower().strip()
+            print("a")
             data['card'] = card_response
+            print("b")
             if card_response == "red_shell":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -142,11 +144,15 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         markup.add(user_member)
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
             elif card_response == "ghost":
+                print("c")
                 await POWCard.next()
+                print("d")
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 chat_id = str(message.chat.id)
+                print("e")
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
                 for key in saves:
+                    print("f")
                     key = key.decode('utf-8')
                     value = r.get(key)
                     if value is not None:
