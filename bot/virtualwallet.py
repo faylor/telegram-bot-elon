@@ -139,9 +139,10 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                     if value is not None:
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
-                        user_member = await bot.get_chat_member(chat_id, user_id)
-                        mention_name = user_member.user.mention
-                        markup.add(str(mention_name))
+                        if user_id != message.user.id:
+                            user_member = await bot.get_chat_member(chat_id, user_id)
+                            mention_name = user_member.user.mention
+                            markup.add(str(mention_name))
                 markup.add("Cancel")
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
             elif card_response == "ghost":
@@ -155,11 +156,12 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                     if value is not None:
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
-                        user_member = await bot.get_chat_member(chat_id, user_id)
-                        mention_name = user_member.user.mention
-                        markup.add(str(mention_name))
+                        if user_id != message.user.id:
+                            user_member = await bot.get_chat_member(chat_id, user_id)
+                            mention_name = user_member.user.mention
+                            markup.add(str(mention_name))
                 markup.add("Cancel")
-                await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
+                await message.reply("To Whom Shall We Ghost Swap Bags With?", reply_markup=markup)
             elif card_response == "trade_token":
                 # Add to users trade total
                 add_tokens_to_user(message.chat.id, message.user.id, 2)
