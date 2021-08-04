@@ -608,12 +608,12 @@ def swap_users_bags(chat_id, user_id_one, user_id_two):
         keys_two = []
         for key in saves_one:
             k_one = key.decode('utf-8')
-            k_two = k.replace(str(user_id_one), str(user_id_two))
+            k_two = k_one.replace(str(user_id_one), str(user_id_two))
             r.set(k_two, r.get(k_one))
             r.delete(k_one)
         for key in saves_two:
             k_two = key.decode('utf-8')
-            k_one = k.replace(str(user_id_two), str(user_id_one))
+            k_one = k_two.replace(str(user_id_two), str(user_id_one))
             r.set(k_one, r.get(k_two))
             r.delete(k_two)   
         return 1     
