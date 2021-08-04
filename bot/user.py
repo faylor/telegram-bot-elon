@@ -55,7 +55,9 @@ def add_random_prize_for_user(user_id, chat_id):
         print("Add Prize Card..")
         config = r.get("cards_" + str(user_id))
         choice = select_card(chat_id)
-        if config is None:
+        if choice is None:
+            return None
+        elif config is None:
             print("Add Basic Card..")
             r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
         else:
@@ -97,10 +99,13 @@ def select_card(chat_id):
         if cards is None:
             raise Exception("Cannot create card set...")
     cards = json.loads(cards)
-    choice = random.choice(cards["cards"])
-    cards["cards"].remove(choice)
-    config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
-    return choice
+    if len(cards["cards"]) == 0:
+        return None
+    else:
+        choice = random.choice(cards["cards"])
+        cards["cards"].remove(choice)
+        config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
+        return choice
 
 def get_cards_remaining(chat_id):
     cards = r.get("chat_cards_" + str(chat_id))

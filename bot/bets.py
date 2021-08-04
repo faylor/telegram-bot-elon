@@ -122,7 +122,10 @@ async def give_prize(message: types.Message):
         uid = str(message.from_user.id)
         #clear_cards(cid)
         #clear_users_cards(uid)
-        add_random_prize_for_user(uid, cid)
+        checker = add_random_prize_for_user(uid, cid)
+        if checker is None:
+            await bot.send_message(chat_id=message.chat.id, text=f'NO MORE PRIZE CARDS LEFT :(')
+    
         cards = get_user_prizes(uid, cid)
         if cid in cards:
             media = types.MediaGroup()
@@ -134,8 +137,8 @@ async def give_prize(message: types.Message):
                     media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS MORE THAN 10 CARDS')
             
             await message.reply_media_group(media=media)
-            remaining = get_cards_remaining(cid)
-            await bot.send_message(chat_id=message.chat.id, text=f'Remaining Cards = {remaining}')
+            #remaining = get_cards_remaining(cid)
+            #await bot.send_message(chat_id=message.chat.id, text=f'Remaining Cards = {len(remaining)}')
     
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
