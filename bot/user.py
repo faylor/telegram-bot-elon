@@ -52,17 +52,17 @@ def add_win_for_user(config, user_id, chat_id):
 
 def add_random_prize_for_user(user_id, chat_id):
     if len(user_id.strip()) > 0:
-        config = r.get("cards_" + user)
+        config = r.get("cards_" + str(user_id))
         choice = select_card(chat_id)
         if config is None:
-            r.set("cards_" + user, json.dumps({chat_id: [choice]}))
+            r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
         else:
             cards = json.loads(config)
             if chat_id in cards:
                 cards[chat_id] = cards.append(choice)
             else:
                 cards.append({chat_id: [choice]})
-            r.set("cards_" + user, json.dumps(cards))
+            r.set("cards_" + str(user_id), json.dumps(cards))
 
 def get_user_prizes(user_id, chat_id):
     cards = []

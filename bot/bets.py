@@ -116,7 +116,7 @@ async def get_weekly(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
 @dp.message_handler(commands=['prize'])
-async def start_weekly(message: types.Message):
+async def give_prize(message: types.Message):
     try:
         cid = str(message.chat.id)
         uid = str(message.from_user.id)
