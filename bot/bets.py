@@ -120,8 +120,8 @@ async def give_prize(message: types.Message):
     try:
         cid = str(message.chat.id)
         uid = str(message.from_user.id)
-        clear_cards(cid)
-        clear_users_cards(uid)
+        #clear_cards(cid)
+        #clear_users_cards(uid)
         add_random_prize_for_user(uid, cid)
         cards = get_user_prizes(uid, cid)
         if cid in cards:
