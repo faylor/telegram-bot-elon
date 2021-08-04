@@ -79,7 +79,7 @@ def setup_cards(chat_id, red_shells = 6, ghost_cards = 3, trade_tokens = 23):
     print("Setup Deck of Cards..")
     cards = []
     cards = cards + (['red_shell'] * red_shells)
-    cards = cards + (['ghost'] * ghost_cards))
+    cards = cards + (['ghost'] * ghost_cards)
     cards = cards + (['trade_token'] * trade_tokens)
     print(str(cards))
     config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
