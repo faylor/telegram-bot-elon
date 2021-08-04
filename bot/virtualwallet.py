@@ -615,18 +615,25 @@ def swap_users_bags(chat_id, user_id_one, user_id_two):
 
         saves_one = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_one))
         saves_two = r.scan_iter("At_" + str(chat_id) + "_*_" + str(user_id_two))
-        keys_one = []
+
         keys_two = []
-        for key in saves_one:
-            k_one = key.decode('utf-8')
-            k_two = k_one.replace(str(user_id_one), str(user_id_two))
-            r.set(k_two, r.get(k_one))
-            r.delete(k_one)
+        values_two = []
         for key in saves_two:
-            k_two = key.decode('utf-8')
-            k_one = k_two.replace(str(user_id_two), str(user_id_one))
-            r.set(k_one, r.get(k_two))
-            r.delete(k_two)   
+            keys_two.append(key.decode('utf-8'))
+            values_two.append(r.get(key))
+            r.delete(key)
+        
+        for key in saves_one:
+            key = key.decode('utf-8')
+            new_key = key.replace(str(user_id_one), str(user_id_two))
+            r.set(new_key, r.get(key))
+            r.delete(key)
+
+        i = 0
+        for key in keys_two:
+            new_key = key.replace(str(user_id_two), str(user_id_one))
+            r.set(new_key, values_two[i])
+            i = i + 1
         return 1     
     except Exception as e:
         logging.warn("Couldnt swap bags:" + str(e))
