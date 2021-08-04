@@ -219,6 +219,7 @@ def add_tokens_to_user(chat_id, user_id, tokens):
             js = json.loads(save.decode("utf-8"))
             js["trades"] = int(js["trades"]) - tokens
             r.set(key, json.dumps(js))
+            print("done!!!!")
     except Exception as e:
         print("add_tokens_to_user: " + str(e))
 
