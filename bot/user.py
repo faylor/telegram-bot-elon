@@ -62,9 +62,9 @@ def add_random_prize_for_user(user_id, chat_id):
             print("Checking Loaded Add Prize Card..")
             cards = json.loads(config)
             if chat_id in cards:
-                cards[chat_id] = cards.append(choice)
+                cards[chat_id] = cards[chat_id].append(choice)
             else:
-                cards.append({chat_id: [choice]})
+                cards[chat_id] = [choice]
             r.set("cards_" + str(user_id), json.dumps(cards))
 
 def get_user_prizes(user_id, chat_id):
