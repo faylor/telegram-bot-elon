@@ -180,7 +180,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardRemove()
             card_response = data["card"]
             data["to_user"] = to_user
-            chat_id = message.chat.id
+            chat_id = str(message.chat.id)
             if card_response == "ghost":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
                 for key in saves:
