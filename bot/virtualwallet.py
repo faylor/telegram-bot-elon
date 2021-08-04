@@ -44,9 +44,9 @@ class SaleFormPercentage(StatesGroup):
     coins = State()  # Will be represented in storage as 'Form:coins'
 
 class POWCard(StatesGroup):
-    card = State()
     user_id = State()
     chat_id = State()
+    card = State()
     to_user = State()
 
 
@@ -102,7 +102,7 @@ async def use_card(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
             for c in set(cards[chat_id]):
                 markup.add(c)
-
+            markup.add("Cancel")
             await message.reply(f"Use Which Card?", reply_markup=markup)
         else:
             await message.reply(f'No POW cards... Win some bets')
@@ -114,10 +114,10 @@ async def use_card(message: types.Message, state: FSMContext):
 async def use_card_specific(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
-            markup = types.ReplyKeyboardRemove()
+            data['card'] = message.text
             card_response = message.text.lower().strip()
-            await POWCard.to_user.set()
             if spent_response == "red_shell":
+                await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 chat_id = str(message.chat.id)
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
@@ -131,6 +131,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         markup.add(user_member)
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
             elif spent_response == "ghost":
+                await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 chat_id = str(message.chat.id)
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
@@ -145,10 +146,27 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
             elif spent_response == "trade_tokens":
                 # Add to users trade total
-                print("not yet")
+                print("not yet implemented")
+                markup = types.ReplyKeyboardRemove()
+            
+                await message.reply(f"Added 2 Trades to your total!", reply_markup=markup)
+                await state.finish()
     except Exception as e:
         print("use_card_specific: " + str(e))
        
+
+@dp.message_handler(state=POWCard.to_user)
+async def use_card_to_user(message: types.Message, state: FSMContext):
+    try:
+        async with state.proxy() as data:
+            to_user = message.text
+            markup = types.ReplyKeyboardRemove()
+            card_response = data["card"]
+            data["to_user"] = to_user
+            await message.reply(f"Running {card_response} on {to_user}?", reply_markup=markup)
+        await state.finish()
+    except Exception as e:
+        print("use_card_specific: " + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
@@ -621,6 +639,19 @@ async def grab_point(message: types.Message, regexp_command, state: FSMContext):
 async def process_spent_invalid(message: types.Message):
     markup = types.ForceReply(force_reply=True, selective=True)
     return await message.reply("Enter Amount:", reply_markup=markup)
+
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    logging.info('Cancelling state %r', current_state)
+    # Cancel state and inform user about it
+    await state.finish()
+    # And remove keyboard (just in case)
+    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 @dp.message_handler(lambda message: not message.text.replace(".", "", 1).isdigit() and message.text not in ["25%", "50%", "75%", "100%", "Cancel", "cancel"], state=Form.spent)
 async def process_spent_invalid(message: types.Message):
