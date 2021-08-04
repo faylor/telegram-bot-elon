@@ -105,10 +105,10 @@ def select_card(chat_id):
 
 
 def clear_cards(chat_id):
-    r.set("chat_cards_" + str(chat_id), json.dumps([]))
+    r.delete("chat_cards_" + str(chat_id))
 
 def clear_users_cards(user_id):
-    r.set("cards_" + str(user_id), json.dumps({}))
+    r.delete("cards_" + str(user_id))
     
     
     
