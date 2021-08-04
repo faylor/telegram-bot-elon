@@ -181,7 +181,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
             card_response = data["card"]
             data["to_user"] = to_user
             chat_id = message.chat.id
-            if card_repose == "ghost":
+            if card_response == "ghost":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
                 for key in saves:
                     key = key.decode('utf-8')
@@ -192,7 +192,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         swap_users_bags(chat_id, message.from_user.id, to_user_id)
                         await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}?", reply_markup=markup)
                         break
-            elif card_repose == "red_shell":
+            elif card_response == "red_shell":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
                 for key in saves:
                     key = key.decode('utf-8')
