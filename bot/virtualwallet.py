@@ -116,7 +116,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['card'] = message.text
             card_response = message.text.lower().strip()
-            if spent_response == "red_shell":
+            if card_response == "red_shell":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 chat_id = str(message.chat.id)
@@ -130,7 +130,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         user_member = await bot.get_chat_member(chat_id, user_id)
                         markup.add(user_member)
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
-            elif spent_response == "ghost":
+            elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
                 chat_id = str(message.chat.id)
@@ -144,7 +144,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                         user_member = await bot.get_chat_member(chat_id, user_id)
                         markup.add(user_member)
                 await message.reply(f"To Whom Shall We Lock Out?", reply_markup=markup)
-            elif spent_response == "trade_tokens":
+            elif card_response == "trade_tokens":
                 # Add to users trade total
                 print("not yet implemented")
                 markup = types.ReplyKeyboardRemove()
