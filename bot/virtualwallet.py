@@ -139,7 +139,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                     if value is not None:
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
-                        if user_id != message.user.id:
+                        if user_id != message.from_user.id:
                             user_member = await bot.get_chat_member(chat_id, user_id)
                             mention_name = user_member.user.mention
                             markup.add(str(mention_name))
@@ -156,7 +156,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                     if value is not None:
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
-                        if user_id != message.user.id:
+                        if user_id != message.from_user.id:
                             user_member = await bot.get_chat_member(chat_id, user_id)
                             mention_name = user_member.user.mention
                             markup.add(str(mention_name))
@@ -164,7 +164,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await message.reply("To Whom Shall We Ghost Swap Bags With?", reply_markup=markup)
             elif card_response == "trade_token":
                 # Add to users trade total
-                add_tokens_to_user(message.chat.id, message.user.id, 2)
+                add_tokens_to_user(message.chat.id, message.from_user.id, 2)
                 markup = types.ReplyKeyboardRemove()
                 await message.reply("Added 2 Trades to your total!", reply_markup=markup)
                 await state.finish()
@@ -189,8 +189,8 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     user_member = await bot.get_chat_member(chat_id, to_user_id)
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
-                        swap_users_bags(chat_id, message.user.id, to_user_id)
-                        await message.reply(f"GHOST SWAP! {message.user.mention} to {mention_name}?", reply_markup=markup)
+                        swap_users_bags(chat_id, message.from_user.id, to_user_id)
+                        await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}?", reply_markup=markup)
                         break
             elif card_repose == "red_shell":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
