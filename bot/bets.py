@@ -126,8 +126,13 @@ async def give_prize(message: types.Message):
         cards = get_user_prizes(uid, cid)
         if cid in cards:
             media = types.MediaGroup()
-            for c in cards[cid]:
-                media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS')
+            if len(cards[cid]) < 10:
+                for c in cards[cid]:
+                    media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS')
+            else:
+                for c in set(cards[cid]):
+                    media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS MORE THAN 10 CARDS')
+            
             await message.reply_media_group(media=media)
             remaining = get_cards_remaining(cid)
             await bot.send_message(chat_id=message.chat.id, text=f'Remaining Cards = {remaining}')
