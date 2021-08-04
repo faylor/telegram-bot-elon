@@ -24,6 +24,7 @@ from .user import get_user_price_config, get_user_prizes
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
+TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
 PRICES_IN = "USDT"
 MAX_TRADES = 60
 # States
@@ -161,7 +162,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
             elif card_response == "trade_token":
                 # Add to users trade total
-                print("not yet implemented")
+                add_tokens_to_user(message.chat.id, message.user.id, 2)
                 markup = types.ReplyKeyboardRemove()
                 await message.reply("Added 2 Trades to your total!", reply_markup=markup)
                 await state.finish()
@@ -177,10 +178,44 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
             markup = types.ReplyKeyboardRemove()
             card_response = data["card"]
             data["to_user"] = to_user
-            await message.reply(f"Running {card_response} on {to_user}?", reply_markup=markup)
+            chat_id = message.chat.id
+            if card_repose == "ghost":
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    to_user_id = key.replace(chat_id + "_bagscore_", "")
+                    user_member = await bot.get_chat_member(chat_id, to_user_id)
+                    mention_name = user_member.user.mention
+                    if data["to_user"] == mention_name:
+                        swap_users_bags(chat_id, message.user.id, to_user_id)
+                        await message.reply(f"GHOST SWAP! {message.user.mention} to {mention_name}?", reply_markup=markup)
+                        break
+            elif card_repose == "red_shell":
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    to_user_id = key.replace(chat_id + "_bagscore_", "")
+                    user_member = await bot.get_chat_member(chat_id, to_user_id)
+                    mention_name = user_member.user.mention
+                    if data["to_user"] == mention_name:
+                        twenty_four = datetime.datetime.now() + datetime.timedelta(hours=24)
+                        saves = r.save(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), {"expires": str(twenty_four)})
+                        await message.reply(f"LOCKED ACCOUNT! Ouchy {mention_name}!", reply_markup=markup)
+                        break
         await state.finish()
     except Exception as e:
         print("use_card_to_user: " + str(e))
+
+def add_tokens_to_user(chat_id, user_id, tokens):
+    try:
+        key = SCORE_KEY.format(chat_id=str(message.chat.id), user_id=str(user_id))
+        save = r.get(key)
+        if save is not None:
+            js = json.loads(save.decode("utf-8"))
+            js["trades"] = int(js["trades"]) + tokens
+            r.set(key, json.dumps(js))
+    except Exception as e:
+        print("add_tokens_to_user: " + str(e))
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
@@ -556,6 +591,27 @@ def get_users_live_value(chat_id, user_id):
                     total_value = total_value + (coins * p)
             i = i + 1
         return total_value
+    except Exception as e:
+        logging.warn("Couldnt get live values data:" + str(e))
+        return 0
+
+def swap_users_bags(chat_id, user_id_one, user_id_two):
+    try:
+        saves_one = r.scan_iter("At_" + chat_id + "_*_" + user_id_one)
+        saves_two = r.scan_iter("At_" + chat_id + "_*_" + user_id_two)
+        keys_one = []
+        keys_two = []
+        for key in saves_one:
+            k_one = key.decode('utf-8')
+            k_two = k.replace(user_id_one, user_id_two)
+            r.set(k_two, r.get(k_one))
+            r.delete(k_one)
+        for key in saves_two:
+            k_two = key.decode('utf-8')
+            k_one = k.replace(user_id_two, user_id_one)
+            r.set(k_one, r.get(k_two))
+            r.delete(k_two)   
+        return 1     
     except Exception as e:
         logging.warn("Couldnt get live values data:" + str(e))
         return 0
