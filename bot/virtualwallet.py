@@ -20,7 +20,7 @@ import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
-from .user import get_user_price_config, get_user_prizes
+from .user import get_user_price_config, get_user_prizes, delete_card
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
@@ -165,6 +165,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
             elif card_response == "trade_token":
                 # Add to users trade total
                 add_tokens_to_user(message.chat.id, message.from_user.id, 2)
+                ok = delete_card(message.chat.id, message.from_user.id, "trade_token")
                 markup = types.ReplyKeyboardRemove()
                 await message.reply("Gave you 2 Trades back to your total!", reply_markup=markup)
                 await state.finish()
@@ -191,6 +192,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     if data["to_user"] == mention_name:
                         ok = swap_users_bags(chat_id, message.from_user.id, to_user_id)
                         if ok == 1:
+                            ok = delete_card(message.chat.id, message.from_user.id, "ghost")
                             await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
                         else:
                             await message.reply(f"FAILED TO GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
@@ -205,6 +207,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     if data["to_user"] == mention_name:
                         twenty_four = datetime.datetime.now() + datetime.timedelta(hours=24)
                         saves = r.save(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), {"expires": str(twenty_four)})
+                        ok = delete_card(message.chat.id, message.from_user.id, "red_shell")
                         await message.reply(f"LOCKED ACCOUNT! Ouchy {mention_name}!", reply_markup=markup)
                         break
         await state.finish()

@@ -74,6 +74,19 @@ def add_random_prize_for_user(user_id, chat_id):
             r.set("cards_" + str(user_id), json.dumps(cards))
         return "OK"
 
+def delete_card(user_id, chat_id, card):
+    if len(user_id.strip()) > 0:
+        config = r.get("cards_" + str(user_id))
+        if card is None or config is None:
+            return None
+        else:
+            user_cards = json.loads(config)
+            if chat_id in user_cards and user_cards[chat_id] is not None:
+                user_cards[chat_id].remove(card)
+                r.set("cards_" + str(user_id), json.dumps(user_cards))
+                return "DELETED"
+    return "OK"
+
 def get_user_prizes(user_id, chat_id):
     cards = []
     if len(user_id.strip()) > 0:
