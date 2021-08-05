@@ -20,7 +20,7 @@ import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
-from .user import get_user_price_config, get_user_prizes, delete_card
+from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
@@ -96,6 +96,25 @@ async def reset_bags(message: types.Message):
             js = {"live": 0, PRICES_IN.lower(): 0, "trades": 0}
             r.set(key, json.dumps(js))
         await message.reply(f'Ok emptied all bags, enjoy. Reset funds with /gimme')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+
+
+@dp.message_handler(commands=['clearcards'])
+async def reset_cards(message: types.Message):
+    try:
+        chat_id = "-375104421"
+        clear_cards(chat_id)
+        chat_id = str(message.chat.id)
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+        for key in saves:
+            key = key.decode('utf-8')
+            value = r.get(key)
+            if value is not None:
+                value = value.decode('utf-8')
+                user_id = key.replace(chat_id + "_bagscore_", "")
+                clear_user_cards(str(user_id))
+        await message.reply(f'Ok cleared cards from Main Chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
