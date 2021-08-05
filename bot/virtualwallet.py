@@ -242,23 +242,15 @@ def date_hook(json_dict):
     return json_dict
 
 def is_account_locked(chat_id, user_id):
-    print("ok")
     saves = r.get(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
-    print("br" + str(saves))
     if saves is not None:
         js = json.loads(saves, object_hook=date_hook)
         if "expires" in js:
             expiry = js["expires"]
-            print("gtocha2" + str(expiry))
-            # dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
-            print("br2")
-            if datetime.datetime.now() < (expiry - datetime.timedelta(hours=22)):
-                print("br4")
+            if datetime.datetime.now() < expiry:
                 return True
             else:
-                print("br5")
                 r.delete(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
-                print("br6")
                 return False
     return False
 
