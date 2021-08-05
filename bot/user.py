@@ -80,10 +80,15 @@ def delete_card(user_id, chat_id, card):
         if card is None or config is None:
             return None
         else:
+            print("here")
             user_cards = json.loads(config)
+            print("here2: " + json.dumps(user_cards))
             if chat_id in user_cards and user_cards[chat_id] is not None:
+                print("here3")
                 user_cards[chat_id].remove(card)
+                print("here3: " + json.dumps(user_cards))
                 r.set("cards_" + str(user_id), json.dumps(user_cards))
+                print("here4: " + json.dumps(user_cards))
                 return "DELETED"
     return "OK"
 
