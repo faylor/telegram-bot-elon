@@ -236,7 +236,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
 def is_account_locked(chat_id, user_id):
     print("ok")
     saves = r.get(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
-    print("br")
+    print("br" + str(saves))
     if saves is not None:
         js = json.loads(saves)
         print("gtocha" + json.dumps(saves))
