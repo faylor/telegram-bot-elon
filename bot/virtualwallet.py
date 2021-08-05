@@ -222,8 +222,11 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
                         twenty_four = datetime.datetime.now() + datetime.timedelta(hours=24)
-                        saves = r.set(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), {"expires": str(twenty_four)})
+                        print("a")
+                        saves = r.set(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), json.dumps({"expires": str(twenty_four)}))
+                        print("b")
                         ok = delete_card(message.from_user.id, data["chat_id"], "red_shell")
+                        print("c")
                         await message.reply(f"LOCKED ACCOUNT! Ouchy {mention_name}!", reply_markup=markup)
                         break
         await state.finish()
