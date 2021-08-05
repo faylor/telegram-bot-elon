@@ -225,13 +225,27 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
                         twenty_four = datetime.datetime.now() + datetime.timedelta(hours=24)
-                        saves = r.save(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), {"expires": str(twenty_four)})
+                        saves = r.set(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), {"expires": str(twenty_four)})
                         ok = delete_card(message.from_user.id, data["chat_id"], "red_shell")
                         await message.reply(f"LOCKED ACCOUNT! Ouchy {mention_name}!", reply_markup=markup)
                         break
         await state.finish()
     except Exception as e:
         print("use_card_to_user: " + str(e))
+
+def is_account_locked(chat_id, user_id):
+    saves = r.get(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
+    if saves is not None:
+        js = json.loads(saves)
+        if "expires" in js:
+            expiry = js["expires"]
+            dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+            if datetime.datetime.now() < dt_object:
+                return True
+            else:
+                r.delete(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
+                return False
+    return False
 
 def add_tokens_to_user(chat_id, user_id, tokens):
     try:
@@ -713,6 +727,8 @@ async def totals_user_scores2(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
 async def grab_point(message: types.Message, regexp_command, state: FSMContext):
     try:
+        if is_account_locked(message.chat.id, message.from_user.id):
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
         
@@ -843,6 +859,8 @@ async def process_spend(message: types.Message, state: FSMContext):
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
+    if is_account_locked(message.chat.id, message.from_user.id):
+        return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
     try:
         to_symbol = regexp_command.group(1)
     except:
@@ -904,6 +922,8 @@ async def set_panic_point(message: types.Message, regexp_command):
 @dp.message_handler(commands=['feelinglucky'])
 async def set_panic_point(message: types.Message):
     try:
+        if is_account_locked(message.chat.id, message.from_user.id):
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
         user_id = str(message.from_user.id)
         chat_id = str(message.chat.id)
         
@@ -958,6 +978,8 @@ async def set_panic_point(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
+        if is_account_locked(message.chat.id, message.from_user.id):
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
         user_id = str(message.from_user.id)
