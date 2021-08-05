@@ -155,7 +155,7 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                     if value is not None:
                         value = value.decode('utf-8')
                         user_id = key.replace(chat_id + "_bagscore_", "")
-                        if int(user_id) != message.from_user.id:
+                        if int(user_id) == message.from_user.id:
                             user_member = await bot.get_chat_member(chat_id, user_id)
                             mention_name = user_member.user.mention
                             markup.add(str(mention_name))
