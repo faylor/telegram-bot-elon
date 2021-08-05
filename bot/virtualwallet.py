@@ -103,20 +103,17 @@ async def reset_bags(message: types.Message):
 @dp.message_handler(commands=['clearcards'])
 async def reset_cards(message: types.Message):
     try:
-        chat_id = "-375104421"
-        clear_cards(chat_id)
+        cards_chat_id = "-375104421"
+        clear_cards(cards_chat_id)
         chat_id = str(message.chat.id)
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         for key in saves:
             key = key.decode('utf-8')
-            value = r.get(key)
-            if value is not None:
-                value = value.decode('utf-8')
-                user_id = key.replace(chat_id + "_bagscore_", "")
-                clear_user_cards(str(user_id))
+            user_id = key.replace(chat_id + "_bagscore_", "")
+            clear_user_cards(str(user_id))
         await message.reply(f'Ok cleared cards from Main Chat.')
     except Exception as e:
-        await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
+        await message.reply(f'{message.from_user.first_name} Failed to clear cards.' + str(e))
 
 @dp.message_handler(commands=['pow'])
 async def use_card(message: types.Message, state: FSMContext):
