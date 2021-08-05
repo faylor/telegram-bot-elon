@@ -110,7 +110,7 @@ async def reset_cards(message: types.Message):
         for key in saves:
             key = key.decode('utf-8')
             user_id = key.replace(chat_id + "_bagscore_", "")
-            clear_user_cards(str(user_id))
+            clear_users_cards(str(user_id))
         await message.reply(f'Ok cleared cards from Main Chat.')
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to clear cards.' + str(e))
