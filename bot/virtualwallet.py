@@ -233,17 +233,25 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
     except Exception as e:
         print("use_card_to_user: " + str(e))
 
+def date_hook(json_dict):
+    for (key, value) in json_dict.items():
+        try:
+            json_dict[key] = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
+        except:
+            pass
+    return json_dict
+
 def is_account_locked(chat_id, user_id):
     print("ok")
     saves = r.get(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
     print("br" + str(saves))
     if saves is not None:
-        js = json.loads(saves)
+        js = json.loads(saves, object_hook=date_hook)
         print("gtocha" + json.dumps(saves))
         if "expires" in js:
             expiry = js["expires"]
             print("gtocha2" + str(expiry))
-            dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+            dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
             print("br2")
             if datetime.datetime.now() < dt_object:
                 print("br4")
