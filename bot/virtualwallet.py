@@ -252,7 +252,7 @@ def is_account_locked(chat_id, user_id):
             print("gtocha2" + str(expiry))
             # dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
             print("br2")
-            if datetime.datetime.now() < expiry:
+            if datetime.datetime.now() < (expiry - datetime.timedelta(hours=22):
                 print("br4")
                 return True
             else:
