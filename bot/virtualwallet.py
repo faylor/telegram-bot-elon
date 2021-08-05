@@ -234,16 +234,24 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
         print("use_card_to_user: " + str(e))
 
 def is_account_locked(chat_id, user_id):
+    print("ok")
     saves = r.get(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
+    print("br")
     if saves is not None:
         js = json.loads(saves)
+        print("gtocha" + json.dumps(saves))
         if "expires" in js:
             expiry = js["expires"]
+            print("gtocha2" + str(expiry))
             dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S")
+            print("br2")
             if datetime.datetime.now() < dt_object:
+                print("br4")
                 return True
             else:
+                print("br5")
                 r.delete(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
+                print("br6")
                 return False
     return False
 
