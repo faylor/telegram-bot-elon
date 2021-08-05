@@ -192,7 +192,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     if data["to_user"] == mention_name:
                         ok = swap_users_bags(chat_id, message.from_user.id, to_user_id)
                         if ok == 1:
-                            ok = delete_card(mchat_id, str(message.from_user.id), "ghost")
+                            ok = delete_card(chat_id, str(message.from_user.id), "ghost")
                             await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
                         else:
                             await message.reply(f"FAILED TO GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
