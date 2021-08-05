@@ -94,7 +94,7 @@ def get_user_prizes(user_id, chat_id):
             cards = json.loads(config)
     return cards
 
-def setup_cards(chat_id, red_shells = 6, ghost_cards = 3, trade_tokens = 1):
+def setup_cards(chat_id, red_shells = 10, ghost_cards = 4, trade_tokens = 23):
     print("Setup Deck of Cards..")
     cards = []
     cards = cards + (['red_shell'] * red_shells)
