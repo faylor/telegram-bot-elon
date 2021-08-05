@@ -247,13 +247,12 @@ def is_account_locked(chat_id, user_id):
     print("br" + str(saves))
     if saves is not None:
         js = json.loads(saves, object_hook=date_hook)
-        print("gtocha" + json.dumps(js))
         if "expires" in js:
             expiry = js["expires"]
             print("gtocha2" + str(expiry))
-            dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
+            # dt_object = datetime.datetime.strptime(expiry, "%Y-%m-%d %H:%M:%S.%f")
             print("br2")
-            if datetime.datetime.now() < dt_object:
+            if datetime.datetime.now() < expiry:
                 print("br4")
                 return True
             else:
