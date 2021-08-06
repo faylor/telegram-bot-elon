@@ -125,10 +125,8 @@ async def show_cards(message: types.Message):
         
         cards = get_user_prizes(uid, cid)
         if cid in cards:
-            print("HERE THE CARDS:" + str(cards[cid]))
             media = types.MediaGroup()
             counted_cards = Counter(cards[cid]) 
-            print("HERE THE CARDS2:" + str(counted_cards))
             for card_name, counter in counted_cards.items():
                 media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
             
