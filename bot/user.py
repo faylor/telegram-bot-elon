@@ -115,6 +115,7 @@ def select_card(chat_id):
         choice = random.choice(cards["cards"])
         cards["cards"].remove(choice)
         config = r.set("chat_cards_" + str(chat_id), json.dumps(cards))
+        print("Selected Card.." + choice)
         return choice
 
 def get_cards_remaining(chat_id):
