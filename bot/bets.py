@@ -141,7 +141,7 @@ async def show_cards(message: types.Message):
 async def prize_message(chat_id, user_id, name, winning_card):
     try:
         if winning_card is None:
-            return await bot.send_message(chat_id=chat_id, text=f'NO MORE PRIZE CARDS LEFT :(')
+            return await bot.send_message(chat_id=chat_id, text=f'NO MORE POW CARDS LEFT :(')
         
         media = types.MediaGroup()
         media.attach_photo(types.InputFile('assets/' + winning_card + '.jpg'), 'CONGRATULATIONS ' + name)
