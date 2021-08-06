@@ -240,11 +240,8 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
                         twenty_four = datetime.datetime.now() + datetime.timedelta(hours=24)
-                        print("a")
                         saves = r.set(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=to_user_id), json.dumps({"expires": str(twenty_four)}))
-                        print("b")
                         ok = delete_card(message.from_user.id, data["chat_id"], "red_shell")
-                        print("c")
                         await message.reply(f"LOCKED ACCOUNT! Ouchy {mention_name}!", reply_markup=markup)
                         break
         await state.finish()
@@ -280,7 +277,6 @@ def add_tokens_to_user(chat_id, user_id, tokens):
             js = json.loads(save.decode("utf-8"))
             js["trades"] = int(js["trades"]) - tokens
             r.set(key, json.dumps(js))
-            print("done!!!!")
     except Exception as e:
         print("add_tokens_to_user: " + str(e))
 
@@ -615,7 +611,7 @@ async def send_user_balance(message: types.Message, regexp_command):
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
         out = out + "\n       TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
         
-        if "022" in message.from_user.mention:
+        if "Jos" in message.from_user.mention:
             out = '👑 Reigning Champ\n' + out
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
@@ -738,7 +734,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd_str}")
-        out.append("</pre>\nEnds Sunday 1st August, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Saturday 5th September, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
