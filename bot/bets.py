@@ -131,7 +131,9 @@ async def show_cards(message: types.Message):
             for card_name, counter in counted_cards.items():
                 media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
             
-            await message.reply_media_group(media=media)
+            return await message.reply_media_group(media=media)
+        else:
+            return await message.reply(f'No POW cards... Win some bets')
             
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
