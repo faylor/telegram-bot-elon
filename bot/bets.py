@@ -165,7 +165,7 @@ async def finish_weekly(message: types.Message):
             await prize_message(message.chat.id, winner, winning_names[i], winning_card)
             i = i + 1
     else:
-        winning_card = add_win_for_user(config, winning_btc)
+        winning_card = add_win_for_user(config, winning_btc, message.chat.id)
         await prize_message(message.chat.id, winner, winning_name, winning_card)
     if "," in winning_eth:
         winners = winning_eth.split(",")
