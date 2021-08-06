@@ -48,31 +48,25 @@ def add_win_for_user(config, user_id, chat_id):
             config["winners_list"][user_id] = 1
         else:
             config["winners_list"][user_id] = int(config["winners_list"][user_id]) + 1
-        #add_random_prize_for_user(user_id, chat_id)
+        return add_random_prize_for_user(user_id, chat_id)
+    return None
 
 def add_random_prize_for_user(user_id, chat_id):
     if len(user_id.strip()) > 0:
-        print("Add Prize Card..")
         config = r.get("cards_" + str(user_id))
         choice = select_card(chat_id)
         if choice is None:
             return None
         elif config is None:
-            print("Add Basic Card..")
             r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
         else:
-            print("Checking Loaded Add Prize Card.." + str(choice))
             cards = json.loads(config)
-            print("Checking Loaded Add Prize Card.." + json.dumps(cards))
             if chat_id in cards and cards[chat_id] is not None:
-                print("Checking Loaded Add Prize Card..11")
                 cards[chat_id] = cards[chat_id] + [choice]
             else:
-                print("Checking Loaded Add Prize Card..22")
                 cards[chat_id] = [choice]
-            print("Checking Loaded Add Prize Card..44" + json.dumps(cards))
             r.set("cards_" + str(user_id), json.dumps(cards))
-        return "OK"
+        return choice
 
 def delete_card(user_id, chat_id, card):
     config = r.get("cards_" + str(user_id))

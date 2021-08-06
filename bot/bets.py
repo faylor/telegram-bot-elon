@@ -14,6 +14,8 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
+from collections import Counter
+
 from .bot import dp, bot, r
 from .user import add_win_for_user, add_random_prize_for_user, get_cards_remaining, get_user_prizes, clear_users_cards, clear_cards
 from .prices import get_abs_difference, get_price
@@ -115,34 +117,36 @@ async def get_weekly(message: types.Message):
     out, _, _, _, _ = await weekly_tally(message, r)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
-@dp.message_handler(commands=['prize'])
-async def give_prize(message: types.Message):
+@dp.message_handler(commands=['cards'])
+async def show_cards(message: types.Message):
     try:
         cid = str(message.chat.id)
         uid = str(message.from_user.id)
-        print("cid" + str(cid))
-        #clear_cards(cid)
-        #clear_users_cards(uid)
-        checker = add_random_prize_for_user(uid, cid)
-        if checker is None:
-            await bot.send_message(chat_id=message.chat.id, text=f'NO MORE PRIZE CARDS LEFT :(')
-    
+        
         cards = get_user_prizes(uid, cid)
         if cid in cards:
             media = types.MediaGroup()
-            if len(cards[cid]) < 10:
-                for c in cards[cid]:
-                    media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS')
-            else:
-                for c in set(cards[cid]):
-                    media.attach_photo(types.InputFile('assets/' + c + '.jpg'), 'CONGRATULATIONS MORE THAN 10 CARDS')
+            counted_cards = Counter(cards[cid]) 
+            
+            for card_name, counter in counted_cards.items():
+                media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
             
             await message.reply_media_group(media=media)
-            #remaining = get_cards_remaining(cid)
-            #await bot.send_message(chat_id=message.chat.id, text=f'Remaining Cards = {len(remaining)}')
-    
+            
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
+
+async def prize_message(chat_id, user_id, name, winning_card):
+    try:
+        if winning_card is None:
+            return await bot.send_message(chat_id=chat_id, text=f'NO MORE PRIZE CARDS LEFT :(')
+        
+        media = types.MediaGroup()
+        media.attach_photo(types.InputFile('assets/' + winning_card + '.jpg'), 'CONGRATULATIONS ' + name)
+        return await bot.send_media_group(chat_id=chat_id, media=media)
+    
+    except Exception as e:
+        return await bot.send_message(chat_id=chat_id, text="PROBLEM GETTING PRIZE for " + name + " ... " + str(e))
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
@@ -152,16 +156,26 @@ async def finish_weekly(message: types.Message):
     config = get_bets_totes(message.chat.id)
     if "," in winning_btc:
         winners = winning_btc.split(",")
+        winning_names = winning_name.split(",")
+        i = 0
         for winner in winners:
-            add_win_for_user(config, winner)
+            winning_card = add_win_for_user(config, winner, message.chat.id)
+            await prize_message(message.chat.id, winner, winning_names[i], winning_card)
+            i = i + 1
     else:
-        add_win_for_user(config, winning_btc)
+        winning_card = add_win_for_user(config, winning_btc)
+        await prize_message(message.chat.id, winner, winning_name, winning_card)
     if "," in winning_eth:
         winners = winning_eth.split(",")
+        winning_eth_names = winning_eth_name.split(",")
+        i = 0
         for winner in winners:
-            add_win_for_user(config, winner)
+            winning_card = add_win_for_user(config, winner, message.chat.id)
+            await prize_message(message.chat.id, winner, winning_eth_names[i], winning_card)
+            i = i + 1
     else:
-        add_win_for_user(config, winning_eth)
+        winning_card = add_win_for_user(config, winning_eth, message.chat.id)
+        await prize_message(message.chat.id, winning_eth, winning_eth_name, winning_card)
     
     logging.info(json.dumps(config))
     set_bets_totes(message.chat.id, config)
