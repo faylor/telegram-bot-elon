@@ -45,7 +45,10 @@ def add_win_for_user(config, user_id, chat_id):
     if len(user_id.strip()) > 0:
         user_id = str(user_id)
         if user_id not in config["winners_list"]:
-            config["winners_list"][user_id] = 1
+            if config["winners_list"] == []:
+                config["winners_list"] = {user_id: 1}
+            else:
+                config["winners_list"][user_id] = 1
         else:
             config["winners_list"][user_id] = int(config["winners_list"][user_id]) + 1
         return add_random_prize_for_user(user_id, chat_id)
