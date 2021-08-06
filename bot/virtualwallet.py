@@ -250,11 +250,11 @@ def is_account_locked(chat_id, user_id):
         if "expires" in js:
             expiry = js["expires"]
             if datetime.datetime.now() < expiry:
-                return True
+                return True, expiry
             else:
                 r.delete(TRADE_LOCK_KEY.format(chat_id=chat_id, user_id=user_id))
-                return False
-    return False
+                return False, None
+    return False, None
 
 def add_tokens_to_user(chat_id, user_id, tokens):
     try:
@@ -736,8 +736,9 @@ async def totals_user_scores2(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['grab ([0-9a-zA-Z]*)']))
 async def grab_point(message: types.Message, regexp_command, state: FSMContext):
     try:
-        if is_account_locked(message.chat.id, message.from_user.id):
-            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
+        locked, expires = is_account_locked(message.chat.id, message.from_user.id)
+        if locked:
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa. Try after " + str(expires) + "!")
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
         
@@ -868,8 +869,10 @@ async def process_spend(message: types.Message, state: FSMContext):
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
-    if is_account_locked(message.chat.id, message.from_user.id):
-        return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
+    locked, expires = is_account_locked(message.chat.id, message.from_user.id)
+    if locked:
+        return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa. Try after " + str(expires) + "!")
+        
     try:
         to_symbol = regexp_command.group(1)
     except:
@@ -931,8 +934,10 @@ async def set_panic_point(message: types.Message, regexp_command):
 @dp.message_handler(commands=['feelinglucky'])
 async def set_panic_point(message: types.Message):
     try:
-        if is_account_locked(message.chat.id, message.from_user.id):
-            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
+        locked, expires = is_account_locked(message.chat.id, message.from_user.id)
+        if locked:
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa. Try after " + str(expires) + "!")
+        
         user_id = str(message.from_user.id)
         chat_id = str(message.chat.id)
         
@@ -987,8 +992,10 @@ async def set_panic_point(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['dump ([\s0-9.,a-zA-Z]*)']))
 async def set_dump_point(message: types.Message, regexp_command, state: FSMContext):
     try:
-        if is_account_locked(message.chat.id, message.from_user.id):
-            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa.")
+        locked, expires = is_account_locked(message.chat.id, message.from_user.id)
+        if locked:
+            return await message.reply(f"You have been hit by a RED SHELL, locked out for 24hours!! Mwaaaahahahaa. Try after " + str(expires) + "!")
+        
         symbols = regexp_command.group(1)
         symbol_split = get_symbol_list2(symbols)
         user_id = str(message.from_user.id)
