@@ -57,6 +57,7 @@ def add_win_for_user(config, user_id, chat_id):
 def add_random_prize_for_user(user_id, chat_id):
     if len(user_id.strip()) > 0:
         config = r.get("cards_" + str(user_id))
+        print("ADDING PRIZE:" + str(config)
         choice = select_card(chat_id)
         if choice is None:
             return None
