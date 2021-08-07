@@ -105,8 +105,8 @@ async def sorted_prices(message: types.Message, regexp_command):
     for l in mains:
         if coins is None or l.upper() not in coins:
             p, c, c24, btc_price = get_price(l)
-            tmp = {l.upper(): {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}}
-            ordered_coins.extend(tmp)
+            tmp = {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}
+            ordered_coins[l.upper()] = tmp
 
     for l, coin in ordered_coins.items():
         p = coin["quote"]["USD"]["price"]
