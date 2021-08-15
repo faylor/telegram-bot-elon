@@ -145,6 +145,8 @@ async def show_cards(message: types.Message):
         cards = get_cards_remaining(cid)
         media = types.MediaGroup()
         counted_cards = Counter(cards['cards'])
+        print(json.dumps(cards))
+        print(str(counted_cards))
         for card_name, counter in counted_cards.items():
             media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
         
