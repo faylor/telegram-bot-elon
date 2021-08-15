@@ -137,6 +137,25 @@ async def show_cards(message: types.Message):
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
 
+@dp.message_handler(commands=['deck'])
+async def show_cards(message: types.Message):
+    try:
+        cid = str(message.chat.id)
+        
+        cards = get_cards_remaining(cid)
+        media = types.MediaGroup()
+        counted_cards = Counter(cards) 
+        for card_name, counter in counted_cards.items():
+            media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
+        
+            return await message.reply_media_group(media=media)
+        else:
+            return await message.reply(f'No POW cards... Win some bets')
+            
+    except Exception as e:
+        await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING DECK:" + str(e))
+
+
 async def prize_message(chat_id, user_id, name, winning_card):
     try:
         if winning_card is None:
