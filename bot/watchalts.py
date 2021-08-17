@@ -13,49 +13,8 @@ from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
 from .bot import dp, bot, r
-from .prices import get_price, coin_price, get_ohcl_trades, get_ath_ranks, get_change_label, get_price_extended
+from .prices import get_bn_price, get_ohcl_trades, get_ath_ranks, get_change_label
 from .user import get_user_price_config
-
-@dp.message_handler(commands=['altsold'])
-async def prices_alts(message: types.Message):
-    chat_id = message.chat.id
-    mains = ["ETH", "GRT", "LTC", "ADA", "NANO", "NEO", "AAVE", "DOGE", "ZIL"]
-    try:
-        config = json.loads(r.get(message.chat.id))
-        logging.info(json.dumps(config))
-        if "watch_list_alts" in config:
-            mains = config["watch_list_alts"]
-    except Exception as ex:
-        logging.info("no config found, ignore")
-    in_prices = get_user_price_config(message.from_user.mention).upper()
-
-    out = [f"<pre>{in_prices}   1hr  24hr  ATH-days   ATH%"]
-    change_list = [""]
-    for l in mains:
-        c, c24, c_btc, c_btc_24, days_since, ath_down = get_price_extended(l)
-        l = l.ljust(5, ' ')
-        
-        if in_prices == "USD":
-            c_value = c
-            change = get_change_label(c, 4)
-            change24 = get_change_label(c24, 4)
-        else:
-            c_value = c_btc
-            change = get_change_label(c_btc, 4)
-            change24 = get_change_label(c_btc_24, 4)
-        days_since = str(days_since).ljust(5, ' ')
-        s = f"{l} {change} {change24}  {days_since} {round(ath_down,1)}%"
-        if len(change_list) >= 2:
-            i = 1
-            while i < len(change_list) and c_value < change_list[i]:
-                i = i + 1
-            out.insert(i, s)
-            change_list.insert(i,c_value)
-        else:
-            out.append(s)
-            change_list.append(c_value)
-
-    await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
 
 @dp.message_handler(commands=['alts', 'ath', 'aths'])
@@ -122,14 +81,12 @@ async def prices_alts(message: types.Message):
 async def add_to_prices_alts(message: types.Message, regexp_command):
     try:
         new_coin = regexp_command.group(1)
-        logging.info("config")
         config = r.get(message.chat.id)
         if config is None:
             config = {}
         else:
             config = json.loads(config)
-        logging.info(json.dumps(config))
-        a, _, _, _ = get_price(new_coin)
+        a = get_bn_price(new_coin)
         if "watch_list_alts" not in config:
             config["watch_list_alts"] = []
         if a == 0:
