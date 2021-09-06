@@ -450,7 +450,7 @@ def user_spent_usd(chat_id, user_id, usd, coin):
            
         
 
-@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['(^gobag[\sa-zA-Z]*)']))
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['(^gobag)([\sa-zA-Z]*)']))
 async def send_user_balance_from_other_chat(message: types.Message, regexp_command):
     try:
         if regexp_command is not None:
