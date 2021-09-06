@@ -29,6 +29,7 @@ dp.middleware.setup(LoggingMiddleware())
 twits = Twits()
 data_watcher = Bntream()
 
+from .shoppinglist import *
 from .watchalts import *
 from .watchlist import *
 from .wallet import *
@@ -36,7 +37,6 @@ from .virtualwallet import *
 from .bets import *
 from .user import *
 from .chart import *
-from .shoppinglist import *
 from .bn_wallet import *
 
 @dp.message_handler(commands=['elon', 'Elon', 'elon?', 'Elon?', 'help', 'me', 'start'])
