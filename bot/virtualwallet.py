@@ -193,6 +193,40 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                             markup.add(str(mention_name))
                 markup.add("Cancel")
                 await message.reply("To Whom Shall We Lock Out?", reply_markup=markup)
+            elif card_response == "draw_4":
+                await POWCard.next()
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                chat_id = str(message.chat.id)
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        user_id = key.replace(chat_id + "_bagscore_", "")
+                        if int(user_id) != message.from_user.id:
+                            user_member = await bot.get_chat_member(chat_id, user_id)
+                            mention_name = user_member.user.mention
+                            markup.add(str(mention_name))
+                markup.add("Cancel")
+                await message.reply("Damn! Who's gonna Draw 4?", reply_markup=markup)
+            elif card_response == "star":
+                await POWCard.next()
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+                chat_id = str(message.chat.id)
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        user_id = key.replace(chat_id + "_bagscore_", "")
+                        if int(user_id) != message.from_user.id:
+                            user_member = await bot.get_chat_member(chat_id, user_id)
+                            mention_name = user_member.user.mention
+                            markup.add(str(mention_name))
+                markup.add("Cancel")
+                await message.reply("Seeing stars.. 2x?", reply_markup=markup)    
             elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -244,6 +278,22 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                             await message.reply(f"GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
                         else:
                             await message.reply(f"FAILED TO GHOST SWAP! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
+                        break
+            elif card_response == "draw_4":
+                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
+                for key in saves:
+                    key = key.decode('utf-8')
+                    to_user_id = key.replace(chat_id + "_bagscore_", "")
+                    user_member = await bot.get_chat_member(chat_id, to_user_id)
+                    mention_name = user_member.user.mention
+                    if data["to_user"] == mention_name:
+                        ok = panic_sell(to_user_id, chat_id, None, message)
+                        # TODO buy 4 from list
+                        if ok == 1:
+                            ok = delete_card(message.from_user.id, data["chat_id"], "draw_4")
+                            await message.reply(f"DRAW 4! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
+                        else:
+                            await message.reply(f"FAILED TO DRAW 4! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
                         break
             elif card_response == "red_shell":
                 saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
@@ -903,13 +953,15 @@ async def set_panic_point(message: types.Message, regexp_command):
         to_symbol = regexp_command.group(1)
     except:
         to_symbol = PRICES_IN.lower()
+    
+    await panic_sell(str(message.from_user.id), str(message.chat.id), to_symbol, message)
+    
+
+async def panic_sell(user_id, chat_id, to_symbol, message):
     try:
         if 'btc' in to_symbol.lower():
             return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
 
-        user_id = str(message.from_user.id)
-        chat_id = str(message.chat.id)
-        
         keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
         for key in keys:
             js = r.get(key).decode('utf-8')
