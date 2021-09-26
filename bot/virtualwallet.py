@@ -211,22 +211,11 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 markup.add("Cancel")
                 await message.reply("Damn! Who's gonna Draw 4?", reply_markup=markup)
             elif card_response == "star":
-                await POWCard.next()
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-                chat_id = str(message.chat.id)
-                saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
-                for key in saves:
-                    key = key.decode('utf-8')
-                    value = r.get(key)
-                    if value is not None:
-                        value = value.decode('utf-8')
-                        user_id = key.replace(chat_id + "_bagscore_", "")
-                        if int(user_id) != message.from_user.id:
-                            user_member = await bot.get_chat_member(chat_id, user_id)
-                            mention_name = user_member.user.mention
-                            markup.add(str(mention_name))
-                markup.add("Cancel")
-                await message.reply("Seeing stars.. 2x?", reply_markup=markup)    
+                add_tokens_to_user(message.chat.id, message.from_user.id, 2)
+                ok = delete_card(message.from_user.id, data["chat_id"], "star")
+                markup = types.ReplyKeyboardRemove()
+                await message.reply("Gave you 2x for the next 24 hours!", reply_markup=markup)
+                await state.finish()  
             elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
