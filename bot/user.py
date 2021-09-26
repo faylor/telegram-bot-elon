@@ -92,11 +92,13 @@ def get_user_prizes(user_id, chat_id):
             cards = json.loads(config)
     return cards
 
-def setup_cards(chat_id, red_shells = 10, ghost_cards = 4, trade_tokens = 23):
+def setup_cards(chat_id, red_shells = 5, ghost_cards = 4, trade_tokens = 10, star_cards = 4, draw_4_cards = 4):
     cards = []
     cards = cards + (['red_shell'] * red_shells)
     cards = cards + (['ghost'] * ghost_cards)
     cards = cards + (['trade_token'] * trade_tokens)
+    cards = cards + (['star'] * star_cards)
+    cards = cards + (['draw_4'] * draw_4_cards)
     config = r.set("chat_cards_" + str(chat_id), json.dumps({"cards": cards}))
 
 def select_card(chat_id):

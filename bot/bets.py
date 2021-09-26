@@ -144,14 +144,14 @@ async def show_cards(message: types.Message):
         
         cards = get_cards_remaining(cid)
         media = types.MediaGroup()
-        counted_cards = Counter(cards['cards'])
-        if len(cards) > 0:
-            for card_name, counter in counted_cards.items():
-                media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
-        
-            return await message.reply_media_group(media=media)
-        else:
-            return await message.reply(f'No POW cards... Win some bets')
+        if 'cards' in cards:
+            counted_cards = Counter(cards['cards'])
+            if len(cards) > 0:
+                for card_name, counter in counted_cards.items():
+                    media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
+                return await message.reply_media_group(media=media)
+         
+        return await message.reply(f'No POW cards... Win some bets')
             
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING DECK:" + str(e))
