@@ -4,6 +4,7 @@ import json
 import requests
 import redis
 import asyncio
+from dateutil import parser
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -23,6 +24,7 @@ from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, 
 from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
+STAR_KEY = "{chat_id}_star_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
 TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
 PRICES_IN = "USDT"
@@ -211,8 +213,8 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 markup.add("Cancel")
                 await message.reply("Damn! Who's gonna Draw 4?", reply_markup=markup)
             elif card_response == "star":
-                add_tokens_to_user(message.chat.id, message.from_user.id, 2)
-                ok = delete_card(message.from_user.id, data["chat_id"], "star")
+                await add_star_to_user(message.chat.id, message.from_user.id, 2)
+                # TODO Add Back ok = delete_card(message.from_user.id, data["chat_id"], "star")
                 markup = types.ReplyKeyboardRemove()
                 await message.reply("Gave you 2x for the next 24 hours!", reply_markup=markup)
                 await state.finish()  
@@ -332,6 +334,35 @@ def add_tokens_to_user(chat_id, user_id, tokens):
             r.set(key, json.dumps(js))
     except Exception as e:
         print("add_tokens_to_user: " + str(e))
+
+async def add_star_to_user(chat_id, user_id, tokens):
+    try:
+        key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+        dt = datetime.now()
+        js = {"end_time": dt.isoformat()}
+        await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
+        r.set(key, json.dumps(js))
+        task = asyncio.create_task(check_account_after(5, chat_id, user_id))
+        # Wait for 30 seconds
+        await asyncio.sleep(30)
+        task.cancel()
+    except Exception as e:
+        print("add_star_to_user: error:" + str(e))
+
+async def check_account_after(delay, chat_id, user_id):
+    key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+    save = r.get(key)
+    if save is not None:
+        await asyncio.sleep(delay)
+    
+        js = json.loads(save.decode("utf-8"))
+        end_time = parser.parse(js["end_time"])
+        if datetime.datetime.now() < end_time:
+            r.delete(key)
+            await bot.send_message(chat_id=chat_id, text="STAR ENDED!")
+        else:
+            await bot.send_message(chat_id=chat_id, text="STAR RUNNING!")
+
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
