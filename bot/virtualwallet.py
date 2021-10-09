@@ -5,6 +5,7 @@ import requests
 import redis
 import asyncio
 from dateutil import parser
+import time
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -52,6 +53,11 @@ class POWCard(StatesGroup):
     card = State()
     to_user = State()
 
+
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+    return wrapped
 
 def get_open_trades2(user, chat_id):
     saves = r.scan_iter("At_" + chat_id + "_*_" + user)
@@ -344,23 +350,21 @@ async def add_star_to_user(chat_id, user_id, tokens):
         js = {"end_time": dt.isoformat(), "start_total": live + free}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
-        task = asyncio.create_task(check_account_after(5, chat_id, user_id))
-        # Wait for 30 seconds
-        await task
-        await asyncio.sleep(600)
+        await check_account_after(5, chat_id, user_id)
+        
     except asyncio.CancelledError:
         print("main(): check_account_after is cancelled now")
     finally:
         print('main(): Finished')
     
-
+@fire_and_forget
 async def check_account_after(delay, chat_id, user_id):
     try:
         while True:
             key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
             save = r.get(key)
             if save is not None:
-                await asyncio.sleep(delay)
+                time.sleep(delay)
             
                 js = json.loads(save.decode("utf-8"))
                 end_time = parser.parse(js["end_time"])
