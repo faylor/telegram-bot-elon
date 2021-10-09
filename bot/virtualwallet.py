@@ -385,7 +385,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
                     current_amount = float(js[PRICES_IN.lower()])
             js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": 0}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Settlers of CRYPTAN\nTrade, Build & Settle as we build our empires together.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO ADA HD\nSorry cant talk, too busy running in circles chasing butterflies - no grass - no ants... and CRYPTO.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -408,7 +408,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": int(js["trades"])}
         r.set(key, json.dumps(js))
 
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Settlers of CRYPTAN\nTrade, Build & Settle as we build our empires together.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO ADA HD\nSorry cant talk, too busy running in circles chasing butterflies - no grass - no ants... and CRYPTO.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -821,7 +821,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd_str}")
-        out.append("</pre>\nEnds Saturday 4th September, MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Sunday 6th November, anyone got a dexi? MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
