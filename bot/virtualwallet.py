@@ -344,7 +344,7 @@ async def add_star_to_user(chat_id, user_id, tokens):
         js = {"end_time": dt.isoformat(), "start_total": live + free}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
-        task = asyncio.create_task(check_account_after(5, chat_id, user_id))
+        task = asyncio.create_task(await check_account_after(5, chat_id, user_id))
         # Wait for 30 seconds
         await asyncio.sleep(600)
         task.cancel()
