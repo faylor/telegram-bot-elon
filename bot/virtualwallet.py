@@ -698,7 +698,7 @@ async def send_user_balance(message: types.Message, regexp_command):
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
         out = out + "\n       TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
         
-        if "Jos" in message.from_user.mention:
+        if "f022" in message.from_user.mention:
             out = '👑 Reigning Champ\n' + out
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
