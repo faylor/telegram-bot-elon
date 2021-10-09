@@ -8,7 +8,12 @@ import asyncio
 import datetime
 from dateutil import parser
 import time
-from .bot import r, get_user_bag_score, STAR_KEY, SCORE_KEY, PRICES_IN
+from .bot import r
+
+
+SCORE_KEY = "{chat_id}_bagscore_{user_id}"
+STAR_KEY = "{chat_id}_star_{user_id}"
+PRICES_IN = "USDT"
 
 class StarCard():
 
@@ -23,7 +28,7 @@ class StarCard():
         if save is not None:
             js = json.loads(save.decode("utf-8"))
             end_time = parser.parse(js["end_time"])
-            live, free, _ = get_user_bag_score(self.chat_id, self.user_id)
+            live, free, _ = self.get_user_bag_score(self.chat_id, self.user_id)
             start_total = js["start_total"]
             current_result = 2 * ((live + free) - start_total)
             if datetime.datetime.now() >= end_time:
@@ -42,6 +47,25 @@ class StarCard():
             else:
                 self.send_chat_message(text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     
+    def get_user_bag_score(chat_id, user_id):
+        try:
+            key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
+            js = r.get(key)
+            if js is not None:
+                js = js.decode('utf-8')
+                js = json.loads(js)
+                return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
+            else:
+                if PRICES_IN.lower() == "btc":
+                    amount = 1
+                else:
+                    amount = 1000
+                js = {"live": 0, PRICES_IN.lower(): amount, "trades": 0}
+                r.set(key, json.dumps(js))
+                return 0, amount, 0
+        except Exception as e:
+            logging.error("FAILED to save user score for bag:" + str(e))
+
     def send_chat_message(self, text):
         try:
             bot_key = TELEGRAM_BOT
