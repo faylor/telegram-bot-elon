@@ -344,38 +344,48 @@ async def add_star_to_user(chat_id, user_id, tokens):
         js = {"end_time": dt.isoformat(), "start_total": live + free}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
-        task = asyncio.create_task(await check_account_after(5, chat_id, user_id))
+        task = asyncio.create_task(check_account_after(5, chat_id, user_id))
         # Wait for 30 seconds
         await asyncio.sleep(600)
         task.cancel()
-    except Exception as e:
-        print("add_star_to_user: error:" + str(e))
+        await task
+    except asyncio.CancelledError:
+        print("main(): check_account_after is cancelled now")
+    finally:
+        print('main(): Finished')
+    
 
 async def check_account_after(delay, chat_id, user_id):
-    key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-    save = r.get(key)
-    if save is not None:
-        await asyncio.sleep(delay)
-    
-        js = json.loads(save.decode("utf-8"))
-        end_time = parser.parse(js["end_time"])
-        live, free, _ = get_user_bag_score(chat_id, user_id)
-        start_total = js["start_total"]
-        current_result = 2 * ((live + free) - start_total)
-        if datetime.datetime.now() >= end_time:
-            r.delete(key)
-            key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-            save = r.get(key) 
-            if save is not None:
-                js = json.loads(save.decode("utf-8"))
-                if PRICES_IN.lower() in js:
-                    current_amount = float(js[PRICES_IN.lower()])
-                    js[PRICES_IN.lower()] = current_result + current_amount
-                    r.set(key, json.dumps(js))
-                    await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
-            await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
-        else:
-            await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
+    try:
+        key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+        save = r.get(key)
+        if save is not None:
+            await asyncio.sleep(delay)
+        
+            js = json.loads(save.decode("utf-8"))
+            end_time = parser.parse(js["end_time"])
+            live, free, _ = get_user_bag_score(chat_id, user_id)
+            start_total = js["start_total"]
+            current_result = 2 * ((live + free) - start_total)
+            if datetime.datetime.now() >= end_time:
+                r.delete(key)
+                key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+                save = r.get(key) 
+                if save is not None:
+                    js = json.loads(save.decode("utf-8"))
+                    if PRICES_IN.lower() in js:
+                        current_amount = float(js[PRICES_IN.lower()])
+                        js[PRICES_IN.lower()] = current_result + current_amount
+                        r.set(key, json.dumps(js))
+                        await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
+                await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
+            else:
+                await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
+    except asyncio.CancelledError:
+        print('check_account_after(): cancel sleep')
+        raise
+    finally:
+        print('check_account_after(): after sleep')
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
