@@ -164,8 +164,12 @@ async def prize_message(chat_id, user_id, name, winning_card):
         
         media = types.MediaGroup()
         media.attach_photo(types.InputFile('assets/' + winning_card + '.jpg'), 'CONGRATULATIONS ' + name)
-        return await bot.send_media_group(chat_id=chat_id, media=media)
-    
+        if winning_card == "ghost":
+            await bot.send_media_group(chat_id=chat_id, media=media)
+            return await bot.send_message(chat_id=chat_id, text="GHOST EXPIRES IN 24 HOURS, USE IT OR LOSE IT. " + name + "!!!")
+        else:
+            return await bot.send_media_group(chat_id=chat_id, media=media)
+        
     except Exception as e:
         return await bot.send_message(chat_id=chat_id, text="PROBLEM GETTING PRIZE for " + name + " ... " + str(e))
 

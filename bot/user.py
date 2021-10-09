@@ -4,6 +4,8 @@ import requests
 import redis
 import asyncio
 import random
+import datetime
+from dateutil import parser
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -59,16 +61,18 @@ def add_random_prize_for_user(user_id, chat_id):
         config = r.get("cards_" + str(user_id))
         chat_id = str(chat_id)
         choice = select_card(chat_id)
+        dt = datetime.datetime.now() + datetime.timedelta(hours=24)
         if choice is None:
             return None
         elif config is None:
-            r.set("cards_" + str(user_id), json.dumps({chat_id: [choice]}))
+            r.set("cards_" + str(user_id), json.dumps({chat_id: [choice], "ghost_expires": dt.isoformat()}))
         else:
             cards = json.loads(config)
             if chat_id in cards and cards[chat_id] is not None:
                 cards[chat_id] = cards[chat_id] + [choice]
             else:
                 cards[chat_id] = [choice]
+            cards["ghost_expires"] = dt.isoformat()
             r.set("cards_" + str(user_id), json.dumps(cards))
         return choice
 
@@ -90,6 +94,14 @@ def get_user_prizes(user_id, chat_id):
         config = r.get("cards_" + str(user_id))
         if config is not None:
             cards = json.loads(config)
+            if "ghost_expires" in cards:
+                end_time = parser.parse(cards["ghost_expires"])
+                if datetime.datetime.now() >= end_time:
+                    new_cards = {}
+                    if chat_id in cards:
+                        cards[chat_id].remove("ghost")
+                        new_cards = {chat_id: cards[chat_id]}
+                        r.set("cards_" + str(user_id), json.dumps(new_cards))
     return cards
 
 def setup_cards(chat_id, red_shells = 5, ghost_cards = 4, trade_tokens = 10, star_cards = 4, draw_4_cards = 4):
