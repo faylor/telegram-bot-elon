@@ -340,7 +340,8 @@ async def add_star_to_user(chat_id, user_id, tokens):
     try:
         key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
         dt = datetime.datetime.now() + datetime.timedelta(hours=24)
-        js = {"end_time": dt.isoformat()}
+        live, free, _ = get_user_bag_score(chat_id, user_id)
+        js = {"end_time": dt.isoformat(), "start_total": live + free}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
         task = asyncio.create_task(check_account_after(5, chat_id, user_id))
@@ -358,12 +359,23 @@ async def check_account_after(delay, chat_id, user_id):
     
         js = json.loads(save.decode("utf-8"))
         end_time = parser.parse(js["end_time"])
+        live, free, _ = get_user_bag_score(chat_id, user_id)
+        start_total = js["start_total"]
+        current_result = 2 * ((live + free) - start_total)
         if datetime.datetime.now() >= end_time:
             r.delete(key)
-            await bot.send_message(chat_id=chat_id, text="STAR ENDED!")
+            key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+            save = r.get(key) 
+            if save is not None:
+                js = json.loads(save.decode("utf-8"))
+                if PRICES_IN.lower() in js:
+                    current_amount = float(js[PRICES_IN.lower()])
+                    js[PRICES_IN.lower()] = current_result + current_amount
+                    r.set(key, json.dumps(js))
+                    await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
+            await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
         else:
-            await bot.send_message(chat_id=chat_id, text="STAR RUNNING!")
-
+            await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
