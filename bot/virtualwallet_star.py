@@ -23,7 +23,7 @@ class StarCard():
         self.user_id = str(user_id)
         self.delay = delay
 
-    def int_star(self):
+    def init_star(self):
         key = STAR_KEY.format(chat_id=self.chat_id, user_id=self.user_id)
         dt = datetime.datetime.now() + datetime.timedelta(minutes=6)
         live = self.get_users_total_value()
