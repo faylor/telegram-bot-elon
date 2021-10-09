@@ -345,7 +345,7 @@ async def add_star_to_user(chat_id, user_id, tokens):
         r.set(key, json.dumps(js))
         task = asyncio.create_task(check_account_after(5, chat_id, user_id))
         # Wait for 30 seconds
-        await asyncio.sleep(30)
+        await asyncio.sleep(600)
         task.cancel()
     except Exception as e:
         print("add_star_to_user: error:" + str(e))
