@@ -28,7 +28,7 @@ class StarCard():
         if save is not None:
             js = json.loads(save.decode("utf-8"))
             end_time = parser.parse(js["end_time"])
-            live, free, _ = self.get_user_bag_score(self.chat_id, self.user_id)
+            live, free, _ = self.get_user_bag_score()
             start_total = js["start_total"]
             current_result = 2 * ((live + free) - start_total)
             if datetime.datetime.now() >= end_time:
@@ -47,9 +47,9 @@ class StarCard():
             else:
                 self.send_chat_message(text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     
-    def get_user_bag_score(chat_id, user_id):
+    def get_user_bag_score(self):
         try:
-            key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
+            key =  SCORE_KEY.format(chat_id=str(self.chat_id), user_id=self.user_id)
             js = r.get(key)
             if js is not None:
                 js = js.decode('utf-8')
