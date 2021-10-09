@@ -358,7 +358,7 @@ async def check_account_after(delay, chat_id, user_id):
     
         js = json.loads(save.decode("utf-8"))
         end_time = parser.parse(js["end_time"])
-        if datetime.datetime.now() < end_time:
+        if datetime.datetime.now() >= end_time:
             r.delete(key)
             await bot.send_message(chat_id=chat_id, text="STAR ENDED!")
         else:
