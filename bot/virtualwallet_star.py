@@ -39,7 +39,7 @@ class StarCard():
             end_time = parser.parse(js["end_time"])
             live = self.get_users_total_value()
             start_total = js["start_total"]
-            current_result = 2 * (live - start_total)
+            current_result = round(2 * (live - start_total), 2)
             if datetime.datetime.now() >= end_time:
                 r.delete(key)
                 key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
