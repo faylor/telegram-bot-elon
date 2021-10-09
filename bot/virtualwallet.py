@@ -348,8 +348,6 @@ async def add_star_to_user(chat_id, user_id, tokens):
         # Wait for 30 seconds
         await task
         await asyncio.sleep(600)
-        task.cancel()
-        
     except asyncio.CancelledError:
         print("main(): check_account_after is cancelled now")
     finally:
@@ -380,6 +378,7 @@ async def check_account_after(delay, chat_id, user_id):
                         r.set(key, json.dumps(js))
                         await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
                 await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
+                raise asyncio.CancelledError()
             else:
                 await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     except asyncio.CancelledError:
