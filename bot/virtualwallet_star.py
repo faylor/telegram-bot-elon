@@ -18,14 +18,14 @@ PRICES_IN = "USDT"
 
 class StarCard():
 
-    def __init__(self, chat_id, user_id, delay):
+    def __init__(self, chat_id, user_id, hours):
         self.chat_id = str(chat_id)
         self.user_id = str(user_id)
-        self.delay = delay
+        self.hours = hours
 
     def init_star(self):
         key = STAR_KEY.format(chat_id=self.chat_id, user_id=self.user_id)
-        dt = datetime.datetime.now() + datetime.timedelta(minutes=6)
+        dt = datetime.datetime.now() + datetime.timedelta(hours=self.hours)
         live = self.get_users_total_value()
         js = {"end_time": dt.isoformat(), "start_total": live}
         r.set(key, json.dumps(js))
@@ -39,7 +39,7 @@ class StarCard():
             end_time = parser.parse(js["end_time"])
             live = self.get_users_total_value()
             start_total = js["start_total"]
-            current_result = round(2 * (live - start_total), 2)
+            current_result = 2 * (live - start_total)
             if datetime.datetime.now() >= end_time:
                 r.delete(key)
                 key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))

@@ -345,9 +345,9 @@ def add_tokens_to_user(chat_id, user_id, tokens):
 
 async def add_star_to_user(chat_id, user_id, tokens):
     try:
-        star = StarCard(chat_id=chat_id, user_id=user_id, delay=5)
+        star = StarCard(chat_id=chat_id, user_id=user_id, hours=24)
         star.init_star()
-        check_account_after(star, 120)
+        check_account_after(star, 30)
         
     except asyncio.CancelledError:
         print("main(): check_account_after is cancelled now")
