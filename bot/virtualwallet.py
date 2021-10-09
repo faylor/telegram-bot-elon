@@ -213,11 +213,12 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 markup.add("Cancel")
                 await message.reply("Damn! Who's gonna Draw 4?", reply_markup=markup)
             elif card_response == "star":
-                await add_star_to_user(message.chat.id, message.from_user.id, 2)
-                # TODO Add Back ok = delete_card(message.from_user.id, data["chat_id"], "star")
                 markup = types.ReplyKeyboardRemove()
                 await message.reply("Gave you 2x for the next 24 hours!", reply_markup=markup)
-                await state.finish()  
+                await state.finish() 
+                await add_star_to_user(message.chat.id, message.from_user.id, 2)
+                # TODO Add Back ok = delete_card(message.from_user.id, data["chat_id"], "star")
+                 
             elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -338,7 +339,7 @@ def add_tokens_to_user(chat_id, user_id, tokens):
 async def add_star_to_user(chat_id, user_id, tokens):
     try:
         key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-        dt = datetime.datetime.now()
+        dt = datetime.datetime.now() + datetime.timedelta(hours=24)
         js = {"end_time": dt.isoformat()}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
