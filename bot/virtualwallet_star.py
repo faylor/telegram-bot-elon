@@ -42,7 +42,8 @@ class StarCard():
                         current_amount = float(js[PRICES_IN.lower()])
                         js[PRICES_IN.lower()] = current_result + current_amount
                         r.set(key, json.dumps(js))
-                        self.send_chat_message(text="STAR ENDED! Final Star Bonus = ${current_result}")
+                        self.send_chat_message(text=f"STAR ENDED! Final Star Bonus = ${current_result}")
+                        raise asyncio.CancelledError()
                 self.send_chat_message(text="STAR ENDED! Couldn't find user score??")
                 raise asyncio.CancelledError()
             else:
