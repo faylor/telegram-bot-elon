@@ -19,8 +19,8 @@ PRICES_IN = "USDT"
 class StarCard():
 
     def __init__(self, chat_id, user_id, delay):
-        self.chat_id = chat_id
-        self.user_id = user_id
+        self.chat_id = str(chat_id)
+        self.user_id = str(user_id)
         self.delay = delay
 
     def update(self):
