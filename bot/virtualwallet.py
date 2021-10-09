@@ -224,8 +224,8 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await message.reply("Gave you 2x for the next 24 hours!", reply_markup=markup)
                 await state.finish() 
                 await add_star_to_user(message.chat.id, message.from_user.id, 2)
-                # TODO Add Back ok = delete_card(message.from_user.id, data["chat_id"], "star")
-                 
+                ok = delete_card(message.from_user.id, data["chat_id"], "star")
+                
             elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -347,7 +347,7 @@ async def add_star_to_user(chat_id, user_id, tokens):
     try:
         star = StarCard(chat_id=chat_id, user_id=user_id, hours=24)
         star.init_star()
-        check_account_after(star, 30)
+        check_account_after(star, 3600)
         
     except asyncio.CancelledError:
         print("main(): check_account_after is cancelled now")
