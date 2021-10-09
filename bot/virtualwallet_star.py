@@ -9,6 +9,7 @@ import datetime
 from dateutil import parser
 import time
 from .bot import r
+from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
@@ -28,9 +29,9 @@ class StarCard():
         if save is not None:
             js = json.loads(save.decode("utf-8"))
             end_time = parser.parse(js["end_time"])
-            live, free, _ = self.get_user_bag_score()
+            live = self.get_users_live_value()
             start_total = js["start_total"]
-            current_result = 2 * ((live + free) - start_total)
+            current_result = 2 * (live - start_total)
             if datetime.datetime.now() >= end_time:
                 r.delete(key)
                 key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
@@ -47,24 +48,46 @@ class StarCard():
             else:
                 self.send_chat_message(text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     
-    def get_user_bag_score(self):
+    def get_users_live_value(self):
         try:
-            key =  SCORE_KEY.format(chat_id=str(self.chat_id), user_id=self.user_id)
-            js = r.get(key)
-            if js is not None:
-                js = js.decode('utf-8')
-                js = json.loads(js)
-                return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
-            else:
-                if PRICES_IN.lower() == "btc":
-                    amount = 1
+            saves = r.scan_iter("At_" + self.chat_id + "_*_" + self.user_id)
+
+            symbols = []
+            keys = []
+            for key in saves:
+                symbols.append(key.decode('utf-8').replace("At_" + self.chat_id + "_" , "").replace("_" + self.user_id,""))
+                keys.append(key.decode('utf-8'))
+            
+            try:
+                coin_prices = None
+                coin_prices = coin_price_realtime(symbols, PRICES_IN)
+            except:
+                logging.error("FAILED TO GET COIN PRICES")
+
+            total_value = float(0.00)
+            i = 0
+            for key in keys:
+                symbol = symbols[i]
+
+                if coin_prices is not None and symbol.upper() in coin_prices:
+                    p = coin_prices[symbol.upper()]["quote"][PRICES_IN]["price"]
                 else:
-                    amount = 1000
-                js = {"live": 0, PRICES_IN.lower(): amount, "trades": 0}
-                r.set(key, json.dumps(js))
-                return 0, amount, 0
+                    p = get_bn_price(symbol, PRICES_IN)
+                if float(p) > 0:
+                    value = r.get(key)
+                    if value is not None:
+                        value = value.decode('utf-8')
+                        if "{" in value:
+                            js = json.loads(value)
+                            coins = float(js["coins"])
+                        else:
+                            coins = 1
+                        total_value = total_value + (coins * p)
+                i = i + 1
+            return total_value
         except Exception as e:
-            logging.error("FAILED to save user score for bag:" + str(e))
+            logging.warn("Couldnt get live values data:" + str(e))
+            return 0
 
     def send_chat_message(self, text):
         try:
