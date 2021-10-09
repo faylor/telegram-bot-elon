@@ -103,7 +103,7 @@ class StarCard():
             else:
                 val_side = 0
 
-            return total_value + val_side
+            return round(total_value + val_side, 2)
         except Exception as e:
             logging.warn("Couldnt get live values data:" + str(e))
             return 0
