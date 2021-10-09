@@ -338,7 +338,7 @@ def add_tokens_to_user(chat_id, user_id, tokens):
 async def add_star_to_user(chat_id, user_id, tokens):
     try:
         key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-        dt = datetime.now()
+        dt = datetime.datetime.now()
         js = {"end_time": dt.isoformat()}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
