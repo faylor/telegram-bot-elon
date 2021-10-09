@@ -345,13 +345,8 @@ def add_tokens_to_user(chat_id, user_id, tokens):
 
 async def add_star_to_user(chat_id, user_id, tokens):
     try:
-        key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-        dt = datetime.datetime.now() + datetime.timedelta(minutes=6)
-        live = get_users_live_value(str(chat_id), str(user_id))
-        js = {"end_time": dt.isoformat(), "start_total": live}
-        await bot.send_message(chat_id=chat_id, text=f"STAR STARTING! Ends at {dt.isoformat()} - start value ${live}")
-        r.set(key, json.dumps(js))
         star = StarCard(chat_id=chat_id, user_id=user_id, delay=5)
+        star.init_star()
         check_account_after(star, 120)
         
     except asyncio.CancelledError:

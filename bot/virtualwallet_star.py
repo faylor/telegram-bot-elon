@@ -23,13 +23,21 @@ class StarCard():
         self.user_id = str(user_id)
         self.delay = delay
 
+    def int_star(self):
+        key = STAR_KEY.format(chat_id=self.chat_id, user_id=self.user_id)
+        dt = datetime.datetime.now() + datetime.timedelta(minutes=6)
+        live = self.get_users_total_value()
+        js = {"end_time": dt.isoformat(), "start_total": live}
+        r.set(key, json.dumps(js))
+        self.send_chat_message(text=f"STAR STARTING! Ends at {dt.isoformat()} - start value ${live}")
+
     def update(self):
         key = STAR_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
         save = r.get(key)
         if save is not None:
             js = json.loads(save.decode("utf-8"))
             end_time = parser.parse(js["end_time"])
-            live = self.get_users_live_value()
+            live = self.get_users_total_value()
             start_total = js["start_total"]
             current_result = 2 * (live - start_total)
             if datetime.datetime.now() >= end_time:
@@ -49,7 +57,7 @@ class StarCard():
             else:
                 self.send_chat_message(text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     
-    def get_users_live_value(self):
+    def get_users_total_value(self):
         try:
             saves = r.scan_iter("At_" + self.chat_id + "_*_" + self.user_id)
 
@@ -85,10 +93,40 @@ class StarCard():
                             coins = 1
                         total_value = total_value + (coins * p)
                 i = i + 1
-            return total_value
+            
+            key =  SCORE_KEY.format(chat_id=self.chat_id, user_id=self.user_id)
+            js = r.get(key)
+            if js is not None:
+                js = js.decode('utf-8')
+                js = json.loads(js)
+                val_side = float(js[PRICES_IN.lower()])
+            else:
+                val_side = 0
+
+            return total_value + val_side
         except Exception as e:
             logging.warn("Couldnt get live values data:" + str(e))
             return 0
+
+
+    def get_user_bag_score(chat_id, user_id):
+        try:
+            key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
+            js = r.get(key)
+            if js is not None:
+                js = js.decode('utf-8')
+                js = json.loads(js)
+                return float(js["live"]), float(js[PRICES_IN.lower()]), int(js["trades"])
+            else:
+                if PRICES_IN.lower() == "btc":
+                    amount = 1
+                else:
+                    amount = 1000
+                js = {"live": 0, PRICES_IN.lower(): amount, "trades": 0}
+                r.set(key, json.dumps(js))
+                return 0, amount, 0
+        except Exception as e:
+            logging.error("FAILED to save user score for bag:" + str(e))
 
     def send_chat_message(self, text):
         try:
