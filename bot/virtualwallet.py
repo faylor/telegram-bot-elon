@@ -356,31 +356,32 @@ async def add_star_to_user(chat_id, user_id, tokens):
 
 async def check_account_after(delay, chat_id, user_id):
     try:
-        key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-        save = r.get(key)
-        if save is not None:
-            await asyncio.sleep(delay)
-        
-            js = json.loads(save.decode("utf-8"))
-            end_time = parser.parse(js["end_time"])
-            live, free, _ = get_user_bag_score(chat_id, user_id)
-            start_total = js["start_total"]
-            current_result = 2 * ((live + free) - start_total)
-            if datetime.datetime.now() >= end_time:
-                r.delete(key)
-                key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-                save = r.get(key) 
-                if save is not None:
-                    js = json.loads(save.decode("utf-8"))
-                    if PRICES_IN.lower() in js:
-                        current_amount = float(js[PRICES_IN.lower()])
-                        js[PRICES_IN.lower()] = current_result + current_amount
-                        r.set(key, json.dumps(js))
-                        await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
-                await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
-                raise asyncio.CancelledError()
-            else:
-                await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
+        while True:
+            key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+            save = r.get(key)
+            if save is not None:
+                await asyncio.sleep(delay)
+            
+                js = json.loads(save.decode("utf-8"))
+                end_time = parser.parse(js["end_time"])
+                live, free, _ = get_user_bag_score(chat_id, user_id)
+                start_total = js["start_total"]
+                current_result = 2 * ((live + free) - start_total)
+                if datetime.datetime.now() >= end_time:
+                    r.delete(key)
+                    key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+                    save = r.get(key) 
+                    if save is not None:
+                        js = json.loads(save.decode("utf-8"))
+                        if PRICES_IN.lower() in js:
+                            current_amount = float(js[PRICES_IN.lower()])
+                            js[PRICES_IN.lower()] = current_result + current_amount
+                            r.set(key, json.dumps(js))
+                            await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
+                    await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
+                    raise asyncio.CancelledError()
+                else:
+                    await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
     except asyncio.CancelledError:
         print('check_account_after(): cancel sleep')
         raise
