@@ -21,6 +21,7 @@ from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
+from .virtualwallet_star import StarCard
 from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
@@ -350,7 +351,8 @@ async def add_star_to_user(chat_id, user_id, tokens):
         js = {"end_time": dt.isoformat(), "start_total": live + free}
         await bot.send_message(chat_id=chat_id, text="STAR STARTING! Ends at " + dt.isoformat())
         r.set(key, json.dumps(js))
-        await check_account_after(5, chat_id, user_id)
+        star = StarCard(chat_id=chat_id, user_id=user_id, delay=5)
+        check_account_after(star, 5)
         
     except asyncio.CancelledError:
         print("main(): check_account_after is cancelled now")
@@ -358,34 +360,12 @@ async def add_star_to_user(chat_id, user_id, tokens):
         print('main(): Finished')
     
 @fire_and_forget
-async def check_account_after(delay, chat_id, user_id):
+def check_account_after(star, delay):
     try:
         while True:
-            key = STAR_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-            save = r.get(key)
-            if save is not None:
-                time.sleep(delay)
-            
-                js = json.loads(save.decode("utf-8"))
-                end_time = parser.parse(js["end_time"])
-                live, free, _ = get_user_bag_score(chat_id, user_id)
-                start_total = js["start_total"]
-                current_result = 2 * ((live + free) - start_total)
-                if datetime.datetime.now() >= end_time:
-                    r.delete(key)
-                    key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
-                    save = r.get(key) 
-                    if save is not None:
-                        js = json.loads(save.decode("utf-8"))
-                        if PRICES_IN.lower() in js:
-                            current_amount = float(js[PRICES_IN.lower()])
-                            js[PRICES_IN.lower()] = current_result + current_amount
-                            r.set(key, json.dumps(js))
-                            await bot.send_message(chat_id=chat_id, text="STAR ENDED! Final Star Bonus = ${current_result}")
-                    await bot.send_message(chat_id=chat_id, text="STAR ENDED! Couldn't find user score??")
-                    raise asyncio.CancelledError()
-                else:
-                    await bot.send_message(chat_id=chat_id, text=f"STAR RUNNING! Current Star Bonus = ${current_result}")
+            star.update()
+            time.sleep(delay)
+        
     except asyncio.CancelledError:
         print('check_account_after(): cancel sleep')
         raise
