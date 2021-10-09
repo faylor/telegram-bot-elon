@@ -8,9 +8,7 @@ import asyncio
 import datetime
 from dateutil import parser
 import time
-from .bot import r
-from .virtualwallet import STAR_KEY, SCORE_KEY, PRICES_IN
-from .bot import get_user_bag_score
+from .bot import r, get_user_bag_score, STAR_KEY, SCORE_KEY, PRICES_IN
 
 class StarCard():
 
