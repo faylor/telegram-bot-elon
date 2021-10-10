@@ -37,44 +37,31 @@ async def prices_alts(message: types.Message):
     if data is None:
         return await bot.send_message(chat_id=chat_id, text="Empty Data", parse_mode="HTML")
 
-    for l in mains:
-        if l.upper() not in data:
-            out.append(l.upper() + " Missing Data")
+    for (l, d) in data.items():
+        l = l.ljust(5, ' ')
+        c_value = 0
+        c_1 = ""
+        c_24 = ""
+        days_since = "0".ljust(5, ' ')
+        ath_down = 0
+        if in_prices == "USD":
+            if "change_usd_1hr" in d:
+                c_value = d["change_usd_1hr"]
+                c_1 = get_change_label(c_value, 4)
+            if "change_usd_24hr" in d:
+                c_24 = get_change_label(d["change_usd_24hr"], 4)
         else:
-            d = data[l.upper()]
-            l = l.ljust(5, ' ')
-            c_value = 0
-            c_1 = ""
-            c_24 = ""
-            days_since = "0".ljust(5, ' ')
-            ath_down = 0
-            if in_prices == "USD":
-                if "change_usd_1hr" in d:
-                    c_value = d["change_usd_1hr"]
-                    c_1 = get_change_label(c_value, 4)
-                if "change_usd_24hr" in d:
-                    c_24 = get_change_label(d["change_usd_24hr"], 4)
-            else:
-                if "change_btc_1hr" in d:
-                    c_value = d["change_btc_1hr"]
-                    c_1 = get_change_label(c_value, 4)
-                if "change_usd_24hr" in d:
-                    c_24 = get_change_label(d["change_usd_24hr"], 4)
-            if "days_since_ath" in d:
-                days_since = str(d["days_since_ath"]).ljust(5, ' ')
-            if "down_from_alt" in d:
-                ath_down = d["down_from_alt"]
-            s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
-            out.append(s)
-            # if len(change_list) >= 2:
-            #     i = 1
-            #     while i < len(change_list) and c_value < change_list[i]:
-            #         i = i + 1
-            #     out.insert(i, s)
-            #     change_list.insert(i,c_value)
-            # else:
-            #     out.append(s)
-            #     change_list.append(c_value)
+            if "change_btc_1hr" in d:
+                c_value = d["change_btc_1hr"]
+                c_1 = get_change_label(c_value, 4)
+            if "change_usd_24hr" in d:
+                c_24 = get_change_label(d["change_usd_24hr"], 4)
+        if "days_since_ath" in d:
+            days_since = str(d["days_since_ath"]).ljust(5, ' ')
+        if "down_from_alt" in d:
+            ath_down = d["down_from_alt"]
+        s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
+        out.append(s)
 
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
