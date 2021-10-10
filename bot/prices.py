@@ -144,9 +144,6 @@ def get_ath_ranks(labels):
                 results[l] = {}
             else:
                 results[l] = format_price_extended(tmp_cr, tmp_cmc)
-        if results != {}:
-            marklist = sorted(results.items(), key=lambda x:x[1])
-            results = dict(marklist)
         return results
     except Exception as e:
         logging.error(e)
