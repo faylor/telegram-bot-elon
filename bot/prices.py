@@ -147,6 +147,7 @@ def get_ath_ranks(labels):
         if results != {}:
             marklist = sorted(results.items(), key=lambda x:x[1]['down_from_alt'])
             results = dict(marklist)
+            print(results)
         return results
     except Exception as e:
         logging.error(e)
