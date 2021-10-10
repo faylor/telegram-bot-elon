@@ -65,15 +65,16 @@ async def prices_alts(message: types.Message):
             if "down_from_alt" in d:
                 ath_down = d["down_from_alt"]
             s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
-            if len(change_list) >= 2:
-                i = 1
-                while i < len(change_list) and c_value < change_list[i]:
-                    i = i + 1
-                out.insert(i, s)
-                change_list.insert(i,c_value)
-            else:
-                out.append(s)
-                change_list.append(c_value)
+            out.append(s)
+            # if len(change_list) >= 2:
+            #     i = 1
+            #     while i < len(change_list) and c_value < change_list[i]:
+            #         i = i + 1
+            #     out.insert(i, s)
+            #     change_list.insert(i,c_value)
+            # else:
+            #     out.append(s)
+            #     change_list.append(c_value)
 
     await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
