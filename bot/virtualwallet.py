@@ -22,7 +22,7 @@ import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .virtualwallet_star import StarCard
-from .prices import get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
+from .prices import get_ath_ranks, get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
 SCORE_KEY = "{chat_id}_bagscore_{user_id}"
@@ -287,6 +287,17 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
                         ok = panic_sell(to_user_id, chat_id, None, message)
+                        mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
+                        try:
+                            config = json.loads(r.get(message.chat.id))
+                            logging.info(json.dumps(config))
+                            if "watch_list_alts" in config:
+                                mains = config["watch_list_alts"]
+                        except Exception as ex:
+                            logging.info("no config found, ignore")
+                        data = get_ath_ranks(mains)
+                        for x in list(data)[-4:]:
+                            grab_for_user(chat_id=chat_id, user_id=to_user_id)
                         # TODO buy 4 from list
                         if ok == 1:
                             ok = delete_card(message.from_user.id, data["chat_id"], "draw_4")
@@ -310,6 +321,27 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
         await state.finish()
     except Exception as e:
         print("use_card_to_user: " + str(e))
+
+
+async def grab_for_user(chat_id, user_id, coin, price, balance):
+    spend = float(balance) * 0.25
+    
+    remaining_balance, trades_count = user_spent_usd(chat_id, user_id, spend, coin)
+      
+    coins = spend/price
+    
+    js = r.get("At_" + chat_id + "_" + coin + "_" + user_id)
+    if js is not None:
+        js = json.loads(js.decode('utf-8'))
+        current_coins = js["coins"]
+        coins = coins + float(current_coins)
+
+    js = {}
+    js[PRICES_IN.lower()] = price
+    js["coins"] = coins 
+    
+    r.set("At_" + chat_id + "_" + coin + "_" + user_id, json.dumps(js))
+    
 
 def date_hook(json_dict):
     for (key, value) in json_dict.items():
@@ -964,7 +996,6 @@ async def process_spend(message: types.Message, state: FSMContext):
     except Exception as e:
         logging.error("BUY ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
-
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['panic([\s0-9.,a-zA-Z]*)']))
 async def set_panic_point(message: types.Message, regexp_command):
