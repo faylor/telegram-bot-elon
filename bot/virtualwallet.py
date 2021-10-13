@@ -286,7 +286,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     user_member = await bot.get_chat_member(chat_id, to_user_id)
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
-                        ok = panic_sell(to_user_id, chat_id, None, message)
+                        ok = panic_sell(to_user_id, chat_id, None, message, free_trades=True)
                         mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
                         try:
                             config = json.loads(r.get(message.chat.id))
@@ -295,10 +295,19 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                                 mains = config["watch_list_alts"]
                         except Exception as ex:
                             logging.info("no config found, ignore")
+                        _, usd, _ = get_user_bag_score(chat_id=chat_id, user_id=to_user_id)
+                        if usd <= 0:
+                            return await message.reply(f"They have no {PRICES_IN}, cannot make them draw 4.")
                         data = get_ath_ranks(mains)
-                        for x in list(data)[-4:]:
-                            grab_for_user(chat_id=chat_id, user_id=to_user_id)
-                        # TODO buy 4 from list
+                        remaining_balance = usd
+                        ii = 0
+                        for coin in list(data)[-8:]:
+                            if remaining_balance > 0:
+                                ratio = float(1/(4-ii))
+                                new_balance = grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
+                                if new_balance < remaining_balance:
+                                    remaining_balance = new_balance
+                                    ii = ii + 1
                         if ok == 1:
                             ok = delete_card(message.from_user.id, data["chat_id"], "draw_4")
                             await message.reply(f"DRAW 4! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
@@ -323,10 +332,12 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
         print("use_card_to_user: " + str(e))
 
 
-async def grab_for_user(chat_id, user_id, coin, price, balance):
-    spend = float(balance) * 0.25
-    
-    remaining_balance, trades_count = user_spent_usd(chat_id, user_id, spend, coin)
+async def grab_for_user(chat_id, user_id, coin, balance, ratio):
+    spend = float(balance) * ratio
+    price = get_bn_price(coin, PRICES_IN) 
+    if price == 0:
+        return balance
+    remaining_balance, _ = user_spent_usd(chat_id, user_id, spend, coin, free_trades=True)
       
     coins = spend/price
     
@@ -341,6 +352,8 @@ async def grab_for_user(chat_id, user_id, coin, price, balance):
     js["coins"] = coins 
     
     r.set("At_" + chat_id + "_" + coin + "_" + user_id, json.dumps(js))
+
+    return remaining_balance
     
 
 def date_hook(json_dict):
@@ -492,7 +505,7 @@ def get_user_bag_score(chat_id, user_id):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
-def user_spent_usd(chat_id, user_id, usd, coin):
+def user_spent_usd(chat_id, user_id, usd, coin, free_trades=False):
     try:
         _, account_usd, trade_count = get_user_bag_score(chat_id, user_id)
         if account_usd is None:
@@ -501,7 +514,10 @@ def user_spent_usd(chat_id, user_id, usd, coin):
         if new_account_usd < 0:
             return None
         new_account_usd = round(new_account_usd, 8)
-        new_trades_count = trade_count + 1
+        if free_trades:
+            new_trades_count = trade_count
+        else:
+            new_trades_count = trade_count + 1
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = {"live": 0, PRICES_IN.lower(): new_account_usd, "trades": new_trades_count}
         r.set(key, json.dumps(js))
@@ -1011,7 +1027,7 @@ async def set_panic_point(message: types.Message, regexp_command):
     await panic_sell(str(message.from_user.id), str(message.chat.id), to_symbol, message)
     
 
-async def panic_sell(user_id, chat_id, to_symbol, message):
+async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
     try:
         if 'btc' in to_symbol.lower():
             return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
@@ -1033,7 +1049,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd
-            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol, free_trades)
             
             r.delete(key)
             profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
