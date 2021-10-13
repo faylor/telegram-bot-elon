@@ -151,7 +151,7 @@ def get_ath_ranks(labels):
     try:
         marklist = sorted(results.items(), key=lambda x:x[1]['down_from_alt'])
         return dict(marklist)
-    except:
+    except Exception as e:
         logging.error("Unable to sort ATH data:" + str(e))
 
     return results
