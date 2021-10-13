@@ -144,14 +144,17 @@ def get_ath_ranks(labels):
                 results[l] = {}
             else:
                 results[l] = format_price_extended(tmp_cr, tmp_cmc)
-        if results != {}:
-            marklist = sorted(results.items(), key=lambda x:x[1]['down_from_alt'])
-            return dict(marklist)
-        else:
-            return results
     except Exception as e:
         logging.error(e)
         return None
+
+    try:
+        marklist = sorted(results.items(), key=lambda x:x[1]['down_from_alt'])
+        return dict(marklist)
+    except:
+        logging.error("Unable to sort ATH data:" + str(e))
+
+    return results
 
 def format_price_extended(data_cr, data_cmc):
     try:
