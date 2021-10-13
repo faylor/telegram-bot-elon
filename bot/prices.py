@@ -141,7 +141,7 @@ def get_ath_ranks(labels):
             if l in data_cmc:
                 tmp_cmc = data_cmc[l]
             if tmp_cr is None and tmp_cmc is None:
-                results[l] = {}
+                results[l] = {"change_usd_1hr": 0, "change_usd_24hr": 0, "days_since_ath": 0, "down_from_alt": 0}
             else:
                 results[l] = format_price_extended(tmp_cr, tmp_cmc)
     except Exception as e:
