@@ -192,7 +192,7 @@ def format_price_extended(data_cr, data_cmc):
         return coin_result
     except Exception as e:
         logging.error("FORMAT ERROR: " + str(e))
-        return {}
+        return {"change_usd_1hr": 0, "change_usd_24hr": 0, "days_since_ath": 0, "down_from_alt": 0}
     
 def get_price_extended(label):
     http.headers.clear()
