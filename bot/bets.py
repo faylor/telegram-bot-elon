@@ -120,7 +120,8 @@ async def get_weekly(message: types.Message):
 @dp.message_handler(commands=['cards'])
 async def show_cards(message: types.Message):
     try:
-        cid = str(message.chat.id)
+        cid = "-375104421"
+        #  cid = str(message.chat.id)   - was a pain
         uid = str(message.from_user.id)
         logging.info("CID is " + cid)
         cards = get_user_prizes(uid, cid)

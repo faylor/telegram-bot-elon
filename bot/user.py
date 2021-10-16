@@ -99,10 +99,11 @@ def get_user_prizes(user_id, chat_id):
                 if datetime.datetime.now() >= end_time:
                     new_cards = {}
                     if chat_id in cards:
+                        cards.remove("ghost_expires")
                         if "ghost" in cards[chat_id]:
                             cards[chat_id].remove("ghost")
                             new_cards = {chat_id: cards[chat_id]}
-                            r.set("cards_" + str(user_id), json.dumps(new_cards))
+                        r.set("cards_" + str(user_id), json.dumps(new_cards))
     return cards
 
 def setup_cards(chat_id, red_shells = 5, ghost_cards = 4, trade_tokens = 10, star_cards = 4, draw_4_cards = 4):
