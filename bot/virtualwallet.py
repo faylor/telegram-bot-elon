@@ -341,9 +341,7 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
     if price == 0:
         return balance
     remaining_balance, _ = user_spent_usd(chat_id, user_id, spend, coin, free_trades=True)
-    logging.info("here3!")
     coins = spend/price
-    logging.info("here4!")
     js = r.get("At_" + chat_id + "_" + coin + "_" + user_id)
     if js is not None:
         js = json.loads(js.decode('utf-8'))
