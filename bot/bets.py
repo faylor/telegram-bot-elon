@@ -123,18 +123,22 @@ async def show_cards(message: types.Message):
         cid = "-375104421"
         #  cid = str(message.chat.id)   - was a pain
         uid = str(message.from_user.id)
-        logging.info("CID is " + cid)
         cards = get_user_prizes(uid, cid)
+        logging.info("here1")
         if cid in cards:
+            logging.info("here2")
             media = types.MediaGroup()
+            logging.info("here3")
             counted_cards = Counter(cards[cid]) 
+            logging.info("here4")
             for card_name, counter in counted_cards.items():
                 media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
-            
+            logging.info("here5")
             return await message.reply_media_group(media=media)
         else:
+            logging.info("here6")
             return await message.reply(f'No POW cards... Win some bets')
-            
+        logging.info("here7")
     except Exception as e:
         await bot.send_message(chat_id=message.chat.id, text="PROBLEM GETTING PRIZE:" + str(e))
 
