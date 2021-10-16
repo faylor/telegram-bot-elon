@@ -162,7 +162,7 @@ async def use_card(message: types.Message, state: FSMContext):
         cards = get_user_prizes(uid, chat_id)
         if chat_id in cards:
             if len(cards[chat_id]) == 0:
-                await message.reply(f'All out of POW cards... Win some bets')
+                return await message.reply(f'All out of POW cards... Win some bets')
             await POWCard.card.set()
             async with state.proxy() as proxy: 
                 proxy['user_id'] = uid

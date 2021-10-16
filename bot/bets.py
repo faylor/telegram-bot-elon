@@ -122,7 +122,7 @@ async def show_cards(message: types.Message):
     try:
         cid = str(message.chat.id)
         uid = str(message.from_user.id)
-        
+        logging.info("CID is " + cid)
         cards = get_user_prizes(uid, cid)
         if cid in cards:
             media = types.MediaGroup()
