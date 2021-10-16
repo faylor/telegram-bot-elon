@@ -286,7 +286,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                     user_member = await bot.get_chat_member(chat_id, to_user_id)
                     mention_name = user_member.user.mention
                     if data["to_user"] == mention_name:
-                        ok = await panic_sell(to_user_id, chat_id, None, message, free_trades=True)
+                        ok = await panic_sell(to_user_id, chat_id, PRICES_IN, message, free_trades=True)
                         mains = ["eth", "grt", "ltc", "ada", "nano", "neo", "aave", "doge", "zil", "ada"]
                         try:
                             config = json.loads(r.get(message.chat.id))
