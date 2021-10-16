@@ -309,9 +309,9 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                                     remaining_balance = new_balance
                                     await message.reply(f"DRAW 4: Present from {message.from_user.mention} to {mention_name}. {coin}", reply_markup=markup)
                                     ii = ii + 1
-                        if ok == 1:
-                            ok = delete_card(message.from_user.id, data["chat_id"], "draw_4")
+                        if remaining_balance == 0:
                             await message.reply(f"DRAW 4! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
+                            ok = delete_card(message.from_user.id, data["chat_id"], "draw_4")
                         else:
                             await message.reply(f"FAILED TO DRAW 4! {message.from_user.mention} to {mention_name}.", reply_markup=markup)
                         break
