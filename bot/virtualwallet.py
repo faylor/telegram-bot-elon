@@ -299,12 +299,16 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         if usd <= 0:
                             return await message.reply(f"They have no {PRICES_IN}, cannot make them draw 4.")
                         data = get_ath_ranks(mains)
+                        # INFO:root:USING ATH CR FILTERED CACHE
+                        # INFO:root:GETTING NEW ATH DATA
+                        # ERROR:root:FORMAT ERROR: float division by zero
+                        # use_card_to_user: '<' not supported between instances of 'coroutine' and 'float'
                         remaining_balance = usd
                         ii = 0
                         for coin in list(data)[-8:]:
                             if remaining_balance > 0:
                                 ratio = float(1/(4-ii))
-                                new_balance = grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
+                                new_balance = await grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
                                 if new_balance < remaining_balance:
                                     remaining_balance = new_balance
                                     ii = ii + 1
