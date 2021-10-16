@@ -307,8 +307,12 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         ii = 0
                         for coin in list(data)[-8:]:
                             if remaining_balance > 0:
+                                logging.info("here!" + str(ii))
                                 ratio = float(1/(4-ii))
                                 new_balance = await grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
+                                
+                                logging.info("here 2!" + str(ii))
+                                
                                 if new_balance < remaining_balance:
                                     remaining_balance = new_balance
                                     ii = ii + 1
@@ -342,9 +346,9 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
     if price == 0:
         return balance
     remaining_balance, _ = user_spent_usd(chat_id, user_id, spend, coin, free_trades=True)
-      
+    logging.info("here3!")
     coins = spend/price
-    
+    logging.info("here4!")
     js = r.get("At_" + chat_id + "_" + coin + "_" + user_id)
     if js is not None:
         js = json.loads(js.decode('utf-8'))
