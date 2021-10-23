@@ -54,6 +54,12 @@ class POWCard(StatesGroup):
     card = State()
     to_user = State()
 
+class BurnPOWCard(StatesGroup):
+    user_id = State()
+    chat_id = State()
+    card = State()
+    to_user = State()
+
 
 def fire_and_forget(f):
     def wrapped(*args, **kwargs):
@@ -355,7 +361,47 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
     r.set("At_" + chat_id + "_" + coin + "_" + user_id, json.dumps(js))
 
     return remaining_balance
-    
+
+
+@dp.message_handler(commands=['burn'])
+async def burn_card(message: types.Message, state: FSMContext):
+    try:
+        uid = str(message.from_user.id)
+        chat_id = "-375104421"
+        cards = get_user_prizes(uid, chat_id)
+        if chat_id in cards:
+            if len(cards[chat_id]) == 0:
+                return await message.reply(f'All out of POW cards... Win some bets')
+            await BurnPOWCard.card.set()
+            async with state.proxy() as proxy: 
+                proxy['user_id'] = uid
+                proxy['chat_id'] = chat_id
+            
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+            for c in set(cards[chat_id]):
+                markup.add(c)
+            markup.add("Cancel")
+            await message.reply(f"Are you Sure this burns you card, and you cannot use the ashes?? Burn which card?", reply_markup=markup)
+        else:
+            await message.reply(f'No POW cards to burn... Win some bets')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to run burn POW Card. ' + str(e))
+
+
+@dp.message_handler(state=BurnPOWCard.card)
+async def burn_card_specific(message: types.Message, state: FSMContext):
+    try:
+        async with state.proxy() as data:
+            card_response = message.text.lower().strip()
+            data['card'] = card_response
+            ok = delete_card(message.from_user.id, data["chat_id"], card_response)
+        
+            markup = types.ReplyKeyboardRemove()
+            await message.reply(f"Burnt a {card_response}, nice protesting, that'll show da man!", reply_markup=markup)
+            await state.finish()
+    except Exception as e:
+        print("burn_card_specific: " + str(e))
+       
 
 def date_hook(json_dict):
     for (key, value) in json_dict.items():
