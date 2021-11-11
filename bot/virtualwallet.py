@@ -30,7 +30,8 @@ STAR_KEY = "{chat_id}_star_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
 TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
 PRICES_IN = "USDT"
-MAX_TRADES = 60
+MAX_TRADES = 9999
+FEE = 0.002
 # States
 class Form(StatesGroup):
     coin = State()
@@ -883,7 +884,6 @@ def swap_users_bags(chat_id, user_id_one, user_id_two):
 async def totals_user_scores2(message: types.Message):
     try:
         chat_id = str(message.chat.id)
-        
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         out = ["<pre>Who [Trades]           Live Val  " + PRICES_IN]
         scores = [0]
@@ -916,7 +916,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd_str}")
-        out.append("</pre>\nEnds Sunday 6th November, anyone got a dexi? MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Saturday 18th December, Santa bring us BigCoin! MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')
@@ -1096,7 +1096,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
             sale_usd = available_coins * sale_price_usd 
-            fee = sale_usd * 0.02
+            fee = sale_usd * FEE
             user_profit = sale_usd - fee
             new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol, free_trades)
 
@@ -1290,7 +1290,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
             sale_usd = coins * sale_price_usd
-            fee = sale_usd * 0.02
+            fee = sale_usd * FEE
             user_profit = sale_usd - fee
             new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol)
             remaining_balance = available_coins - coins
