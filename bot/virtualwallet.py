@@ -1129,7 +1129,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
         if total_fees > 0:
             free_total = await update_parking(chat_id, total_fees)
             if free_total is not None:
-                await message.reply(f"Free Parking now: ${free_total}")
+                await message.reply(f"Free Parking now: ${round_sense(free_total)}")
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
     except Exception as e:
         logging.error("Panic error: " + str(e))
@@ -1336,7 +1336,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             if fee > 0:
                 free_total = await update_parking(chat_id, fee)
                 if free_total is not None:
-                    await message.reply(f"Free Parking now: ${free_total}")
+                    await message.reply(f"Free Parking now: ${round_sense(free_total)}")
 
         # Finish conversation
         await state.finish()
