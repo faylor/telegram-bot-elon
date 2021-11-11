@@ -1095,11 +1095,13 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
             else:
                 return await bot.send_message(chat_id=message.chat.id, text='Sorry, the api didnt return for ' + key + ' so we have stopped panic sale.')
 
-            sale_usd = available_coins * sale_price_usd
-            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol, free_trades)
+            sale_usd = available_coins * sale_price_usd 
+            fee = sale_usd * 0.02
+            user_profit = sale_usd - fee
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol, free_trades)
             
             r.delete(key)
-            profit_or_loss = (sale_price_usd * available_coins) - (price_usd * available_coins)
+            profit_or_loss = user_profit - (price_usd * available_coins)
             if profit_or_loss > 0:
                 profit_or_loss_md = md.text('Profit ' + PRICES_IN + ':', '🚀', md.text(str(round_sense(profit_or_loss))))
             else:
@@ -1114,6 +1116,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
                     md.text('Sale Price ' + PRICES_IN + ':', md.text(round_sense(sale_price_usd))),
                     md.text('Total Coins Sold:', md.text(str(available_coins))),
                     md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
+                    md.text('Total Minus Fee ' + PRICES_IN + ':', md.text(str(round_sense(user_profit)))),
                     profit_or_loss_md,
                     md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
                     md.text('Trades Used:', md.text(str(trades_count))),
@@ -1280,7 +1283,9 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 return await message.reply("Total Coins is more than Available Coins\nTry again (digits only)")
 
             sale_usd = coins * sale_price_usd
-            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * sale_usd, symbol)
+            fee = sale_usd * 0.02
+            user_profit = sale_usd - fee
+            new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol)
             remaining_balance = available_coins - coins
             if remaining_balance == 0:
                 r.delete("At_" + chat_id + "_" + symbol + "_" + user_id)
@@ -1294,7 +1299,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 else:
                     return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
             
-            profit_or_loss = (data["sale_price_usd"] * coins) - (data["price_usd"] * coins)
+            profit_or_loss = user_profit - (data["price_usd"] * coins)
             if profit_or_loss > 0:
                 profit_or_loss_md = md.text('Profit ' + PRICES_IN + ':', '🚀', md.text(str(round_sense(profit_or_loss))))
             else:
@@ -1310,6 +1315,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     md.text('Total Coins Sold:', md.text(str(coins))),
                     md.text('Remaining Coins:', md.text(str(round(remaining_balance, 4)))),
                     md.text('Total From Sale ' + PRICES_IN + ':', md.text(str(round_sense(sale_usd)))),
+                    md.text('Total Minus Fee ' + PRICES_IN + ':', md.text(str(round_sense(user_profit)))),
                     profit_or_loss_md,
                     md.text('New Bag Balance ' + PRICES_IN + ':', md.text(str(new_balance))),
                     md.text('Trades Used:', md.text(str(trades_count))),
