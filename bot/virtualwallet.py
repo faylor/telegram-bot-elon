@@ -1078,7 +1078,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
     try:
         if 'btc' in to_symbol.lower():
             return await bot.send_message(chat_id=message.chat.id, text='Sorry, BTC panic not yet implemented. Try /panic then buy BTC.')
-
+        total_fees = 0
         keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
         for key in keys:
             js = r.get(key).decode('utf-8')
@@ -1099,8 +1099,6 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
             fee = sale_usd * 0.02
             user_profit = sale_usd - fee
             new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol, free_trades)
-            free_total = await update_parking(chat_id, fee)
-            await message.reply(f"Free Parking now: ${free_total}")
 
             r.delete(key)
             profit_or_loss = user_profit - (price_usd * available_coins)
@@ -1126,6 +1124,12 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
                 ),
                 parse_mode=ParseMode.MARKDOWN,
             )
+            total_fees = total_fees + fee
+
+        if total_fees > 0:
+            free_total = await update_parking(chat_id, total_fees)
+            if free_total is not None:
+                await message.reply(f"Free Parking now: ${free_total}")
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
     except Exception as e:
         logging.error("Panic error: " + str(e))
@@ -1140,7 +1144,7 @@ async def set_panic_point(message: types.Message):
         
         user_id = str(message.from_user.id)
         chat_id = str(message.chat.id)
-        
+
         keys = r.scan_iter("At_" + chat_id + "_*_" + user_id)
         for key in keys:
             js = r.get(key).decode('utf-8')
@@ -1184,6 +1188,7 @@ async def set_panic_point(message: types.Message):
                 ),
                 parse_mode=ParseMode.MARKDOWN,
             )
+
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
     except Exception as e:
         logging.error("Panic error: " + str(e))
@@ -1298,8 +1303,6 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     js_set = json.loads(value)
                     js_set["coins"] = remaining_balance
                     r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
-                    free_total = await update_parking(chat_id, fee)
-                    await message.reply(f"Free Parking now: ${free_total}")
                 else:
                     return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
 
@@ -1329,6 +1332,11 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                 reply_markup=markup,
                 parse_mode=ParseMode.MARKDOWN,
             )
+
+            if fee > 0:
+                free_total = await update_parking(chat_id, fee)
+                if free_total is not None:
+                    await message.reply(f"Free Parking now: ${free_total}")
 
         # Finish conversation
         await state.finish()
