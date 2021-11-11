@@ -1099,7 +1099,9 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
             fee = sale_usd * 0.02
             user_profit = sale_usd - fee
             new_balance, trades_count = user_spent_usd(chat_id, user_id, -1 * user_profit, symbol, free_trades)
-            
+            free_total = await update_parking(fee)
+            await message.reply(f"Free Parking now: ${free_total}")
+
             r.delete(key)
             profit_or_loss = user_profit - (price_usd * available_coins)
             if profit_or_loss > 0:
@@ -1296,8 +1298,11 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
                     js_set = json.loads(value)
                     js_set["coins"] = remaining_balance
                     r.set("At_" + chat_id + "_" + symbol + "_" + user_id, json.dumps(js_set))
+                    free_total = await update_parking(fee)
+                    await message.reply(f"Free Parking now: ${free_total}")
                 else:
                     return await message.reply("Total Coins For this coin is missing now...\nTry again (digits only)")
+
             
             profit_or_loss = user_profit - (data["price_usd"] * coins)
             if profit_or_loss > 0:
@@ -1330,3 +1335,15 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
     except Exception as e:
         logging.error("SALE PROCESS ERROR:" + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
+
+
+async def update_parking(chat_id, amount):
+    value = r.get("Free-Parking-" + chat_id)
+    if value is not None and amount != 0:
+        value = value.decode('utf-8')
+        js_set = json.loads(value)
+        free_parking = js_set["usd"] + amount
+        js_set["usd"] = free_parking
+        r.set("Free-Parking-" + chat_id, json.dumps(js_set))
+        return free_parking
+    return None
