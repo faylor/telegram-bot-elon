@@ -211,7 +211,7 @@ async def finish_weekly(message: types.Message):
         parking = get_parking(WALLET_GAME_CHAT_ID)
         user_spent_usd(WALLET_GAME_CHAT_ID, last_user, -1 * parking, None, free_trades=True)
         update_parking(WALLET_GAME_CHAT_ID, -1 * parking)
-        await bot.send_message(chat_id=message.chat.id, text=f"Last place to receive ${parking} free parking is {member.user.mention}.")
+        await bot.send_message(chat_id=message.chat.id, text=f"Last place to receive ${round(parking, 2)} free parking is {member.user.mention}.")
 
         
 
