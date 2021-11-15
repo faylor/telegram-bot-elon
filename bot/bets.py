@@ -124,7 +124,7 @@ async def show_cards(message: types.Message):
         #  cid = str(message.chat.id)   - was a pain
         uid = str(message.from_user.id)
         cards = get_user_prizes(uid, cid)
-        logging.info("here1")
+        logging.info("THIS Chat id" + str(message.chat.id))
         if cid in cards and len(cards[cid]) > 0:
             media = types.MediaGroup()
             counted_cards = Counter(cards[cid])
