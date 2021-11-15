@@ -207,10 +207,11 @@ async def finish_weekly(message: types.Message):
 
     last_user = get_wallet_last_place_user_id()
     if last_user is not None:
-        user_member = await bot.get_chat_member(WALLET_GAME_CHAT_ID, last_user)
+        member = await bot.get_chat_member(WALLET_GAME_CHAT_ID, last_user)
         parking = get_parking(WALLET_GAME_CHAT_ID)
         user_spent_usd(WALLET_GAME_CHAT_ID, last_user, -1 * parking, None, free_trades=True)
-        await bot.send_message(chat_id=message.chat.id, text=f"Last place to receive ${parking} free parking is {user_member}.")
+        update_parking(WALLET_GAME_CHAT_ID, -1 * parking)
+        await bot.send_message(chat_id=message.chat.id, text=f"Last place to receive ${parking} free parking is {member.user.mention}.")
 
         
 
