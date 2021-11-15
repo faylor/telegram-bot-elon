@@ -32,3 +32,14 @@ BN_TEST_API_KEY = os.environ.get("BN_TEST_API")
 BN_TEST_API_SECRET = os.environ.get("BN_TEST_SECRET")
 BN_CHAT_ID = os.environ.get("BN_CHAT_ID")
 BN_CHAT_ID_GROUP = os.environ.get("BN_CHAT_ID_GROUP")
+
+BETS_GAME_CHAT_ID = os.environ.get("BETS_GAME_CHAT_ID")
+WALLET_GAME_CHAT_ID = os.environ.get("WALLET_GAME_CHAT_ID")
+
+SCORE_KEY = "{chat_id}_bagscore_{user_id}"
+STAR_KEY = "{chat_id}_star_{user_id}"
+SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
+TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
+PRICES_IN = "USDT"
+MAX_TRADES = 9999
+FEE = 0.002

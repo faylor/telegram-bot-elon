@@ -11,7 +11,8 @@ from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
-                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL, 
+                          BETS_GAME_CHAT_ID, WALLET_GAME_CHAT_ID, SCORE_KEY, PRICES_IN)
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from collections import Counter
@@ -19,6 +20,7 @@ from collections import Counter
 from .bot import dp, bot, r
 from .user import add_win_for_user, add_random_prize_for_user, get_cards_remaining, get_user_prizes, clear_users_cards, clear_cards
 from .prices import get_abs_difference, get_price
+from .virtualwallet import get_users_live_value, get_parking, update_parking, user_spent_usd
 
 BETS_KEY = "{chat_id}_bets"
   
@@ -120,14 +122,11 @@ async def get_weekly(message: types.Message):
 @dp.message_handler(commands=['cards'])
 async def show_cards(message: types.Message):
     try:
-        cid = "-375104421"
-        #  cid = str(message.chat.id)   - was a pain
         uid = str(message.from_user.id)
-        cards = get_user_prizes(uid, cid)
-        logging.info("THIS Chat id" + str(message.chat.id))
-        if cid in cards and len(cards[cid]) > 0:
+        cards = get_user_prizes(uid, BETS_GAME_CHAT_ID)
+        if BETS_GAME_CHAT_ID in cards and len(cards[BETS_GAME_CHAT_ID]) > 0:
             media = types.MediaGroup()
-            counted_cards = Counter(cards[cid])
+            counted_cards = Counter(cards[BETS_GAME_CHAT_ID])
             for card_name, counter in counted_cards.items():
                 media.attach_photo(types.InputFile('assets/' + card_name + '.jpg'), str(counter) + ' x ' + card_name.upper())
             return await message.reply_media_group(media=media)
@@ -175,36 +174,45 @@ async def prize_message(chat_id, user_id, name, winning_card):
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
-    await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
-    await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
-    config = get_bets_totes(message.chat.id)
-    if "," in winning_btc:
-        winners = winning_btc.split(",")
-        winning_names = winning_name.split(",")
-        i = 0
-        for winner in winners:
-            winning_card = add_win_for_user(config, winner, message.chat.id)
-            await prize_message(message.chat.id, winner, winning_names[i], winning_card)
-            i = i + 1
-    else:
-        winning_card = add_win_for_user(config, winning_btc, message.chat.id)
-        await prize_message(message.chat.id, winning_btc, winning_name, winning_card)
-    if "," in winning_eth:
-        winners = winning_eth.split(",")
-        winning_eth_names = winning_eth_name.split(",")
-        i = 0
-        for winner in winners:
-            winning_card = add_win_for_user(config, winner, message.chat.id)
-            await prize_message(message.chat.id, winner, winning_eth_names[i], winning_card)
-            i = i + 1
-    else:
-        winning_card = add_win_for_user(config, winning_eth, message.chat.id)
-        await prize_message(message.chat.id, winning_eth, winning_eth_name, winning_card)
-    
-    logging.info(json.dumps(config))
-    set_bets_totes(message.chat.id, config)
+    # await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
+    # await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
+    # config = get_bets_totes(message.chat.id)
+    # if "," in winning_btc:
+    #     winners = winning_btc.split(",")
+    #     winning_names = winning_name.split(",")
+    #     i = 0
+    #     for winner in winners:
+    #         winning_card = add_win_for_user(config, winner, message.chat.id)
+    #         await prize_message(message.chat.id, winner, winning_names[i], winning_card)
+    #         i = i + 1
+    # else:
+    #     winning_card = add_win_for_user(config, winning_btc, message.chat.id)
+    #     await prize_message(message.chat.id, winning_btc, winning_name, winning_card)
+    # if "," in winning_eth:
+    #     winners = winning_eth.split(",")
+    #     winning_eth_names = winning_eth_name.split(",")
+    #     i = 0
+    #     for winner in winners:
+    #         winning_card = add_win_for_user(config, winner, message.chat.id)
+    #         await prize_message(message.chat.id, winner, winning_eth_names[i], winning_card)
+    #         i = i + 1
+    # else:
+    #     winning_card = add_win_for_user(config, winning_eth, message.chat.id)
+    #     await prize_message(message.chat.id, winning_eth, winning_eth_name, winning_card)
+    # 
+    # logging.info(json.dumps(config))
+    # set_bets_totes(message.chat.id, config)
     await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
     await total_weekly(message)
+
+    last_user = get_wallet_last_place_user_id()
+    if last_user is not None:
+        user_member = await bot.get_chat_member(WALLET_GAME_CHAT_ID, last_user)
+        parking = get_parking(WALLET_GAME_CHAT_ID)
+        user_spent_usd(WALLET_GAME_CHAT_ID, last_user, -1 * parking, None, free_trades=True)
+        await bot.send_message(chat_id=message.chat.id, text=f"Last place to receive ${parking} free parking is {user_member}.")
+
+        
 
 def get_bets_totes(chat_id):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
@@ -275,6 +283,39 @@ async def clear_weekly_totals(message: types.Message):
             config["winners_list"] = {}
             set_bets_totes(message.chat.id, config)
             await bot.send_message(chat_id=message.chat.id, text='Cleared Table.')
+
+
+def get_wallet_last_place_user_id():
+    try:
+        saves = r.scan_iter(SCORE_KEY.format(chat_id=WALLET_GAME_CHAT_ID, user_id="*"))
+        scores = [0]
+        users = []
+        for key in saves:
+            key = key.decode('utf-8')
+            value = r.get(key)
+            if "*" in key:
+                r.delete(key)
+            elif value is not None:
+                value = value.decode('utf-8')
+                user_id = key.replace(WALLET_GAME_CHAT_ID + "_bagscore_", "")
+                js = json.loads(value)
+                score_live = get_users_live_value(WALLET_GAME_CHAT_ID, user_id)
+                score_usd = float(js[PRICES_IN.lower()])
+                score_total = score_live + score_usd
+                if len(scores) > 1:
+                    i = 1
+                    while i < len(scores) and score_total < scores[i]:
+                        i = i + 1
+                    users.insert(i, user_id)
+                    scores.insert(i, score_total)
+                else:
+                    scores.append(score_total)
+                    users.append(user_id)
+        
+        return users[-1]
+    except Exception as e:
+        logging.error("ERROR: " + str(e))
+        return None, None
 
 @dp.message_handler(commands=['setupagain'])
 async def setup_totes_manually(message: types.Message):

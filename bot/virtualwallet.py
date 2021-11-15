@@ -14,7 +14,9 @@ from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
-                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+                          WEBAPP_HOST, WEBAPP_PORT, REDIS_URL,
+                          WALLET_GAME_CHAT_ID, BETS_GAME_CHAT_ID,
+                          SCORE_KEY, PRICES_IN, TRADE_LOCK_KEY, SCORE_LOG_KEY, MAX_TRADES, FEE)
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -25,14 +27,8 @@ from .virtualwallet_star import StarCard
 from .prices import get_ath_ranks, get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
-SCORE_KEY = "{chat_id}_bagscore_{user_id}"
-STAR_KEY = "{chat_id}_star_{user_id}"
-SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
-TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
-PRICES_IN = "USDT"
-MAX_TRADES = 9999
-FEE = 0.002
-WALLET_GAME_CHAT_ID = "-375104421"
+
+
 # States
 class Form(StatesGroup):
     coin = State()
@@ -120,8 +116,7 @@ async def reset_bags(message: types.Message):
 @dp.message_handler(commands=['clearcards'])
 async def reset_cards(message: types.Message):
     try:
-        cards_chat_id = "-375104421"
-        clear_cards(cards_chat_id)
+        clear_cards(BETS_GAME_CHAT_ID)
         chat_id = str(message.chat.id)
         saves = r.scan_iter(SCORE_KEY.format(chat_id=chat_id, user_id="*"))
         for key in saves:
@@ -166,18 +161,17 @@ async def reset_cards(message: types.Message):
 async def use_card(message: types.Message, state: FSMContext):
     try:
         uid = str(message.from_user.id)
-        chat_id = "-375104421"
-        cards = get_user_prizes(uid, chat_id)
-        if chat_id in cards:
-            if len(cards[chat_id]) == 0:
+        cards = get_user_prizes(uid, BETS_GAME_CHAT_ID)
+        if BETS_GAME_CHAT_ID in cards:
+            if len(cards[BETS_GAME_CHAT_ID]) == 0:
                 return await message.reply(f'All out of POW cards... Win some bets')
             await POWCard.card.set()
             async with state.proxy() as proxy: 
                 proxy['user_id'] = uid
-                proxy['chat_id'] = chat_id
+                proxy['chat_id'] = BETS_GAME_CHAT_ID
             
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-            for c in set(cards[chat_id]):
+            for c in set(cards[BETS_GAME_CHAT_ID]):
                 markup.add(c)
             markup.add("Cancel")
             await message.reply(f"Use Which Card?", reply_markup=markup)
@@ -369,18 +363,17 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
 async def burn_card(message: types.Message, state: FSMContext):
     try:
         uid = str(message.from_user.id)
-        chat_id = "-375104421"
-        cards = get_user_prizes(uid, chat_id)
-        if chat_id in cards:
-            if len(cards[chat_id]) == 0:
+        cards = get_user_prizes(uid, BETS_GAME_CHAT_ID)
+        if BETS_GAME_CHAT_ID in cards:
+            if len(cards[BETS_GAME_CHAT_ID]) == 0:
                 return await message.reply(f'All out of POW cards... Win some bets')
             await BurnPOWCard.card.set()
             async with state.proxy() as proxy: 
                 proxy['user_id'] = uid
-                proxy['chat_id'] = chat_id
+                proxy['chat_id'] = BETS_GAME_CHAT_ID
             
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-            for c in set(cards[chat_id]):
+            for c in set(cards[BETS_GAME_CHAT_ID]):
                 markup.add(c)
             markup.add("Cancel")
             await message.reply(f"Are you Sure this burns you card, and you cannot use the ashes?? Burn which card?", reply_markup=markup)
@@ -554,6 +547,7 @@ def get_user_bag_score(chat_id, user_id):
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
 
+
 def user_spent_usd(chat_id, user_id, usd, coin, free_trades=False):
     try:
         _, account_usd, trade_count = get_user_bag_score(chat_id, user_id)
@@ -570,14 +564,16 @@ def user_spent_usd(chat_id, user_id, usd, coin, free_trades=False):
         key =  SCORE_KEY.format(chat_id=str(chat_id), user_id=user_id)
         js = {"live": 0, PRICES_IN.lower(): new_account_usd, "trades": new_trades_count}
         r.set(key, json.dumps(js))
+        # log_key =  SCORE_LOG_KEY.format(chat_id=str(chat_id), user_id=user_id)
+        # current_log = r.get(log_key)
+        # if current_log is None:
+        #     current_log = []
+        # else:
+        #     current_log = json.loads(current_log.decode("utf-8"))
+        # current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, PRICES_IN.lower(): new_account_usd}})
+        # r.set(log_key, json.dumps(current_log))
         log_key =  SCORE_LOG_KEY.format(chat_id=str(chat_id), user_id=user_id)
-        current_log = r.get(log_key)
-        if current_log is None:
-            current_log = []
-        else:
-            current_log = json.loads(current_log.decode("utf-8"))
-        current_log.append({"time": str(datetime.datetime.now()),"change": usd, "coin": coin, "balance":{"live": 0, PRICES_IN.lower(): new_account_usd}})
-        r.set(log_key, json.dumps(current_log))
+        r.delete(log_key)
         return new_account_usd, new_trades_count
     except Exception as e:
         logging.error("FAILED to save user score for bag:" + str(e))
@@ -1128,7 +1124,7 @@ async def panic_sell(user_id, chat_id, to_symbol, message, free_trades=False):
             total_fees = total_fees + fee
 
         if total_fees > 0:
-            free_total = await update_parking(chat_id, total_fees)
+            free_total = update_parking(chat_id, total_fees)
             if free_total is not None:
                 await message.reply(f"Free Parking now: ${round_sense(free_total)}")
         await bot.send_message(chat_id=message.chat.id, text='Panic Fire Sale Done')
@@ -1335,7 +1331,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
             )
 
             if fee > 0:
-                free_total = await update_parking(chat_id, fee)
+                free_total = update_parking(chat_id, fee)
                 if free_total is not None:
                     await message.reply(f"Free Parking now: ${round_sense(free_total)}")
 
@@ -1346,7 +1342,7 @@ async def process_sell_percentage(message: types.Message, state: FSMContext):
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /grab btc')
 
 
-async def update_parking(chat_id, amount):
+def update_parking(chat_id, amount):
     if amount != 0:
         value = r.get("Free-Parking-" + chat_id)
         if value is not None:
@@ -1361,3 +1357,13 @@ async def update_parking(chat_id, amount):
             r.set("Free-Parking-" + chat_id, json.dumps(js_set))
             return amount
     return None
+
+
+def get_parking(chat_id):
+    value = r.get("Free-Parking-" + chat_id)
+    if value is not None:
+        value = value.decode('utf-8')
+        js_set = json.loads(value)
+        free_parking = js_set["usd"]
+        return free_parking
+    return 0
