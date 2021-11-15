@@ -472,7 +472,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
                     current_amount = float(js[PRICES_IN.lower()])
             js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": 0}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO ADA HD\nSorry cant talk, too busy running in circles chasing butterflies - no grass - no ants... and CRYPTO.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO BIGCOIN BADNESS\nThe King Has Taxed You All 0.2% On Each Sale. So he can buy into BigCoin, he heard it was Big and Coiny.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -495,7 +495,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": int(js["trades"])}
         r.set(key, json.dumps(js))
 
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO ADA HD\nSorry cant talk, too busy running in circles chasing butterflies - no grass - no ants... and CRYPTO.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO BIGCOIN BADNESS.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -791,7 +791,7 @@ async def send_user_balance(message: types.Message, regexp_command):
             out = out + "\n     AVERAGE CHANGE = " + str(round(total_change/counter,2)) + "%"
         out = out + "\n       TOTAL TRADES = " + str(trades) + " of MAX = " + str(MAX_TRADES) + "\n"
         
-        if "f022" in message.from_user.mention:
+        if "Ryan" in message.from_user.mention:
             out = '👑 Reigning Champ\n' + out
         await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     except Exception as e:
