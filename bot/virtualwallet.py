@@ -32,6 +32,7 @@ TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
 PRICES_IN = "USDT"
 MAX_TRADES = 9999
 FEE = 0.002
+WALLET_GAME_CHAT_ID = "-375104421"
 # States
 class Form(StatesGroup):
     coin = State()
