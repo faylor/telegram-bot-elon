@@ -45,7 +45,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
             logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
         else:
             member = await bot.get_chat_member(message.chat.id, user_id)
-            if show_all or message.from_user.id == user_id:
+            if show_all or str(message.from_user.id) == str(user_id):
                 mention_name = member.user.mention
             else:
                 mention_name = "****"
@@ -62,10 +62,16 @@ async def weekly_tally(message: types.Message, r, show_all=False):
                 while i < len(btc_scores) and d > btc_scores[i]:
                     i = i + 1
                 btc_scores.insert(i, d)
-                ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                if show_all:
+                    ordered_btc.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                else:
+                    ordered_btc.insert(i, mention_name.ljust(15, ' '))
             else:
                 btc_scores.append(d)
-                ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                if show_all:
+                    ordered_btc.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                else:
+                    ordered_btc.append(mention_name.ljust(15, ' '))
             
     out = out + "\n".join(ordered_btc)
     
@@ -85,7 +91,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
             logging.error("User Id ETH not stored in DB as int " + str(user_id) + " ignoring.")
         else:
             member = await bot.get_chat_member(message.chat.id, user_id)
-            if show_all or message.from_user.id == user_id:
+            if show_all or str(message.from_user.id) == str(user_id):
                 mention_name = member.user.mention
             else:
                 mention_name = "****" 
@@ -102,10 +108,16 @@ async def weekly_tally(message: types.Message, r, show_all=False):
                 while i < len(eth_scores) and d > eth_scores[i]:
                     i = i + 1
                 eth_scores.insert(i, d)
-                ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                if show_all:
+                    ordered_eth.insert(i, mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                else:
+                    ordered_eth.insert(i, mention_name.ljust(15, ' '))
             else:
                 eth_scores.append(d)
-                ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                if show_all:
+                    ordered_eth.append(mention_name.ljust(15, ' ') + " " + a.ljust(7, ' ') + "  " + str(round(d,1)))
+                else:
+                    ordered_eth.append(mention_name.ljust(15, ' '))
             
     out = out + "\n".join(ordered_eth)
     out = out + "</pre>\nWINNING ETH: " + winning_eth_name + "\n"
@@ -122,7 +134,7 @@ async def start_weekly(message: types.Message):
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _, _, _, _ = await weekly_tally(message, r)
+    out, _, _, _, _ = await weekly_tally(message, r, show_all=False)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
 @dp.message_handler(commands=['cards'])
