@@ -24,7 +24,7 @@ from .virtualwallet import get_users_live_value, get_parking, update_parking, us
 
 BETS_KEY = "{chat_id}_bets"
   
-async def weekly_tally(message: types.Message, r):
+async def weekly_tally(message: types.Message, r, show_all=False):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
     out = "BTC Bets (Current=" + str(round(p_btc,0)) + "):\n"
@@ -45,7 +45,10 @@ async def weekly_tally(message: types.Message, r):
             logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
         else:
             member = await bot.get_chat_member(message.chat.id, user_id)
-            mention_name = member.user.mention
+            if show_all or message.from_user.id == user_id:
+                mention_name = member.user.mention
+            else:
+                mention_name = "****"
             if d <= winning_diff:
                 if d == winning_diff:
                     winning = winning + ", " + user_id
@@ -82,7 +85,10 @@ async def weekly_tally(message: types.Message, r):
             logging.error("User Id ETH not stored in DB as int " + str(user_id) + " ignoring.")
         else:
             member = await bot.get_chat_member(message.chat.id, user_id)
-            mention_name = member.user.mention    
+            if show_all or message.from_user.id == user_id:
+                mention_name = member.user.mention
+            else:
+                mention_name = "****" 
             if d <= winning_diff:
                 if d == winning_diff:
                     winning_eth = winning_eth + ", " + user_id
@@ -173,7 +179,7 @@ async def prize_message(chat_id, user_id, name, winning_card):
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r)
+    out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r, show_all=True)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
     await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
     config = get_bets_totes(message.chat.id)
@@ -265,12 +271,16 @@ async def total_weekly(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
     try:
-        amount = regexp_command.group(1)
-        amount_eth = regexp_command.group(2)
-        cid = str(message.chat.id)
-        r.set(f"{cid}_BTC_" + str(message.from_user.id), amount)
-        r.set(f"{cid}_ETH_" + str(message.from_user.id), amount_eth)
-        await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
+        if str(message.chat.id) != str(BETS_GAME_CHAT_ID):
+            amount = regexp_command.group(1)
+            amount_eth = regexp_command.group(2)
+            cid = str(BETS_GAME_CHAT_ID)
+            r.set(f"{cid}_BTC_" + str(message.from_user.id), amount)
+            r.set(f"{cid}_ETH_" + str(message.from_user.id), amount_eth)
+            await message.reply(f'Gotit. Bet for first Mars seat: BTC {amount}, ETH {amount_eth}')
+            await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text=f"{message.from_user.mention} has bet.")
+        else:
+            await message.reply(f'Hide your bet, raise in private chat with me or whisper into your Tesla. I am always on.')
     except Exception as e:
         logging.error("Cannot bet: " + str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. Try /bet btc 12.3k eth 1.2k')
