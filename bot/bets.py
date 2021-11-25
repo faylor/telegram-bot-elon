@@ -142,7 +142,7 @@ async def lock_bets(message: types.Message):
 
 @dp.message_handler(commands=['unlockbets'])
 async def lock_bets(message: types.Message):
-    lock_bets(message.chat.id)
+    unlock_bets(message.chat.id)
     out, _, _, _, _ = await weekly_tally(message, r, show_all=True)
     await bot.send_message(chat_id=message.chat.id, text="BETS UNLOCKED. [run /lockbets if this was a mistake]")
 
