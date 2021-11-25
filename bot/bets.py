@@ -142,7 +142,9 @@ async def lock_bets(message: types.Message):
 
 @dp.message_handler(commands=['unlockbets'])
 async def lock_bets(message: types.Message):
+    logging.error("UNLOCKING....")
     unlock_bets(message.chat.id)
+    logging.error("UNLOCKed....")
     await bot.send_message(chat_id=message.chat.id, text="BETS UNLOCKED. [run /lockbets if this was a mistake]")
 
 
@@ -254,6 +256,7 @@ def get_bets_totes(chat_id):
 def unlock_bets(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
     r.set(bets_chat_key, "False")
+    logging.error(f"AFTER: {is_bets_locked(chat_id)}")
 
 def lock_bets(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
