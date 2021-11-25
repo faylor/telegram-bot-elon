@@ -261,8 +261,7 @@ def is_bets_locked(chat_id):
         r.set(bets_chat_key, "False")
         return False
     else:
-        lock = json.loads(config)
-        return bool(lock)
+        return bool(config)
 
 def set_bets_totes(chat_id, config):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
