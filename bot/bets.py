@@ -131,6 +131,7 @@ async def start_weekly(message: types.Message):
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
     locked = is_bets_locked(message.chat.id)
+    logging.error(f"IS LOCKED {locked}")
     out, _, _, _, _ = await weekly_tally(message, r, show_all=locked)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
 
