@@ -265,6 +265,7 @@ def lock_bets(chat_id):
 def is_bets_locked(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
     config = r.get(bets_chat_key)
+    logging.error(f"HERE IS CONFIG {config}")
     if config is None:
         r.set(bets_chat_key, "False")
         return False
