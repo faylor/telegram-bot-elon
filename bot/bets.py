@@ -255,22 +255,22 @@ def get_bets_totes(chat_id):
 
 def unlock_bets(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
-    r.set(bets_chat_key, "False")
+    r.set(bets_chat_key, "false")
     logging.error(f"AFTER: {is_bets_locked(chat_id)}")
 
 def lock_bets(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
-    r.set(bets_chat_key, "True")
+    r.set(bets_chat_key, "true")
 
 def is_bets_locked(chat_id):
     bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
     config = r.get(bets_chat_key)
     logging.error(f"HERE IS CONFIG {config}")
     if config is None:
-        r.set(bets_chat_key, "False")
+        r.set(bets_chat_key, "false")
         return False
     else:
-        return bool(config)
+        return json.loads(config.lower())
 
 def set_bets_totes(chat_id, config):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
