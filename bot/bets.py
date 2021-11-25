@@ -126,7 +126,7 @@ async def start_weekly(message: types.Message):
     for key in r.scan_iter(f"{cid}_ETH_*"):
         r.delete(key)
     unlock_bets(message.chat.id)
-    await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
+    await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck. [run /lockbets when everyone is ready]")
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
@@ -138,7 +138,13 @@ async def get_weekly(message: types.Message):
 async def lock_bets(message: types.Message):
     lock_bets(message.chat.id)
     out, _, _, _, _ = await weekly_tally(message, r, show_all=True)
-    await bot.send_message(chat_id=message.chat.id, text="BETS LOCKED IN. Good Luck.")
+    await bot.send_message(chat_id=message.chat.id, text="BETS LOCKED IN. Good Luck. [run /unlockbets if this was a mistake]")
+
+@dp.message_handler(commands=['unlockbets'])
+async def lock_bets(message: types.Message):
+    lock_bets(message.chat.id)
+    out, _, _, _, _ = await weekly_tally(message, r, show_all=True)
+    await bot.send_message(chat_id=message.chat.id, text="BETS UNLOCKED. [run /lockbets if this was a mistake]")
 
 
 @dp.message_handler(commands=['cards'])
@@ -224,7 +230,7 @@ async def finish_weekly(message: types.Message):
     
     logging.info(json.dumps(config))
     set_bets_totes(message.chat.id, config)
-    await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets')
+    await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets, and /lockbets to restrict bets')
     await total_weekly(message)
 
     last_user = get_wallet_last_place_user_id()
