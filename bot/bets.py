@@ -23,7 +23,8 @@ from .prices import get_abs_difference, get_price
 from .virtualwallet import get_users_live_value, get_parking, update_parking, user_spent_usd
 
 BETS_KEY = "{chat_id}_bets"
-  
+BETS_KEY_LOCK = "{chat_id}_bets_lock"
+
 async def weekly_tally(message: types.Message, r, show_all=False):
     p_btc, _, _, _ = get_price("btc")
     p_eth, _, _, _ = get_price("eth")
@@ -124,12 +125,21 @@ async def start_weekly(message: types.Message):
         r.delete(key)
     for key in r.scan_iter(f"{cid}_ETH_*"):
         r.delete(key)
+    unlock_bets(message.chat.id)
     await bot.send_message(chat_id=message.chat.id, text="DELETED BETS. Good Luck.")
 
 @dp.message_handler(commands=['bets', 'weekly', 'weeklybets', '#weeklybets'])
 async def get_weekly(message: types.Message):
-    out, _, _, _, _ = await weekly_tally(message, r, show_all=False)
+    locked = is_bets_locked(message.chat.id)
+    out, _, _, _, _ = await weekly_tally(message, r, show_all=locked)
     await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
+
+@dp.message_handler(commands=['lockbets'])
+async def lock_bets(message: types.Message):
+    lock_bets(message.chat.id)
+    out, _, _, _, _ = await weekly_tally(message, r, show_all=True)
+    await bot.send_message(chat_id=message.chat.id, text="BETS LOCKED IN. Good Luck.")
+
 
 @dp.message_handler(commands=['cards'])
 async def show_cards(message: types.Message):
@@ -236,6 +246,24 @@ def get_bets_totes(chat_id):
         config = json.loads(config)
     return config
 
+def unlock_bets(chat_id):
+    bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
+    r.set(bets_chat_key, False)
+
+def lock_bets(chat_id):
+    bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
+    r.set(bets_chat_key, True)
+
+def is_bets_locked(chat_id):
+    bets_chat_key = BETS_KEY_LOCK.format(chat_id=chat_id)
+    config = r.get(bets_chat_key)
+    if config is None:
+        r.set(bets_chat_key, False)
+        return False
+    else:
+        lock = json.loads(config)
+        return lock
+
 def set_bets_totes(chat_id, config):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
     r.set(bets_chat_key, json.dumps(config))
@@ -277,7 +305,9 @@ async def total_weekly(message: types.Message):
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['bet btc ([0-9.,a-zA-Z]*) eth ([0-9.,a-zA-Z]*)']))
 async def set_weekly(message: types.Message, regexp_command):
     try:
-        if str(message.chat.id) != str(BETS_GAME_CHAT_ID):
+        if is_bets_locked(BETS_GAME_CHAT_ID):
+            await message.reply(f'Bets are locked, cheating bastard.')   
+        elif str(message.chat.id) != str(BETS_GAME_CHAT_ID):        
             amount = regexp_command.group(1)
             amount_eth = regexp_command.group(2)
             cid = str(BETS_GAME_CHAT_ID)
