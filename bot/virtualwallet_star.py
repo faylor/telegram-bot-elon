@@ -22,10 +22,8 @@ def update_open_stars(chat_id):
     saves = r.scan_iter(score_key)
     open_user_id = []
     for key in saves:
-        logging.error("Here:")
         key = key.decode('utf-8')
         value = r.get(key)
-        logging.error("value:" + value)
         if value is not None:
             value = value.decode('utf-8')
             user_id = key.replace(chat_id + "_star_", "")
