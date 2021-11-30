@@ -16,16 +16,32 @@ SCORE_KEY = "{chat_id}_bagscore_{user_id}"
 STAR_KEY = "{chat_id}_star_{user_id}"
 PRICES_IN = "USDT"
 
+def update_open_stars(chat_id):
+    chat_id = str(chat_id)
+    key = STAR_KEY.format(chat_id=chat_id, user_id="*")
+    saves = r.scan_iter(STAR_KEY)
+    open_user_id = []
+    for key in saves:
+        key = key.decode('utf-8')
+        value = r.get(key)
+        if value is not None:
+            value = value.decode('utf-8')
+            user_id = key.replace(chat_id + "_star_", "")
+            star_card = StarCard(chat_id=chat_id, user_id=user_id)
+            star_card.update()
+            open_user_id.append(star_card)
+    return open_user_id
+            
+
 class StarCard():
 
-    def __init__(self, chat_id, user_id, hours):
+    def __init__(self, chat_id, user_id):
         self.chat_id = str(chat_id)
         self.user_id = str(user_id)
-        self.hours = hours
 
-    def init_star(self):
+    def init_star(self, hours):
         key = STAR_KEY.format(chat_id=self.chat_id, user_id=self.user_id)
-        dt = datetime.datetime.now() + datetime.timedelta(hours=self.hours)
+        dt = datetime.datetime.now() + datetime.timedelta(hours=hours)
         live = self.get_users_total_value()
         js = {"end_time": dt.isoformat(), "start_total": live}
         r.set(key, json.dumps(js))

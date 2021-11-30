@@ -23,7 +23,7 @@ from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as md
 from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
-from .virtualwallet_star import StarCard
+from .virtualwallet_star import StarCard, update_open_stars
 from .prices import get_ath_ranks, get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
 from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
 
@@ -357,6 +357,16 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
     r.set("At_" + chat_id + "_" + coin + "_" + user_id, json.dumps(js))
 
     return remaining_balance
+
+@dp.message_handler(commands=['checkstar'])
+async def check_star(message: types.Message):
+    try:
+        user_stars = update_open_stars(message.chat.id)
+        await message.reply(f'{message.from_user.first_name} Stars Checked. Found = ' + str(len(user_stars)))
+        for star in user_stars:
+            check_account_after(star, 3600)
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to check stars. ' + str(e))
 
 
 @dp.message_handler(commands=['burn'])
