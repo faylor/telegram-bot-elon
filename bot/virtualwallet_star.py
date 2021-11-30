@@ -22,8 +22,10 @@ def update_open_stars(chat_id):
     saves = r.scan_iter(STAR_KEY)
     open_user_id = []
     for key in saves:
+        logging.error("Here:")
         key = key.decode('utf-8')
         value = r.get(key)
+        logging.error("value:" + value)
         if value is not None:
             value = value.decode('utf-8')
             user_id = key.replace(chat_id + "_star_", "")
@@ -57,6 +59,7 @@ class StarCard():
             start_total = js["start_total"]
             current_result = 2 * (live - start_total)
             if datetime.datetime.now() >= end_time:
+                self.send_chat_message(text="Deleting star... (Debug only)")
                 r.delete(key)
                 key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
                 save = r.get(key) 
