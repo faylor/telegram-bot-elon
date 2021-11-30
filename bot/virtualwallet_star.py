@@ -18,7 +18,7 @@ PRICES_IN = "USDT"
 
 def update_open_stars(chat_id):
     chat_id = str(chat_id)
-    key = STAR_KEY.format(chat_id="*", user_id="*")
+    key = SCORE_KEY.format(chat_id="*", user_id="*")
     logging.error("Here:"+ key)
     saves = r.scan_iter(STAR_KEY)
     open_user_id = []
@@ -27,12 +27,15 @@ def update_open_stars(chat_id):
         key = key.decode('utf-8')
         value = r.get(key)
         logging.error("value:" + value)
+
+        
+
         if value is not None:
             value = value.decode('utf-8')
             user_id = key.replace(chat_id + "_star_", "")
-            star_card = StarCard(chat_id=chat_id, user_id=user_id)
-            star_card.update()
-            open_user_id.append(star_card)
+        #     star_card = StarCard(chat_id=chat_id, user_id=user_id)
+        #     star_card.update()
+            open_user_id.append(user_id)
     return open_user_id
             
 
