@@ -459,11 +459,8 @@ async def check_star(message: types.Message):
     try:
         user_stars = update_open_stars(message.chat.id)
         await message.reply(f'{message.from_user.first_name} Stars Checked. Found = ' + str(len(user_stars)))
-        for user in user_stars:
-            member = await bot.get_chat_member(message.chat.id, user)
-            mention_name = member.user.mention
-            logging.error(f"{mention_name} {user}")
-            # check_account_after(star, 3600)
+        for star in user_stars:
+            check_account_after(star, 3600)
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to check stars. ' + str(e))
 
