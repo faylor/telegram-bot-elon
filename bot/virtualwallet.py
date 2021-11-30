@@ -358,17 +358,6 @@ async def grab_for_user(chat_id, user_id, coin, balance, ratio):
 
     return remaining_balance
 
-@dp.message_handler(commands=['checkstar'])
-async def check_star(message: types.Message):
-    try:
-        user_stars = update_open_stars(message.chat.id)
-        await message.reply(f'{message.from_user.first_name} Stars Checked. Found = ' + str(len(user_stars)))
-        for star in user_stars:
-            check_account_after(star, 3600)
-    except Exception as e:
-        await message.reply(f'{message.from_user.first_name} Failed to check stars. ' + str(e))
-
-
 @dp.message_handler(commands=['burn'])
 async def burn_card(message: types.Message, state: FSMContext):
     try:
@@ -442,8 +431,8 @@ def add_tokens_to_user(chat_id, user_id, tokens):
 
 async def add_star_to_user(chat_id, user_id, tokens):
     try:
-        star = StarCard(chat_id=chat_id, user_id=user_id, hours=24)
-        star.init_star()
+        star = StarCard(chat_id=chat_id, user_id=user_id)
+        star.init_star(hours=24)
         check_account_after(star, 3600)
         
     except asyncio.CancelledError:
@@ -463,6 +452,21 @@ def check_account_after(star, delay):
         raise
     finally:
         print('check_account_after(): after sleep')
+
+
+@dp.message_handler(commands=['checkstar'])
+async def check_star(message: types.Message):
+    try:
+        user_stars = update_open_stars(message.chat.id)
+        await message.reply(f'{message.from_user.first_name} Stars Checked. Found = ' + str(len(user_stars)))
+        for user in user_stars:
+            member = await bot.get_chat_member(message.chat.id, user)
+            mention_name = member.user.mention
+            logging.error(f"{mention_name} {user}")
+            # check_account_after(star, 3600)
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to check stars. ' + str(e))
+
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['gimme([\s0-9.]*)']))
 async def add_bag_usd(message: types.Message, regexp_command):
