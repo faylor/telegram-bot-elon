@@ -18,7 +18,7 @@ PRICES_IN = "USDT"
 
 def update_open_stars(chat_id):
     chat_id = str(chat_id)
-    key = STAR_KEY.format(chat_id=chat_id, user_id="*")
+    key = STAR_KEY.format(chat_id="*", user_id="*")
     logging.error("Here:"+ key)
     saves = r.scan_iter(STAR_KEY)
     open_user_id = []
