@@ -511,6 +511,29 @@ async def add_bag_usd(message: types.Message, regexp_command):
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
 
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['punish([\s0-9.]*)']))
+async def remove_bag_usd(message: types.Message, regexp_command):
+    try:
+        if regexp_command is not None:
+            user_id = message.from_user.id
+            amount = float(regexp_command.group(1).strip())
+        else: 
+            return await message.reply(f'Need the user and amount\n')
+        key = SCORE_KEY.format(chat_id=str(message.chat.id), user_id=str(user_id))
+        save = r.get(key) 
+        current_amount = 0
+        if save is not None:
+            js = json.loads(save.decode("utf-8"))
+            if PRICES_IN.lower() in js:
+                current_amount = float(js[PRICES_IN.lower()])
+        js = {"live": 0, PRICES_IN.lower(): current_amount - amount, "trades": int(js["trades"])}
+        r.set(key, json.dumps(js))
+
+        await message.reply(f'Meow. Punished... Naughty Naughty\n')
+    except Exception as e:
+        logging.error("punish failed:" + str(e))
+        await message.reply(f'{message.from_user.first_name} Failed to punish. Contact... meh')
+
 @dp.message_handler(commands=['log'])
 async def get_log(message: types.Message):
     try:

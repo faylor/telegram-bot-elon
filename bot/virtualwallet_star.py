@@ -57,7 +57,7 @@ class StarCard():
             start_total = js["start_total"]
             current_result = 2 * (live - start_total)
             if datetime.datetime.now() >= end_time:
-                self.send_chat_message(text="Deleting star... (Debug only)")
+                self.send_chat_message(text="Closing star...")
                 r.delete(key)
                 key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
                 save = r.get(key) 
@@ -65,9 +65,12 @@ class StarCard():
                     js = json.loads(save.decode("utf-8"))
                     if PRICES_IN.lower() in js:
                         current_amount = float(js[PRICES_IN.lower()])
-                        js[PRICES_IN.lower()] = current_result + current_amount
-                        r.set(key, json.dumps(js))
-                        self.send_chat_message(text=f"STAR ENDED! Final Star Bonus = ${current_result}")
+                        if current_amount > 0:
+                            js[PRICES_IN.lower()] = current_result + current_amount
+                            r.set(key, json.dumps(js))
+                            self.send_chat_message(text=f"STAR ENDED! Final Star Bonus = ${current_result}")
+                        else:
+                            self.send_chat_message(text=f"STAR ENDED! Final Star Bonus 0... you lost money so no gain.")
                         raise asyncio.CancelledError()
                 self.send_chat_message(text="STAR ENDED! Couldn't find user score??")
                 raise asyncio.CancelledError()
