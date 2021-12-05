@@ -34,7 +34,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
     winning_name = ""
     winning_eth_name = ""
     winning_diff = 99999
-    cid = str(message.chat.id)
+    cid = str(WALLET_GAME_CHAT_ID)
     ordered_btc = []
     btc_scores = []
     for key in r.scan_iter(f"{cid}_BTC_*"):
@@ -200,35 +200,35 @@ async def prize_message(chat_id, user_id, name, winning_card):
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r, show_all=True)
-    await bot.send_message(chat_id=message.chat.id, text=out, parse_mode="HTML")
-    await bot.send_message(chat_id=message.chat.id, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
-    config = get_bets_totes(message.chat.id)
+    await bot.send_message(chat_id=WALLET_GAME_CHAT_ID, text=out, parse_mode="HTML")
+    await bot.send_message(chat_id=WALLET_GAME_CHAT_ID, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
+    config = get_bets_totes(WALLET_GAME_CHAT_ID)
     if "," in winning_btc:
         winners = winning_btc.split(",")
         winning_names = winning_name.split(",")
         i = 0
         for winner in winners:
-            winning_card = add_win_for_user(config, winner, message.chat.id)
-            await prize_message(message.chat.id, winner, winning_names[i], winning_card)
+            winning_card = add_win_for_user(config, winner, WALLET_GAME_CHAT_ID)
+            await prize_message(WALLET_GAME_CHAT_ID, winner, winning_names[i], winning_card)
             i = i + 1
     else:
-        winning_card = add_win_for_user(config, winning_btc, message.chat.id)
-        await prize_message(message.chat.id, winning_btc, winning_name, winning_card)
+        winning_card = add_win_for_user(config, winning_btc, WALLET_GAME_CHAT_ID)
+        await prize_message(WALLET_GAME_CHAT_ID, winning_btc, winning_name, winning_card)
     if "," in winning_eth:
         winners = winning_eth.split(",")
         winning_eth_names = winning_eth_name.split(",")
         i = 0
         for winner in winners:
-            winning_card = add_win_for_user(config, winner, message.chat.id)
-            await prize_message(message.chat.id, winner, winning_eth_names[i], winning_card)
+            winning_card = add_win_for_user(config, winner, WALLET_GAME_CHAT_ID)
+            await prize_message(WALLET_GAME_CHAT_ID, winner, winning_eth_names[i], winning_card)
             i = i + 1
     else:
-        winning_card = add_win_for_user(config, winning_eth, message.chat.id)
-        await prize_message(message.chat.id, winning_eth, winning_eth_name, winning_card)
+        winning_card = add_win_for_user(config, winning_eth, WALLET_GAME_CHAT_ID)
+        await prize_message(WALLET_GAME_CHAT_ID, winning_eth, winning_eth_name, winning_card)
     
     logging.info(json.dumps(config))
-    set_bets_totes(message.chat.id, config)
-    await bot.send_message(chat_id=message.chat.id, text='To clear all bets for this week, run /startbets, and /lockbets to restrict bets')
+    set_bets_totes(WALLET_GAME_CHAT_ID, config)
+    await bot.send_message(chat_id=WALLET_GAME_CHAT_ID, text='To clear all bets for this week, run /startbets, and /lockbets to restrict bets')
     await total_weekly(message)
 
     last_user = get_wallet_last_place_user_id()
@@ -237,9 +237,16 @@ async def finish_weekly(message: types.Message):
         parking = get_parking(WALLET_GAME_CHAT_ID)
         user_spent_usd(WALLET_GAME_CHAT_ID, last_user, -1 * parking, None, free_trades=True)
         update_parking(WALLET_GAME_CHAT_ID, -1 * parking)
-        await bot.send_message(chat_id=message.chat.id, text=f"Last place WINNER! Receiving ${round(parking, 2)} free parking, you loser .... {member.user.mention}.")
+        await bot.send_message(chat_id=WALLET_GAME_CHAT_ID, text=f"Last place WINNER! Receiving ${round(parking, 2)} free parking, you loser .... {member.user.mention}.")
 
-        
+
+@dp.message_handler(commands=['testfreeparking'])
+async def test_free_parking(message: types.Message):
+    last_user = get_wallet_last_place_user_id()
+    if last_user is not None:
+        member = await bot.get_chat_member(WALLET_GAME_CHAT_ID, last_user)
+        await bot.send_message(chat_id=WALLET_GAME_CHAT_ID, text=f"This is the real loser .... {member.user.mention}.")
+
 
 def get_bets_totes(chat_id):
     bets_chat_key = BETS_KEY.format(chat_id=chat_id)
@@ -338,8 +345,8 @@ async def clear_weekly_totals(message: types.Message):
 def get_wallet_last_place_user_id():
     try:
         saves = r.scan_iter(SCORE_KEY.format(chat_id=WALLET_GAME_CHAT_ID, user_id="*"))
-        scores = [0]
-        users = []
+        min_score = None
+        min_user = None
         for key in saves:
             key = key.decode('utf-8')
             value = r.get(key)
@@ -352,17 +359,14 @@ def get_wallet_last_place_user_id():
                 score_live = get_users_live_value(WALLET_GAME_CHAT_ID, user_id)
                 score_usd = float(js[PRICES_IN.lower()])
                 score_total = score_live + score_usd
-                if len(scores) > 1:
-                    i = 1
-                    while i < len(scores) and score_total < scores[i]:
-                        i = i + 1
-                    users.insert(i, user_id)
-                    scores.insert(i, score_total)
-                else:
-                    scores.append(score_total)
-                    users.append(user_id)
+                if min_score is None:
+                    min_score = score_total
+                    min_user = user_id
+                elif score_total < min_score:
+                    min_score = score_total
+                    min_user = user_id
         
-        return users[-1]
+        return min_user
     except Exception as e:
         logging.error("ERROR: " + str(e))
         return None, None
