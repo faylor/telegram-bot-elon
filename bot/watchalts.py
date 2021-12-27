@@ -65,7 +65,9 @@ async def prices_alts(message: types.Message):
 
     if len(out) > 30:
         await bot.send_message(chat_id=chat_id, text="\n".join(out[:30]) + "</pre>", parse_mode="HTML")
-        await bot.send_message(chat_id=chat_id, text="\n".join(out[30:]) + "</pre>", parse_mode="HTML")
+        out2 = [f"<pre>{in_prices}    1hr   24hr  ATH-days   ATH%"]
+        out2.extend(out[30:])
+        await bot.send_message(chat_id=chat_id, text="\n".join(out2) + "</pre>", parse_mode="HTML")
     else:
         await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
