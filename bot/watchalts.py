@@ -63,7 +63,11 @@ async def prices_alts(message: types.Message):
         s = f"{l} {c_1} {c_24}  {days_since} {round(ath_down,1)}%"
         out.append(s)
 
-    await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
+    if len(out) > 30:
+        await bot.send_message(chat_id=chat_id, text="\n".join(out[:30]) + "</pre>", parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="\n".join(out[30:]) + "</pre>", parse_mode="HTML")
+    else:
+        await bot.send_message(chat_id=chat_id, text="\n".join(out) + "</pre>", parse_mode="HTML")
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['watch ([a-zA-Z]*)']))
 async def add_to_prices_alts(message: types.Message, regexp_command):
