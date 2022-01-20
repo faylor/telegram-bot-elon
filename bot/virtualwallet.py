@@ -483,7 +483,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
                     current_amount = float(js[PRICES_IN.lower()])
             js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": 0}
             r.set(key, json.dumps(js))
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO BIGCOIN BADNESS\nThe King Has Taxed You All 0.2% On Each Sale. So he can buy into BigCoin, he heard it was Big and Coiny.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Winner Winner Shrillcoin Dinner\nThe King Has Taxed You All 0.22% On Each Sale. Shrill like mad biatches (not really shrillin is for punks).\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -506,7 +506,7 @@ async def add_bag_usd(message: types.Message, regexp_command):
         js = {"live": 0, PRICES_IN.lower(): amount + current_amount, "trades": int(js["trades"])}
         r.set(key, json.dumps(js))
 
-        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO BIGCOIN BADNESS.\n')
+        await message.reply(f'Sup. You get a car, you get a car... everyone gets a lambo.\n WELCOME TO Winner Winner Shrillcoin Dinner.\n')
     except Exception as e:
         logging.error("Gimme failed:" + str(e))
         await message.reply(f'{message.from_user.first_name} Failed to reset score. Contact... meh')
@@ -947,7 +947,7 @@ async def totals_user_scores2(message: types.Message):
                     scores.append(score_total)
                     score_live = str(round_sense(score_live)).ljust(10, ' ')
                     out.append(f"🔸 {user} {score_live} {score_usd_str}")
-        out.append("</pre>\nEnds Saturday 18th December, Santa bring us BigCoin! MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
+        out.append("</pre>\nEnds Saturday 26th Feb! MAXIMUM TRADES (GRAB LOCKS) = " + str(MAX_TRADES))
         if len(out) > 3:
             out[1] =  out[1].replace('🔸', '👑')
             out[len(out)-2] = out[len(out)-2].replace('🔸', '🥄')

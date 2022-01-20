@@ -41,5 +41,5 @@ STAR_KEY = "{chat_id}_star_{user_id}"
 SCORE_LOG_KEY = "{chat_id}_baglog_{user_id}"
 TRADE_LOCK_KEY = "{chat_id}_baglock_{user_id}"
 PRICES_IN = "USDT"
-MAX_TRADES = 100
+MAX_TRADES = 125
 FEE = 0.0022
