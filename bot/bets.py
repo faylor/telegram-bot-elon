@@ -207,10 +207,11 @@ async def add_ghost_card_to_user(message: types.Message, regexp_command):
         to_user_id = key.replace(BETS_GAME_CHAT_ID + "_bagscore_", "")
         user_member = await bot.get_chat_member(BETS_GAME_CHAT_ID, to_user_id)
         mention_name = user_member.user.mention
+        logging.error("Trying to find " + to_user + "  current attempt:" + mention_name)
         if to_user == mention_name:
             add_random_prize_for_user(to_user_id, BETS_GAME_CHAT_ID, ghost_override=True)
             return await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text='Added a ghost to ' + mention_name)
-    await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text='Unabled a ghost to ' + mention_name)
+    await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text='Unable to give a ghost to ' + to_user)
 
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
