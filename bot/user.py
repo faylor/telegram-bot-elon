@@ -45,7 +45,7 @@ def get_user_price_config(user):
 
 def add_win_for_user(config, user_id, chat_id):
     if len(user_id.strip()) > 0:
-        user_id = str(user_id)
+        user_id = str(user_id.strip())
         if user_id not in config["winners_list"]:
             if config["winners_list"] == []:
                 config["winners_list"] = {user_id: 1}
@@ -56,11 +56,14 @@ def add_win_for_user(config, user_id, chat_id):
         return add_random_prize_for_user(user_id, chat_id)
     return None
 
-def add_random_prize_for_user(user_id, chat_id):
+def add_random_prize_for_user(user_id, chat_id, ghost_override=False):
     if len(user_id.strip()) > 0:
         config = r.get("cards_" + str(user_id))
         chat_id = str(chat_id)
-        choice = select_card(chat_id)
+        if ghost_override:
+            choice = "ghost"
+        else:
+            choice = select_card(chat_id)
         dt = datetime.datetime.now() + datetime.timedelta(hours=24)
         if choice is None:
             return None

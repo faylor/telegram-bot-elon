@@ -197,6 +197,22 @@ async def prize_message(chat_id, user_id, name, winning_card):
     except Exception as e:
         return await bot.send_message(chat_id=chat_id, text="PROBLEM GETTING PRIZE for " + name + " ... " + str(e))
 
+
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['swayze([\s@0-9a-zA-Z]*)']))
+async def add_ghost_card_to_user(message: types.Message, regexpcommand):
+    to_user = regexpcommand.group[1].strip()
+    saves = r.scan_iter(SCORE_KEY.format(chat_id=BETS_GAME_CHAT_ID, user_id="*"))
+    for key in saves:
+        key = key.decode('utf-8')
+        to_user_id = key.replace(BETS_GAME_CHAT_ID + "_bagscore_", "")
+        user_member = await bot.get_chat_member(BETS_GAME_CHAT_ID, to_user_id)
+        mention_name = user_member.user.mention
+        if to_user == mention_name:
+            add_random_prize_for_user(to_user_id, BETS_GAME_CHAT_ID, ghost_override=True)
+            return await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text='Added a ghost to ' + mention_name)
+    await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text='Unabled a ghost to ' + mention_name)
+
+
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
     out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r, show_all=True)
