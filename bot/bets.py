@@ -200,7 +200,7 @@ async def prize_message(chat_id, user_id, name, winning_card):
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['swayze([\s@0-9a-zA-Z]*)']))
 async def add_ghost_card_to_user(message: types.Message, regexp_command):
-    to_user = regexp_command.group[1].strip()
+    to_user = regexp_command.group(1).strip()
     saves = r.scan_iter(SCORE_KEY.format(chat_id=BETS_GAME_CHAT_ID, user_id="*"))
     for key in saves:
         key = key.decode('utf-8')
