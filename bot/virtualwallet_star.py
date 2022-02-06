@@ -59,15 +59,15 @@ class StarCard():
             if datetime.datetime.now() >= end_time:
                 self.send_chat_message(text="Closing star...")
                 r.delete(key)
-                key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
-                save = r.get(key) 
-                if save is not None:
-                    js = json.loads(save.decode("utf-8"))
+                score_key = SCORE_KEY.format(chat_id=str(self.chat_id), user_id=str(self.user_id))
+                user_score = r.get(score_key) 
+                if user_score is not None:
+                    js = json.loads(user_score.decode("utf-8"))
                     if PRICES_IN.lower() in js:
                         current_amount = float(js[PRICES_IN.lower()])
                         if current_amount > 0:
                             js[PRICES_IN.lower()] = current_result + current_amount
-                            r.set(key, json.dumps(js))
+                            r.set(score_key, json.dumps(js))
                             self.send_chat_message(text=f"STAR ENDED! Final Star Bonus = ${current_result}")
                         else:
                             self.send_chat_message(text=f"STAR ENDED! Final Star Bonus 0... you lost money so no gain.")

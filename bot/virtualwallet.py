@@ -5,6 +5,7 @@ import requests
 import redis
 import asyncio
 from dateutil import parser
+import random
 import time
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -304,14 +305,14 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         remaining_balance = usd
                         ii = 0
                         new_coins = []
-                        for coin in list(data)[-8:]:
-                            if remaining_balance > 0 and ii < 4:
-                                ratio = float(1/(4-ii))
-                                new_balance = await grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
-                                if new_balance < remaining_balance:
-                                    remaining_balance = new_balance
-                                    new_coins.append(coin)
-                                    ii = ii + 1
+                        while remaining_balance > 0 and ii < 4:
+                            coin = random.choice(data)
+                            ratio = float(1/(4-ii))
+                            new_balance = await grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
+                            if new_balance < remaining_balance:
+                                remaining_balance = new_balance
+                                new_coins.append(coin)
+                                ii = ii + 1
                         if remaining_balance == 0:
                             new_coins_str = ", ".join(new_coins)
                             await message.reply(f"DRAW 4 Done! {message.from_user.mention} to {mention_name}. Shit Coins: {new_coins_str}.", reply_markup=markup)
