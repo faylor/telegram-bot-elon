@@ -302,7 +302,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         if usd <= 0:
                             return await message.reply(f"They have no {PRICES_IN}, cannot make them draw 4.")
                         logging.error("EH 1? " + str(usd))
-                        data_ath = get_ath_ranks(mains).keys()
+                        data_ath = list(get_ath_ranks(mains).keys())
                         logging.error("EH 2? " + str(len(data_ath)))
                         remaining_balance = usd
                         ii = 0
