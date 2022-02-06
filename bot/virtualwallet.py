@@ -308,6 +308,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         ii = 0
                         new_coins = []
                         while remaining_balance > 0 and ii < 4:
+                            logging.error(data)
                             coin = random.choice(data)
                             logging.error("EH 3? " + str(coin))
                             ratio = float(1/(4-ii))
@@ -338,7 +339,7 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         break
         await state.finish()
     except Exception as e:
-        print("use_card_to_user: " + str(e))
+        print("use_card_to_user ERROR: " + str(e))
 
 
 async def grab_for_user(chat_id, user_id, coin, balance, ratio):
