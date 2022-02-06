@@ -302,14 +302,14 @@ async def use_card_to_user(message: types.Message, state: FSMContext):
                         if usd <= 0:
                             return await message.reply(f"They have no {PRICES_IN}, cannot make them draw 4.")
                         logging.error("EH 1? " + str(usd))
-                        data = get_ath_ranks(mains)
-                        logging.error("EH 2? " + str(len(data)))
+                        data_ath = get_ath_ranks(mains).keys()
+                        logging.error("EH 2? " + str(len(data_ath)))
                         remaining_balance = usd
                         ii = 0
                         new_coins = []
                         while remaining_balance > 0 and ii < 4:
-                            logging.error(data)
-                            coin = random.choice(data)
+                            logging.error(data_ath)
+                            coin = random.choice(data_ath)
                             logging.error("EH 3? " + str(coin))
                             ratio = float(1/(4-ii))
                             new_balance = await grab_for_user(chat_id=chat_id, user_id=to_user_id, coin=coin, balance=remaining_balance, ratio=ratio)
