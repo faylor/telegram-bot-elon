@@ -91,7 +91,7 @@ async def sorted_prices(message: types.Message, regexp_command):
     except Exception as ex:
         logging.info("no config found, ignore")
     in_prices = get_user_price_config(message.from_user.mention).upper()
-    out = f"<pre>       {in_prices}    | 1hr      24hr\n"
+    out = [f"<pre>       {in_prices}    | 1hr      24hr"]
     totes = 0
 
     try:
@@ -123,18 +123,18 @@ async def sorted_prices(message: types.Message, regexp_command):
         prices = prices.ljust(7, ' ')
         change = get_change_label(c)
         change24 = get_change_label(c24)
-        out = out + f"{l} {prices} |{change}    {change24}\n"
+        out.append(f"{l} {prices} |{change}    {change24}")
     if totes < 0:
-        out = out + "</pre>\n\n ☠️☠️☠️☠️☠️☠️" 
+        out.append("</pre>\n\n ☠️☠️☠️☠️☠️☠️")
     elif totes > 6:
-        out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
+        out.append("</pre>\n\n 🏎🏎🏎🏎🏎")
     else:
-        out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
+        out.append("</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽")
 
     if len(out) > 50:
         await bot.send_message(chat_id=chat_id, text="\n".join(out[:50]) + "</pre>", parse_mode="HTML")
         out2 = f"<pre>       {in_prices}    | 1hr      24hr\n"
         out2.extend(out[50:])
-        await bot.send_message(chat_id=chat_id, text="\n".join(out2) + "</pre>", parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="\n".join(out2), parse_mode="HTML")
     else:
         await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
