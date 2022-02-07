@@ -130,4 +130,11 @@ async def sorted_prices(message: types.Message, regexp_command):
         out = out + "</pre>\n\n 🏎🏎🏎🏎🏎"
     else:
         out = out + "</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽"
-    await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
+
+    if len(out) > 50:
+        await bot.send_message(chat_id=chat_id, text="\n".join(out[:50]) + "</pre>", parse_mode="HTML")
+        out2 = f"<pre>       {in_prices}    | 1hr      24hr\n"
+        out2.extend(out[50:])
+        await bot.send_message(chat_id=chat_id, text="\n".join(out2) + "</pre>", parse_mode="HTML")
+    else:
+        await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
