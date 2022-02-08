@@ -137,4 +137,4 @@ async def sorted_prices(message: types.Message, regexp_command):
         out2.extend(out[50:])
         await bot.send_message(chat_id=chat_id, text="\n".join(out2), parse_mode="HTML")
     else:
-        await bot.send_message(chat_id=chat_id, text=out, parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="\n".join(out), parse_mode="HTML")
