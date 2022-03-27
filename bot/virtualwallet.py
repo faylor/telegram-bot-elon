@@ -26,7 +26,7 @@ from aiogram.types import ParseMode
 from .bot import bot, dp, r, get_change_label
 from .virtualwallet_star import StarCard, update_open_stars
 from .prices import get_ath_ranks, get_price, get_simple_price_gecko, get_simple_prices_gecko, coin_price, round_sense, coin_price_realtime, get_bn_price
-from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards
+from .user import get_user_price_config, get_user_prizes, delete_card, clear_users_cards, clear_cards, setup_cards
 
 
 
@@ -128,6 +128,15 @@ async def reset_cards(message: types.Message):
     except Exception as e:
         await message.reply(f'{message.from_user.first_name} Failed to clear cards.' + str(e))
 
+@dp.message_handler(commands=['resetdeck'])
+async def reset_cards(message: types.Message):
+    try:
+        reset_cards(message)
+        setup_cards(str(message.chat.id))
+        await message.reply(f'Ok reset deck.')
+    except Exception as e:
+        await message.reply(f'{message.from_user.first_name} Failed to reset deck cards.' + str(e))
+
 @dp.message_handler(commands=['clearlocks'])
 async def reset_locks(message: types.Message):
     try:
@@ -228,7 +237,12 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 await state.finish() 
                 await add_star_to_user(message.chat.id, message.from_user.id, 2)
                 ok = delete_card(message.from_user.id, data["chat_id"], "star")
-                
+            elif card_response == "coin":
+                markup = types.ReplyKeyboardRemove()
+                await message.reply("UFO gave you $20k!", reply_markup=markup)
+                await state.finish() 
+                await add_coin_to_user(message.chat.id, message.from_user.id)
+                ok = delete_card(message.from_user.id, data["chat_id"], "coin")    
             elif card_response == "ghost":
                 await POWCard.next()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -440,6 +454,18 @@ async def add_star_to_user(chat_id, user_id, tokens):
         print("main(): check_account_after is cancelled now")
     finally:
         print('main(): Finished')
+
+async def add_coin_to_user(chat_id, user_id, amount=20000):
+    try:
+        key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+        save = r.get(key)
+        if save is not None:
+            js = json.loads(save.decode("utf-8"))
+            js["usd"] = int(js["usd"]) + amount
+            r.set(key, json.dumps(js))
+        
+    except Exception as e:
+        print("add_coin_to_user: " + str(e))
     
 @fire_and_forget
 def check_account_after(star, delay):
