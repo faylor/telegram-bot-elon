@@ -59,8 +59,6 @@ async def add_to_shop(message: types.Message, regexp_command):
         logging.warn(str(e))
         await message.reply(f'{message.from_user.first_name} Fail. You Idiot. ')
 
-
-
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['\-([\s0-9,.a-zA-Z]*)']))
 async def remove_from_shop(message: types.Message, regexp_command):
     try:
