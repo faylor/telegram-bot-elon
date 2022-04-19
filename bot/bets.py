@@ -37,6 +37,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
     cid = str(BETS_GAME_CHAT_ID)
     ordered_btc = []
     btc_scores = []
+    all_users = []
     for key in r.scan_iter(f"{cid}_BTC_*"):
         a = r.get(key).decode('utf-8') or "NONE"
         d = get_abs_difference(a, p_btc)
@@ -45,6 +46,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
             r.delete(key.decode('utf-8'))
             logging.error("User Id not stored in DB as int " + str(user_id) + " ignoring.")
         else:
+            all_users.append(user_id)
             member = await bot.get_chat_member(message.chat.id, user_id)
             mention_name = member.user.mention
             if d <= winning_diff:
@@ -116,7 +118,7 @@ async def weekly_tally(message: types.Message, r, show_all=False):
             
     out = out + "\n".join(ordered_eth)
     out = out + "</pre>\nWINNING ETH: " + winning_eth_name + "\n"
-    return out, winning, winning_eth, winning_name, winning_eth_name
+    return out, winning, winning_eth, winning_name, winning_eth_name, all_users
 
 @dp.message_handler(commands=['startbets', 'startweekly', 'startweeklybets', 'start#weeklybets'])
 async def start_weekly(message: types.Message):
@@ -187,6 +189,8 @@ async def prize_message(chat_id, user_id, name, winning_card):
             return await bot.send_message(chat_id=chat_id, text=f'NO MORE POW CARDS LEFT :(')
         
         media = types.MediaGroup()
+        if winning_card == "$20,000":
+            winning_card = "coin"
         media.attach_photo(types.InputFile('assets/' + winning_card + '.jpg'), 'CONGRATULATIONS ' + name)
         if winning_card == "ghost":
             await bot.send_media_group(chat_id=chat_id, media=media)
@@ -216,7 +220,7 @@ async def add_ghost_card_to_user(message: types.Message, regexp_command):
 
 @dp.message_handler(commands=['stopbets', 'stopweekly', 'stopweeklybets', 'stop#weeklybets'])
 async def finish_weekly(message: types.Message):
-    out, winning_btc, winning_eth, winning_name, winning_eth_name = await weekly_tally(message, r, show_all=True)
+    out, winning_btc, winning_eth, winning_name, winning_eth_name, all_users = await weekly_tally(message, r, show_all=True)
     await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text=out, parse_mode="HTML")
     await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text=f'BTC winner = {winning_name}, ETH winner = {winning_eth_name}')
     config = get_bets_totes(BETS_GAME_CHAT_ID)
@@ -255,6 +259,14 @@ async def finish_weekly(message: types.Message):
         user_spent_usd(WALLET_GAME_CHAT_ID, last_user, -1 * parking, None, free_trades=True)
         update_parking(WALLET_GAME_CHAT_ID, -1 * parking)
         await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text=f"Last place WINNER! Receiving ${round(parking, 2)} free parking, you loser .... {member.user.mention}.")
+
+
+    await bot.send_message(chat_id=BETS_GAME_CHAT_ID, text=f"Now if you bet!! Y'all get 2 random cards >>")
+    for u in all_users:
+        winning_card_1 = add_random_prize_for_user(u, BETS_GAME_CHAT_ID)
+        await prize_message(BETS_GAME_CHAT_ID, winner, winning_names[i], winning_card_1)
+        winning_card_2 = add_random_prize_for_user(u, BETS_GAME_CHAT_ID)
+        await prize_message(BETS_GAME_CHAT_ID, winner, winning_names[i], winning_card_2)
 
 
 @dp.message_handler(commands=['testfreeparking'])

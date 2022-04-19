@@ -13,8 +13,11 @@ from aiogram.utils.executor import start_webhook
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
-                          WEBHOOK_URL, WEBHOOK_PATH,
+                          WEBHOOK_URL, WEBHOOK_PATH, SCORE_KEY,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL)
+
+
+
 from .bot import r, dp
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['userprices ([a-zA-Z]*)']))
@@ -53,8 +56,20 @@ def add_win_for_user(config, user_id, chat_id):
                 config["winners_list"][user_id] = 1
         else:
             config["winners_list"][user_id] = int(config["winners_list"][user_id]) + 1
-        return add_random_prize_for_user(user_id, chat_id)
+        return add_prize_money_for_user(user_id, chat_id)
+        # return add_random_prize_for_user(user_id, chat_id)
     return None
+
+def add_prize_money_for_user(user_id, chat_id, amount=20000):
+    if len(user_id.strip()) > 0:
+        key = SCORE_KEY.format(chat_id=str(chat_id), user_id=str(user_id))
+        save = r.get(key)
+        if save is not None:
+            js = json.loads(save.decode("utf-8"))
+            js["usd"] = int(js["usd"]) + amount
+            r.set(key, json.dumps(js))
+            return "$20,000"
+    return "Unable to add money. You have no bag?"
 
 def add_random_prize_for_user(user_id, chat_id, ghost_override=False):
     if len(user_id.strip()) > 0:
@@ -108,7 +123,7 @@ def get_user_prizes(user_id, chat_id):
                             r.set("cards_" + str(user_id), json.dumps(new_cards))
     return cards
 
-def setup_cards(chat_id, red_shells = 5, ghost_cards = 4, trade_tokens = 0, star_cards = 4, draw_4_cards = 4, coin_cards = 4):
+def setup_cards(chat_id, red_shells = 10, ghost_cards = 4, trade_tokens = 0, star_cards = 8, draw_4_cards = 14, coin_cards = 12):
     cards = []
     cards = cards + (['red_shell'] * red_shells)
     cards = cards + (['ghost'] * ghost_cards)
