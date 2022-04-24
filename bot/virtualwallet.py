@@ -239,9 +239,9 @@ async def use_card_specific(message: types.Message, state: FSMContext):
                 ok = delete_card(message.from_user.id, data["chat_id"], "star")
             elif card_response == "coin":
                 markup = types.ReplyKeyboardRemove()
-                await message.reply("UFO gave you $20k!", reply_markup=markup)
+                await message.reply("UFO gave you $10k!", reply_markup=markup)
                 await state.finish() 
-                await add_coin_to_user(message.chat.id, message.from_user.id)
+                await add_coin_to_user(message.chat.id, message.from_user.id, 10000)
                 ok = delete_card(message.from_user.id, data["chat_id"], "coin")    
             elif card_response == "ghost":
                 await POWCard.next()
@@ -461,8 +461,9 @@ async def add_coin_to_user(chat_id, user_id, amount=20000):
         save = r.get(key)
         if save is not None:
             js = json.loads(save.decode("utf-8"))
-            js["usd"] = int(js["usd"]) + amount
-            r.set(key, json.dumps(js))
+            if "usdt" in js:
+                js["usdt"] = int(js["usdt"]) + amount
+                r.set(key, json.dumps(js))
         
     except Exception as e:
         print("add_coin_to_user: " + str(e))
