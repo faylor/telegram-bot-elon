@@ -1,6 +1,6 @@
 from binance.client import Client
 from binance import *
-from twisted.internet import reactor
+# from twisted.internet import reactor
 import threading
 
 class bn_UserSocket(BinanceSocketManager):
