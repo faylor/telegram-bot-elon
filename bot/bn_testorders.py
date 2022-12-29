@@ -6,7 +6,7 @@ import datetime
 import math
 import requests
 from bot.settings import (BN_TEST_API_KEY, BN_TEST_API_SECRET, BN_CHAT_ID, BN_CHAT_ID_GROUP, BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
-from binance.websockets import BinanceSocketManager
+from binance import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
 from .bn_userSocket import bn_UserSocket

@@ -1,5 +1,5 @@
 from binance.client import Client
-from binance.websockets import *
+from binance import *
 from twisted.internet import reactor
 import threading
 

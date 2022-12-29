@@ -4,7 +4,7 @@ import asyncio
 import logging
 import requests
 from bot.settings import (BN_API_KEY, BN_API_SECRET, TELEGRAM_BOT)
-from binance.websockets import BinanceSocketManager
+from binance import BinanceSocketManager
 from binance.client import Client
 from binance.enums import *
 import redis
