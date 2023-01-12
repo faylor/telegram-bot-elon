@@ -526,10 +526,10 @@ async def call_complete(message: types.Message, regexp_command):
         model="text-davinci-001",
         prompt=q,
         temperature=0.4,
-        max_tokens=64,
+        max_tokens=4000,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
     )
-    await message.reply('resp:' + json.dumps(response["choices"][0]["text"]))
+    await message.reply(response["choices"][0]["text"])
     
