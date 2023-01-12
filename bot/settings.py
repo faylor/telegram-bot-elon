@@ -33,6 +33,8 @@ BN_TEST_API_SECRET = os.environ.get("BN_TEST_SECRET")
 BN_CHAT_ID = os.environ.get("BN_CHAT_ID")
 BN_CHAT_ID_GROUP = os.environ.get("BN_CHAT_ID_GROUP")
 
+OPENAI = os.environ.get("OPENAI")
+
 BETS_GAME_CHAT_ID = os.environ.get("BETS_GAME_CHAT_ID")
 WALLET_GAME_CHAT_ID = os.environ.get("WALLET_GAME_CHAT_ID")
 

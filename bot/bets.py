@@ -3,6 +3,7 @@ import json
 import requests
 import redis
 import asyncio
+import openai
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, filters
@@ -12,7 +13,7 @@ from aiogram.utils.markdown import escape_md
 from bot.settings import (TELEGRAM_BOT, HEROKU_APP_NAME,
                           WEBHOOK_URL, WEBHOOK_PATH,
                           WEBAPP_HOST, WEBAPP_PORT, REDIS_URL, 
-                          BETS_GAME_CHAT_ID, WALLET_GAME_CHAT_ID, SCORE_KEY, PRICES_IN)
+                          BETS_GAME_CHAT_ID, WALLET_GAME_CHAT_ID, SCORE_KEY, PRICES_IN, OPENAI)
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from collections import Counter
@@ -516,4 +517,19 @@ async def minus_user(message: types.Message):
             logging.info(json.dumps(config))
             r.set(message.chat.id, json.dumps(config))
     await message.reply('user:' + message.from_user.mention)
+    
+@dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['ai ([\s@0-9a-zA-Z]*)']))
+async def call_complete(message: types.Message, regexp_command):
+    openai.api_key = OPENAI
+    q = regexp_command.group(1)
+    response = openai.Completion.create(
+        model="text-davinci-001",
+        prompt=q,
+        temperature=0.4,
+        max_tokens=64,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    await message.reply('resp:' + json.dumps(response))
     
