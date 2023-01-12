@@ -32,3 +32,4 @@ mplfinance==0.12.7a7
 pandas
 cryptowatch-sdk
 python-binance
+openai
