@@ -526,7 +526,7 @@ async def call_complete(message: types.Message, regexp_command):
         model="text-davinci-001",
         prompt=q,
         temperature=0.4,
-        max_tokens=2049,
+        max_tokens=2000,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
