@@ -531,5 +531,5 @@ async def call_complete(message: types.Message, regexp_command):
         frequency_penalty=0,
         presence_penalty=0
     )
-    await message.reply('resp:' + json.dumps(response))
+    await message.reply('resp:' + json.dumps(response["choices"][0]["text"]))
     
