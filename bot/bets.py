@@ -523,7 +523,7 @@ async def call_complete(message: types.Message, regexp_command):
     openai.api_key = OPENAI
     q = regexp_command.group(1)
     response = openai.Completion.create(
-        model="text-davinci-001",
+        model="text-davinci-003",
         prompt=q,
         temperature=0.4,
         max_tokens=2000,
@@ -533,3 +533,17 @@ async def call_complete(message: types.Message, regexp_command):
     )
     await message.reply(response["choices"][0]["text"])
     
+    
+# @dp.message_handler(commands=['models'])
+# async def openai_models(message: types.Message):
+#     openai.api_key = OPENAI
+#     response = openai.Completion.models(
+#         model="text-davinci-001",
+#         prompt=q,
+#         temperature=0.4,
+#         max_tokens=2000,
+#         top_p=1,
+#         frequency_penalty=0,
+#         presence_penalty=0
+#     )
+#     await message.reply(response["choices"][0]["text"])
