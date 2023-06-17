@@ -1,3 +1,4 @@
+from cmath import e
 import logging
 import json
 import requests
@@ -522,16 +523,20 @@ async def minus_user(message: types.Message):
 async def call_complete(message: types.Message, regexp_command):
     openai.api_key = OPENAI
     q = regexp_command.group(1)
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",
-        prompt=q,
-        temperature=0.4,
-        max_tokens=2000,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0
-    )
-    await message.reply(response["choices"][0]["text"])
+    try:
+        response = openai.Completion.create(
+            model="gpt-3.5-turbo",
+            prompt=q,
+            temperature=0.4,
+            max_tokens=2000,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+        await message.reply(response["choices"][0]["text"])
+    except e: 
+        await message.reply(e)
+    
     
     
 @dp.message_handler(commands=['models'])
