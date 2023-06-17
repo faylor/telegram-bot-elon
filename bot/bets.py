@@ -534,7 +534,7 @@ async def call_complete(message: types.Message, regexp_command):
             presence_penalty=0
         )
         await message.reply(response["choices"][0]["text"])
-    except e: 
+    except Exception as e: 
         await message.reply(e)
     
     
