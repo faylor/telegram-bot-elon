@@ -263,8 +263,8 @@ async def find_news(message: types.Message, regexp_command):
 async def on_startup(dp):
     logging.warning('Starting connection.')
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
-    twits.prepare_stream()
-    twits.start_stream()
+    # twits.prepare_stream()
+    # twits.start_stream()
     # get_stream(twits)
 
 async def on_shutdown(dp):
