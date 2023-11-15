@@ -474,6 +474,7 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
                     return get_ohcl_trades(coin, period_seconds, 'poloniex', 'usdt')
                 logging.error("ERROR WITH RESP:" + json.dumps(data))
             else:
+                logging.info("Result:" + json.dumps(data))
                 return data["result"][str(period_seconds)]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
