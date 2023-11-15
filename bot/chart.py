@@ -243,28 +243,32 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
     df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
     df.set_index('timestamp', inplace=True)
-    
+    logging.error("1")
     df['MA20'] = df['close'].rolling(window=20).mean()
     df['20dSTD'] = df['close'].rolling(window=20).std() 
     df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
     df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
-    
+    logging.error("2")
     rsi_df = get_rsi_df(df)
+    logging.error("3")
     rsi_df = rsi_df.tail(int(period_counts))
+    logging.error("4")
     df = df.tail(int(period_counts))
     h_lines, y_min, y_max = fibs(df, extend=True)
+    logging.error("5")
 
     apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
             mpf.make_addplot(df['Upper'],color='#42A5F5', width=0.9),
             mpf.make_addplot(df['MA20'],color='#FFEB3B',width=0.9)]
-    
+    logging.error("6")
     if rsi_df is not None:
         apd.append(mpf.make_addplot(rsi_df, color='#FFFFFF', panel=1, y_on_right=True, ylabel='RSI'))
-
+    logging.error("7")
     kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in ' + convert.upper(),volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
-    
+    logging.error("8")
     mpf.plot(df,**kwargs,style='nightclouds')
     mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
+    logging.error("9")
     s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
     mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + convert + '-mplfiance.png', hlines=h_lines)
     await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + convert + '-mplfiance.png'))
