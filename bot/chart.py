@@ -243,6 +243,7 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     trades = trades[ranger:]
     logging.error("33")
     # "close": "35999", "high": "35999", "low": "35987", "open": "35987", "timestamp": "1700047140", "volume": "0.00922837"}
+    return
     df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
     df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
     df.set_index('timestamp', inplace=True)
