@@ -239,7 +239,8 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
         raise Exception("No data found for coin: " + coin)
     ranger = -2 * period_counts
     trades = trades[ranger:]
-    df = pd.DataFrame(trades, columns='time open high low close volume amount'.split())
+    # "close": "35999", "high": "35999", "low": "35987", "open": "35987", "timestamp": "1700047140", "volume": "0.00922837"}
+    df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
     df['time'] = pd.DatetimeIndex(df['time']*10**9)
     df.set_index('time', inplace=True)
     
