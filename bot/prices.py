@@ -443,39 +443,19 @@ def get_last_trades(x):
 
 def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     http.headers.clear()
-    url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
+    # url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
+    url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=50&limit=100'
+    https://www.bitstamp.net/api/v2/ohlc/{market_symbol}/
     data_arr = None
     try:
         response = http.get(url)
-        if response.status_code == 429:
-            # use mess
-            logging.error("HIT LIMIT")
+        if response.status_code != 200:
+            logging.error("BITSTAMP ERROR" + response.text())
         else:
             data = response.json()
-            if "error" in data:
-                if exchange=='binance':
-                    logging.error("NOT FOUND IN BINANCE")
-                    return get_ohcl_trades(coin, period_seconds, 'kraken', 'usd')
-                elif exchange=='kraken':
-                    logging.error("NOT FOUND IN KRAKEN")
-                    return get_ohcl_trades(coin, period_seconds, 'bittrex', 'usdt')
-                elif exchange=='bittrex':
-                    logging.error("NOT FOUND IN BITREX")
-                    return get_ohcl_trades(coin, period_seconds, 'upbit', 'usdt')
-                elif exchange=='upbit':
-                    logging.error("NOT FOUND IN UPBIT")
-                    return get_ohcl_trades(coin, period_seconds, 'okex', 'usdt')
-                elif exchange=='okex':
-                    logging.error("NOT FOUND IN okex")
-                    return get_ohcl_trades(coin, period_seconds, 'hitbtc', 'usdt')
-                elif exchange=='hitbtc':
-                    logging.error("NOT FOUND IN hitbtc")
-                    return get_ohcl_trades(coin, period_seconds, 'poloniex', 'usdt')
-                logging.error("ERROR WITH RESP:" + json.dumps(data))
-            else:
-                logging.info("Result:" + json.dumps(data))
-                return data["result"][str(period_seconds)]
+            logging.info("Result:" + json.dumps(data))
+            return data["ohlc"]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
 
