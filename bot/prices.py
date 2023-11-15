@@ -453,7 +453,6 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
             logging.error("BITSTAMP ERROR" + response.text)
         else:
             data = response.json()
-            logging.error("Result:" + json.dumps(data))
             return data["data"]["ohlc"]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
