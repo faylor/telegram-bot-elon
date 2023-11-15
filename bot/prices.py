@@ -448,17 +448,13 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=60&limit=100'
     data_arr = None
     try:
-        logging.error("Attempting to see issue?1" + url)
         response = http.get(url)
         if response.status_code != 200:
-            logging.error("Attempting to see issue?2")
             logging.error("BITSTAMP ERROR" + response.text)
         else:
-            logging.error("Attempting to see issue3?")
             data = response.json()
             logging.error("Result:" + json.dumps(data))
-            logging.error("Attempting to see issue4?")
-            return data["ohlc"]
+            return data["data"]["ohlc"]
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         logging.error("Get OHCL error:" + str(e))
 
