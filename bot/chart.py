@@ -245,7 +245,7 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     
     df['MA20'] = df['close'].rolling(window=20).mean()
     df['20dSTD'] = df['close'].rolling(window=20).std() 
-
+    logging.error("MA20" + df.to_string())
     df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
     df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
     
