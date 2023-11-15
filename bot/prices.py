@@ -445,15 +445,14 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     http.headers.clear()
     # url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
-    logging.error("Attempting to see issue?")
     url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=50&limit=100'
     data_arr = None
     try:
-        logging.error("Attempting to see issue?1")
+        logging.error("Attempting to see issue?1" + url)
         response = http.get(url)
         if response.status_code != 200:
             logging.error("Attempting to see issue?2")
-            logging.error("BITSTAMP ERROR" + response.text())
+            logging.error("BITSTAMP ERROR" + response.text)
         else:
             logging.error("Attempting to see issue3?")
             data = response.json()
