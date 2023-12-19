@@ -253,6 +253,7 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     df['open'] = pd.to_numeric(df['open'], errors='coerce').fillna(0)
     df['high'] = pd.to_numeric(df['high'], errors='coerce').fillna(0)
     df['low'] = pd.to_numeric(df['low'], errors='coerce').fillna(0)
+    df['volume'] = pd.to_numeric(df['volume'], errors='coerce').fillna(0)
     df['MA20'] = df['close'].rolling(window=20).mean()
     df['20dSTD'] = df['close'].rolling(window=20).std() 
     df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
