@@ -233,7 +233,7 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
 
 
 async def send_image(chat_id, coin, convert, period_seconds, period_counts):
-    trades = get_ohcl_trades(coin, period_seconds, "binance", convert)
+    trades = get_ohcl_trades(coin, period_seconds, period_counts, "binance", convert)
     if trades is None:
         logging.error("Trades is empty")
         raise Exception("No data found for coin: " + coin)
