@@ -441,13 +441,13 @@ def get_last_trades(x):
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
 
-def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
+def get_ohcl_trades(coin, period_seconds, period_counts, exchange='binance', pair='usdt'):
     http.headers.clear()
     # url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
     # Enum: 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 259200 
     
-    url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=' + str(period_seconds) + '&limit=100'
+    url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=' + str(period_seconds) + '&limit=' + str(period_counts)
     data_arr = None
     try:
         response = http.get(url)
