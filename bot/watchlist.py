@@ -21,31 +21,28 @@ async def send_price_of(message: types.Message, regexp_command):
     try:
         symbol = regexp_command.group(1).strip()
         # _, c, c24, _ = get_price(symbol)
-        price_gecko, btc_price = get_simple_price_gecko(symbol)
+        # price_gecko, btc_price = get_simple_price_gecko(symbol)
         price_bn = get_bn_price(symbol)
         price_bn_btc = get_bn_price(symbol, "BTC")
-        data = coin_price_realtime(symbol, "USDT,BTC")
-        if data is not None:
-            usd_data = data[symbol.upper()]["quote"]["USDT"]
-            btc_data = data[symbol.upper()]["quote"]["BTC"]
-            p = usd_data["price"]
-            c = usd_data["percent_change_1h"]
-            c24 = usd_data["percent_change_24h"]
-            p_btc = btc_data["price"]
-            c_btc = btc_data["percent_change_1h"]
-            c24_btc = btc_data["percent_change_24h"]
-        else:
-            p = 0
-            c = 0
-            c24 = 0
-            p_btc = 0
-            c_btc = 0
-            c24_btc = 0
+        # data = coin_price_realtime(symbol, "USDT,BTC")
+        # if data is not None:
+        #     usd_data = data[symbol.upper()]["quote"]["USDT"]
+        #     btc_data = data[symbol.upper()]["quote"]["BTC"]
+        #     p = usd_data["price"]
+        #     c = usd_data["percent_change_1h"]
+        #     c24 = usd_data["percent_change_24h"]
+        #     p_btc = btc_data["price"]
+        #     c_btc = btc_data["percent_change_1h"]
+        #     c24_btc = btc_data["percent_change_24h"]
+        # else:
+        #     p = 0
+        #     c = 0
+        #     c24 = 0
+        #     p_btc = 0
+        #     c_btc = 0
+        #     c24_btc = 0
         await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>USDT\nBinance - {symbol}: ${round_sense_str(price_bn)}\nCoinMarketCap - {symbol}: ${round_sense_str(p)}\nGecko API - {symbol}: ${round_sense_str(price_gecko)}\nChange: {round(c,2)}% 1hr    {round(c24,2)}% 24hr</pre>", 
-        parse_mode="HTML")
-        await bot.send_message(chat_id=message.chat.id, 
-                                text=f"<pre>BTC\nBinance - {symbol}: {round_sense_str(price_bn_btc)}BTC\nCoinMarketCap - {symbol}: {round_sense_str(p_btc)}BTC\nGecko API - {symbol}: {round_sense_str(btc_price)}BTC  \nChange: {round(c_btc,2)}% 1hr    {round(c24_btc,2)}% 24hr</pre>", 
+                                text=f"Binance - {symbol}: ${round_sense_str(price_bn)}  {round_sense_str(price_bn_btc)}BTC", 
         parse_mode="HTML")
         saved = r.get("At_" + symbol.lower() + "_" + message.from_user.mention)
         if saved is not None:
@@ -58,7 +55,7 @@ async def send_price_of(message: types.Message, regexp_command):
                 saved = float(saved)
                 saved_btc = 0
             changes = round(100 * (p - saved) / saved, 2)
-            await bot.send_message(chat_id=message.chat.id, text=f"<pre>You marked at ${saved} and {saved_btc}BTC, changed by {changes}%</pre>", parse_mode="HTML")
+            await bot.send_message(chat_id=message.chat.id, text=f"You marked at ${saved} and {saved_btc}BTC, changed by {changes}%", parse_mode="HTML")
         await fibs_chart_extended(message, regexp_command)
     except Exception as e:
         logging.warn("Could convert saved point:" + str(e))
