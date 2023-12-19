@@ -446,7 +446,7 @@ def get_ohcl_trades(coin, period_seconds, exchange='binance', pair='usdt'):
     # url = 'https://api.cryptowat.ch/markets/' + exchange + '/' + coin + pair + '/ohlc?periods=' + str(period_seconds)
     # https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=USDT-BTC&tickInterval=fiveMin
     # Enum: 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 259200 
-    logging.error(period_seconds)
+    
     url = 'https://www.bitstamp.net/api/v2/ohlc/' + coin + pair + '/?step=' + period_seconds + '&limit=100'
     data_arr = None
     try:
