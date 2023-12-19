@@ -240,9 +240,12 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     ranger = -2 * period_counts
     trades = trades[ranger:]
     # "close": "35999", "high": "35999", "low": "35987", "open": "35987", "timestamp": "1700047140", "volume": "0.00922837"}
-    
+    logging.error("1")
     df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
-    df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
+    logging.error("1.1")
+    df['timestamp'] = pd.to_datetime(df['timestamp'],unit='s')
+    logging.error("2")
+    #df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
     df.set_index('timestamp', inplace=True)
     logging.error("1")
     df['MA20'] = df['close'].rolling(window=20).mean()
