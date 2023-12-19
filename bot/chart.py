@@ -240,11 +240,14 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     ranger = -2 * period_counts
     trades = trades[ranger:]
     # "close": "35999", "high": "35999", "low": "35987", "open": "35987", "timestamp": "1700047140", "volume": "0.00922837"}
+    logging.error("1")
     df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
     
     df['timestamp'] = pd.to_datetime(df['timestamp'],unit='s')
+    logging.error("2")
     #df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
     df.set_index('timestamp', inplace=True)
+    logging.error("1")
     
     df['close'] = pd.to_numeric(df['close'], errors='coerce').fillna(0)
     df['open'] = pd.to_numeric(df['open'], errors='coerce').fillna(0)
@@ -255,6 +258,8 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     df['20dSTD'] = df['close'].rolling(window=20).std() 
     df['Upper'] = df['MA20'] + (df['20dSTD'] * 2)
     df['Lower'] = df['MA20'] - (df['20dSTD'] * 2)
+    logging.error("44")
+    
     rsi_df = get_rsi_df(df)
     rsi_df = rsi_df.tail(int(period_counts))
     df = df.tail(int(period_counts))
@@ -270,6 +275,7 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     kwargs = dict(type='candle',ylabel=coin.upper() + ' Price in ' + convert.upper(),volume=True, volume_panel=1, figratio=(3,2),figscale=1.5,addplot=apd,ylim=[y_min,y_max])
     mpf.plot(df,**kwargs,style='nightclouds')
     mc = mpf.make_marketcolors(up='#69F0AE',down='#FF5252',inherit=True)
+    logging.error("9")
     s  = mpf.make_mpf_style(base_mpf_style='nightclouds',facecolor='#121212',edgecolor="#131313",gridcolor="#232323",marketcolors=mc)
     mpf.plot(df,**kwargs, style=s, scale_width_adjustment=dict(volume=0.55,candle=0.8), savefig=coin + convert + '-mplfiance.png', hlines=h_lines)
     await bot.send_photo(chat_id=chat_id, photo=InputFile(coin + convert + '-mplfiance.png'))
