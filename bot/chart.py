@@ -233,17 +233,14 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
 
 
 async def send_image(chat_id, coin, convert, period_seconds, period_counts):
-    logging.error("10")
     trades = get_ohcl_trades(coin, period_seconds, "binance", convert)
     if trades is None:
         logging.error("Trades is empty")
         raise Exception("No data found for coin: " + coin)
-    logging.error("2")
     ranger = -2 * period_counts
     trades = trades[ranger:]
-    logging.error("33")
     # "close": "35999", "high": "35999", "low": "35987", "open": "35987", "timestamp": "1700047140", "volume": "0.00922837"}
-    return
+    
     df = pd.DataFrame(trades, columns='close high low open timestamp volume'.split())
     df['timestamp'] = pd.DatetimeIndex(df['timestamp']*10**9)
     df.set_index('timestamp', inplace=True)
