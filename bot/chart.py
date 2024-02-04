@@ -260,7 +260,12 @@ async def send_image(chat_id, coin, convert, period_seconds, period_counts):
     rsi_df = get_rsi_df(df)
     rsi_df = rsi_df.tail(int(period_counts))
     df = df.tail(int(period_counts))
-    print(df)
+    print(df['open'])
+    print(df['high'])
+    print(df['low'])
+    print(df['close'])
+    
+    
     h_lines, y_min, y_max = fibs(df, extend=True)
 
     apd  = [mpf.make_addplot(df['Lower'],color='#EC407A',width=0.9),
