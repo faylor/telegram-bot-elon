@@ -174,7 +174,7 @@ async def fibs_chart_extended(message: types.Message, regexp_command):
         inputs = regexp_command.group(1)
         splits = inputs.split()
         coin = splits[0]
-        period_seconds = 60
+        period_seconds = 600
         period_counts = 80
 
         if len(splits) > 1:
