@@ -413,6 +413,8 @@ def coin_price(labels):
         if response.status_code == 429:
             logging.error("HIT LIMIT")
         else:
+            print("REPONSE STATUS: " + str(response.status_code))
+            print("REPONSE TEXT: " + str(response.text))
             data = response.json()
             data_arr = data["data"]
             r.set("QUOTES_cmc_" + str(lab_hash), json.dumps(data_arr), ex=2)
