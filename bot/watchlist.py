@@ -97,41 +97,44 @@ async def sorted_prices(message: types.Message, regexp_command):
     except:
         logging.error("FAILED TO GET COIN PRICES")
 
-    ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by], reverse=True))
+    if coins != None:
+        ordered_coins = dict(sorted(coins.items(), key=lambda item: item[1]['quote']['USD'][order_by], reverse=True))
 
-    for l in mains:
-        if coins is None or l.upper() not in coins:
-            p, c, c24, btc_price = get_price(l)
-            tmp = {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}
-            ordered_coins[l.upper()] = tmp
+        for l in mains:
+            if coins is None or l.upper() not in coins:
+                p, c, c24, btc_price = get_price(l)
+                tmp = {"quote": {"USD": {"price": p, "percent_change_1h": c, "percent_change_24h": c24}}}
+                ordered_coins[l.upper()] = tmp
 
-    for l, coin in ordered_coins.items():
-        p = coin["quote"]["USD"]["price"]
-        c = coin["quote"]["USD"]["percent_change_1h"]
-        c24 = coin["quote"]["USD"]["percent_change_24h"]
-        btc_price = 1
-        totes = totes + c
-        l = l.ljust(5, ' ')
-        
-        if in_prices == "USD":
-            prices = str(round_sense(p))
+        for l, coin in ordered_coins.items():
+            p = coin["quote"]["USD"]["price"]
+            c = coin["quote"]["USD"]["percent_change_1h"]
+            c24 = coin["quote"]["USD"]["percent_change_24h"]
+            btc_price = 1
+            totes = totes + c
+            l = l.ljust(5, ' ')
+            
+            if in_prices == "USD":
+                prices = str(round_sense(p))
+            else:
+                prices = str(round(btc_price,8))
+            prices = prices.ljust(7, ' ')
+            change = get_change_label(c)
+            change24 = get_change_label(c24)
+            out.append(f"{l} {prices} |{change}    {change24}")
+        if totes < 0:
+            out.append("</pre>\n\n ☠️☠️☠️☠️☠️☠️")
+        elif totes > 6:
+            out.append("</pre>\n\n 🏎🏎🏎🏎🏎")
         else:
-            prices = str(round(btc_price,8))
-        prices = prices.ljust(7, ' ')
-        change = get_change_label(c)
-        change24 = get_change_label(c24)
-        out.append(f"{l} {prices} |{change}    {change24}")
-    if totes < 0:
-        out.append("</pre>\n\n ☠️☠️☠️☠️☠️☠️")
-    elif totes > 6:
-        out.append("</pre>\n\n 🏎🏎🏎🏎🏎")
-    else:
-        out.append("</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽")
+            out.append("</pre>\n\n 🤷🏽🤷🏽🤷🏽🤷🏽🤷🏽")
 
-    if len(out) > 50:
-        await bot.send_message(chat_id=chat_id, text="\n".join(out[:50]) + "</pre>", parse_mode="HTML")
-        out2 = [f"<pre>       {in_prices}    | 1hr      24hr"]
-        out2.extend(out[50:])
-        await bot.send_message(chat_id=chat_id, text="\n".join(out2), parse_mode="HTML")
+        if len(out) > 50:
+            await bot.send_message(chat_id=chat_id, text="\n".join(out[:50]) + "</pre>", parse_mode="HTML")
+            out2 = [f"<pre>       {in_prices}    | 1hr      24hr"]
+            out2.extend(out[50:])
+            await bot.send_message(chat_id=chat_id, text="\n".join(out2), parse_mode="HTML")
+        else:
+            await bot.send_message(chat_id=chat_id, text="\n".join(out), parse_mode="HTML")
     else:
-        await bot.send_message(chat_id=chat_id, text="\n".join(out), parse_mode="HTML")
+        await bot.send_message(chat_id=chat_id, text="Failed to get prices from API - check Keys", parse_mode="HTML")
