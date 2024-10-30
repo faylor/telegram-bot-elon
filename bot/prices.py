@@ -22,7 +22,7 @@ http.mount("https://", adapter)
 http.mount("http://", adapter)
 
 from .settings import (REDIS_URL)
-r = redis.from_url(REDIS_URL)
+r = redis.from_url(REDIS_URL, ssl_cert_reqs=None)
 
 def to_zero(js, key1, key2, key3):
     try:

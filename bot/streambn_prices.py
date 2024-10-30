@@ -9,7 +9,7 @@ from binance.client import Client
 from binance.enums import *
 import redis
 from .settings import (REDIS_URL)
-r = redis.from_url(REDIS_URL)
+r = redis.from_url(REDIS_URL, ssl_cert_reqs=None)
 
 COIN_DATA_KEY = "STREAM_{}"
 

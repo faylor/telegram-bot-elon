@@ -10,7 +10,7 @@ import logging
 from .prices import get_simple_price_gecko
 import redis
 from .settings import (REDIS_URL)
-r = redis.from_url(REDIS_URL)
+r = redis.from_url(REDIS_URL, ssl_cert_reqs=None)
 
 COIN_DATA_KEY = "DATA_{}"
 

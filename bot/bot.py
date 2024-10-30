@@ -21,7 +21,7 @@ from .prices import get_price, round_sense, get_news, get_rapids
 # from .datawatcher import DataWatcher
 from .streambn_prices import Bntream
 
-r = redis.from_url(REDIS_URL)
+r = redis.from_url(REDIS_URL, ssl_cert_reqs=None)
 
 bot = Bot(token=TELEGRAM_BOT)
 storage = MemoryStorage()

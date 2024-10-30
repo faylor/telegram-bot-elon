@@ -14,7 +14,7 @@ from .bn_trailingStopLimit import TrailingStopLimit
 import redis
 import time
 from .settings import (REDIS_URL)
-r = redis.from_url(REDIS_URL)
+r = redis.from_url(REDIS_URL, ssl_cert_reqs=None)
 
 COIN_DATA_KEY = "STREAM_{}"
 LIVE_ORDER_KEY = "LIVE_{}"
