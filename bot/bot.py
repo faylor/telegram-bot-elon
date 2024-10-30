@@ -20,6 +20,7 @@ from .thecats import getTheApiUrl, get_a_fox, search_pix
 from .prices import get_price, round_sense, get_news, get_rapids
 # from .datawatcher import DataWatcher
 from .streambn_prices import Bntream
+
 r = redis.from_url(REDIS_URL)
 
 bot = Bot(token=TELEGRAM_BOT)
@@ -262,6 +263,7 @@ async def find_news(message: types.Message, regexp_command):
 
 async def on_startup(dp):
     logging.warning('Starting bot connection.')
+    logging.error("IS REDIS UP: " + r.info)
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     # twits.prepare_stream()
     # twits.start_stream()
