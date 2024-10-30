@@ -263,7 +263,7 @@ async def find_news(message: types.Message, regexp_command):
 
 async def on_startup(dp):
     logging.warning('Starting bot connection.')
-    logging.error("IS REDIS UP: " + r.info)
+    logging.error("IS REDIS UP: " + str(r.info))
     await bot.set_webhook(WEBHOOK_URL,drop_pending_updates=True)
     # twits.prepare_stream()
     # twits.start_stream()
